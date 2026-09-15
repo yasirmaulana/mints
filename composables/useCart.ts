@@ -1,0 +1,85 @@
+const CART_KEY = 'mints-cart'
+const CART_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
+
+export interface CartItem {
+  productId: string
+  title: string
+  imageUrl: string
+  price: number
+  variantId: string | null
+  size: string | null
+  qty: number
+}
+
+interface CartStore {
+  items: CartItem[]
+  savedAt: number
+}
+
+function readStorage(): CartItem[] {
+  if (!process.client) return []
+  try {
+    const raw = localStorage.getItem(CART_KEY)
+    if (!raw) return []
+    const store: CartStore = JSON.parse(raw)
+    if (Date.now() - store.savedAt > CART_TTL_MS) { localStorage.removeItem(CART_KEY); return [] }
+    return store.items
+  } catch { return [] }
+}
+
+function writeStorage(items: CartItem[]) {
+  if (!process.client) return
+  try { localStorage.setItem(CART_KEY, JSON.stringify({ items, savedAt: Date.now() })) } catch {}
+}
+
+const cartItems = ref<CartItem[]>([])
+let hydrated = false
+
+export function useCart() {
+  if (process.client && !hydrated) {
+    cartItems.value = readStorage()
+    hydrated = true
+  }
+
+  const itemCount = computed(() => cartItems.value.reduce((s, i) => s + i.qty, 0))
+  const subtotal = computed(() => cartItems.value.reduce((s, i) => s + i.price * i.qty, 0))
+  const freeShippingMin = 500_000
+  const freeShippingProgress = computed(() => Math.min(subtotal.value / freeShippingMin, 1))
+  const freeShippingRemaining = computed(() => Math.max(freeShippingMin - subtotal.value, 0))
+
+  function addItem(item: Omit<CartItem, 'qty'>) {
+    const existing = cartItems.value.find(
+      i => i.productId === item.productId && i.variantId === item.variantId
+    )
+    if (existing) {
+      existing.qty++
+    } else {
+      cartItems.value.push({ ...item, qty: 1 })
+    }
+    writeStorage(cartItems.value)
+  }
+
+  function removeItem(productId: string, variantId: string | null) {
+    cartItems.value = cartItems.value.filter(
+      i => !(i.productId === productId && i.variantId === variantId)
+    )
+    writeStorage(cartItems.value)
+  }
+
+  function updateQty(productId: string, variantId: string | null, qty: number) {
+    const item = cartItems.value.find(
+      i => i.productId === productId && i.variantId === variantId
+    )
+    if (!item) return
+    if (qty <= 0) { removeItem(productId, variantId); return }
+    item.qty = qty
+    writeStorage(cartItems.value)
+  }
+
+  function clearCart() {
+    cartItems.value = []
+    if (process.client) localStorage.removeItem(CART_KEY)
+  }
+
+  return { cartItems, itemCount, subtotal, freeShippingMin, freeShippingProgress, freeShippingRemaining, addItem, removeItem, updateQty, clearCart }
+}

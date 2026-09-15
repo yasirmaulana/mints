@@ -1,0 +1,69 @@
+export default defineEventHandler(async (event) => {
+  const body = await readBody(event)
+  const { orderId, paymentMethod } = body
+
+  if (!orderId || !paymentMethod) {
+    throw createError({ statusCode: 400, statusMessage: 'orderId dan paymentMethod wajib diisi' })
+  }
+
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { product: true }
+  })
+  if (!order) throw createError({ statusCode: 404, statusMessage: 'Order tidak ditemukan' })
+  if (order.status !== 'PENDING_PAYMENT') {
+    throw createError({ statusCode: 400, statusMessage: 'Order sudah diproses atau dibatalkan' })
+  }
+
+  const config = useRuntimeConfig()
+  const isProduction = config.duitkuIsProduction === 'true'
+  const merchantCode = config.duitkuMerchantCode
+  const apiKey = config.duitkuApiKey
+  const baseUrl = getDuitkuBaseUrl(isProduction)
+
+  const merchantOrderId = `MINTS-${orderId.slice(0, 8)}-${Date.now()}`
+  const amount = String(Number(order.product.price) + (order.shippingCost || 0))
+  const signature = duitkuSignature(merchantCode, merchantOrderId, amount, apiKey)
+
+  const expiredAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+
+  const payload = {
+    merchantCode,
+    paymentAmount: Number(amount),
+    paymentMethod,
+    merchantOrderId,
+    productDetails: order.product.title,
+    customerVaName: order.buyerName,
+    email: `${order.buyerPhone.replace(/\D/g, '')}@mints.id`,
+    phoneNumber: order.buyerPhone,
+    additionalParam: '',
+    merchantUserInfo: '',
+    callbackUrl: config.duitkuCallbackUrl,
+    returnUrl: config.duitkuReturnUrl || `${config.appUrl || 'https://mints.id'}/orders`,
+    signature,
+    expiryPeriod: 1440 // minutes
+  }
+
+  const duitkuRes = await $fetch<any>(`${baseUrl}/v2/inquiry`, {
+    method: 'POST',
+    body: payload,
+    headers: { 'content-type': 'application/json' }
+  })
+
+  if (duitkuRes.statusCode !== '00') {
+    throw createError({ statusCode: 400, statusMessage: duitkuRes.statusMessage || 'Gagal membuat transaksi Duitku' })
+  }
+
+  await prisma.payment.create({
+    data: {
+      orderId,
+      duitkuReference: merchantOrderId,
+      paymentUrl: duitkuRes.paymentUrl,
+      paymentMethod,
+      status: 'pending',
+      expiredAt
+    }
+  })
+
+  return { paymentUrl: duitkuRes.paymentUrl, merchantOrderId }
+})
