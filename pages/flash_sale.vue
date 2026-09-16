@@ -25,12 +25,6 @@
         </nav>
 
         <div class="ml-auto flex items-center gap-2">
-          <ClientOnly>
-            <div v-if="selectedSession" class="flex items-center gap-2 md:hidden">
-              <span class="text-xs" style="color:rgba(9,11,12,0.5)">{{ selectedSession.isRunning ? 'Berakhir' : 'Dimulai' }}</span>
-              <span class="font-mono font-bold text-sm tabular-nums rounded-full px-3 py-1" style="background:#090b0c;color:white">{{ sessionCountdown }}</span>
-            </div>
-          </ClientOnly>
           <template v-if="isLoggedIn">
             <NuxtLink to="/account/orders" class="hidden sm:block rounded-full px-4 py-2 text-sm transition-colors" style="color:rgba(9,11,12,0.7)">Pesanan</NuxtLink>
             <NuxtLink to="/account" class="hidden sm:block rounded-full px-4 py-2 text-sm transition-colors" style="color:rgba(9,11,12,0.7)">Akun</NuxtLink>
