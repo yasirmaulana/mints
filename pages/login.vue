@@ -42,8 +42,6 @@
           <label class="block text-sm font-normal mb-2" style="color:rgba(9,11,12,0.6)">Password</label>
           <input v-model="form.password" type="password" placeholder="Password" class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none" style="background:white;border:1px solid rgba(9,11,12,0.12);color:#090b0c" />
         </div>
-        <!-- Turnstile widget -->
-        <div v-if="siteKey" :id="turnstileId" class="cf-turnstile" :data-sitekey="siteKey" data-theme="light" data-size="flexible"></div>
         <button
           type="submit"
           class="w-full rounded-full py-3.5 text-sm font-normal transition-opacity"
@@ -70,8 +68,6 @@
           <label class="block text-sm font-normal mb-2" style="color:rgba(9,11,12,0.6)">Password</label>
           <input v-model="form.password" type="password" placeholder="Min. 6 karakter" class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none" style="background:white;border:1px solid rgba(9,11,12,0.12);color:#090b0c" />
         </div>
-        <!-- Turnstile widget -->
-        <div v-if="siteKey" :id="turnstileId" class="cf-turnstile" :data-sitekey="siteKey" data-theme="light" data-size="flexible"></div>
         <button
           type="submit"
           class="w-full rounded-full py-3.5 text-sm font-normal transition-opacity"
@@ -91,66 +87,24 @@ useSeoMeta({ title: 'Akun — MINTS' })
 
 const route = useRoute()
 const redirect = computed(() => String(route.query.redirect || '/account'))
-const config = useRuntimeConfig()
-const siteKey = config.public.turnstileSiteKey as string
-
 const isLogin = ref(true)
 const loading = ref(false)
 const error = ref('')
 const success = ref('')
-const turnstileToken = ref('')
-const turnstileId = 'cf-turnstile-widget'
 
 const form = reactive({ name: '', email: '', phone: '', password: '' })
 
 const canLogin = computed(() => form.phone.trim() && form.password.trim().length >= 6)
 const canRegister = computed(() => form.name.trim().length >= 2 && form.phone.trim() && form.password.trim().length >= 6)
 
-// Load Turnstile script once and (re-)render widget when tab switches
-function renderTurnstile() {
-  if (!siteKey || typeof window === 'undefined') return
-  nextTick(() => {
-    const el = document.getElementById(turnstileId)
-    if (!el) return
-    if ((window as any).turnstile) {
-      ;(window as any).turnstile.render(`#${turnstileId}`, {
-        sitekey: siteKey,
-        theme: 'light',
-        size: 'flexible',
-        callback: (token: string) => { turnstileToken.value = token },
-        'expired-callback': () => { turnstileToken.value = '' },
-        'error-callback': () => { turnstileToken.value = '' }
-      })
-    }
-  })
-}
-
-onMounted(() => {
-  if (!siteKey) return
-  if ((window as any).turnstile) { renderTurnstile(); return }
-  const s = document.createElement('script')
-  s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
-  s.async = true
-  s.defer = true
-  s.onload = renderTurnstile
-  document.head.appendChild(s)
-})
-
-watch(isLogin, () => {
-  turnstileToken.value = ''
-  renderTurnstile()
-})
-
 async function doLogin() {
   loading.value = true
   error.value = ''
   try {
-    await $fetch('/api/auth/login', { method: 'POST', body: { phone: form.phone, password: form.password, turnstileToken: turnstileToken.value } })
+    await $fetch('/api/auth/login', { method: 'POST', body: { phone: form.phone, password: form.password } })
     window.location.href = redirect.value
   } catch (err: any) {
     error.value = err?.data?.statusMessage || 'Gagal masuk'
-    turnstileToken.value = ''
-    ;(window as any).turnstile?.reset(`#${turnstileId}`)
   } finally {
     loading.value = false
   }
@@ -163,14 +117,12 @@ async function doRegister() {
   try {
     await $fetch('/api/auth/register', {
       method: 'POST',
-      body: { name: form.name, email: form.email, phone: form.phone, password: form.password, turnstileToken: turnstileToken.value }
+      body: { name: form.name, email: form.email, phone: form.phone, password: form.password }
     })
     success.value = 'Akun berhasil dibuat, mengalihkan…'
     window.location.href = redirect.value
   } catch (err: any) {
     error.value = err?.data?.statusMessage || 'Gagal mendaftar'
-    turnstileToken.value = ''
-    ;(window as any).turnstile?.reset(`#${turnstileId}`)
   } finally {
     loading.value = false
   }

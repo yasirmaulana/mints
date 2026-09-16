@@ -5,9 +5,7 @@ export default defineEventHandler(async (event) => {
   checkRateLimit(`buyer-login:${ip}`, 10, 15 * 60 * 1000)
 
   const body = await readBody(event)
-  const { phone, password, turnstileToken } = body ?? {}
-
-  await verifyTurnstile(turnstileToken ?? '', ip)
+  const { phone, password } = body ?? {}
 
   if (!phone?.trim() || !password?.trim()) {
     throw createError({ statusCode: 400, statusMessage: 'Nomor HP dan password wajib diisi' })
