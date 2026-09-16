@@ -5,12 +5,10 @@ import { withAccelerate } from '@prisma/extension-accelerate'
 const globalForPrisma = globalThis as unknown as { prisma: ReturnType<typeof buildPrisma> }
 
 function buildPrisma() {
-  // Hanya pakai Accelerate di production — dev tetap pakai DATABASE_URL langsung
-  const accelerateUrl = process.env.ACCELERATE_URL ?? ''
-  const useAccelerate = process.env.NODE_ENV === 'production' && accelerateUrl.startsWith('prisma')
-  if (useAccelerate) process.env.DATABASE_URL = accelerateUrl
+  // Pakai Accelerate jika DATABASE_URL sendiri sudah berupa prisma:// URL
+  const url = process.env.DATABASE_URL ?? ''
   const client = new PrismaClient()
-  return useAccelerate ? client.$extends(withAccelerate()) : client
+  return url.startsWith('prisma') ? client.$extends(withAccelerate()) : client
 }
 
 export const prisma = globalForPrisma.prisma ?? buildPrisma()
