@@ -6,8 +6,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const config = useRuntimeConfig()
-  const origin = config.rajaOngkirOriginCityId || '501'
   const freeShippingMin = Number(config.public.freeShippingMin || 500000)
+
+  // Prioritas: DB > env > fallback default Surabaya (501)
+  const dbOrigin = await prisma.storeSettings.findUnique({ where: { key: 'shipping_origin_city_id' } })
+  const origin = dbOrigin?.value || config.rajaOngkirOriginCityId || '501'
 
   const body = new URLSearchParams({
     origin: String(origin),
