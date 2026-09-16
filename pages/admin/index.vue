@@ -1245,7 +1245,7 @@ async function uploadProof() {
 }
 
 // Products
-const { data: products, refresh: refreshProducts } = await useFetch('/api/products')
+const { data: products, refresh: refreshProducts } = await useFetch('/api/admin/products')
 const { data: categories, refresh: refreshCategories } = await useFetch<any[]>('/api/admin/categories')
 
 // Category management
