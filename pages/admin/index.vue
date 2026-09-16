@@ -1011,38 +1011,65 @@ const activeChatSession = ref<any>(null)
 const activeChatMessages = ref<any[]>([])
 const adminReply = ref('')
 const chatMessagesEl = ref<HTMLElement>()
-let chatSSE: EventSource | null = null
+let chatPollTimer: ReturnType<typeof setTimeout> | null = null
+let chatLastCreatedAt = ''
 
-function openChatSession(sess: any) {
+async function openChatSession(sess: any) {
   activeChatSession.value = sess
   activeChatMessages.value = []
-  chatSSE?.close()
-  chatSSE = new EventSource(`/api/chat/${sess.id}/messages`)
-  chatSSE.onmessage = (e) => {
-    const data = JSON.parse(e.data)
-    if (data.type === 'init') {
-      activeChatMessages.value = data.messages
-    } else if (data.type === 'messages') {
-      // Deduplicate: remove any optimistic tmp messages that now have a real id
-      const existingIds = new Set(activeChatMessages.value.filter(m => !m.id.startsWith('tmp-')).map((m: any) => m.id))
-      const newMsgs = data.messages.filter((m: any) => !existingIds.has(m.id))
-      if (newMsgs.length) {
-        // Replace tmp entries with real ones, then append truly new
+  chatLastCreatedAt = ''
+  stopChatPolling()
+  await loadChatMessages(sess.id)
+  startChatPolling(sess.id)
+}
+
+async function loadChatMessages(sessionId: string) {
+  const res = await $fetch<{ messages: any[] }>(`/api/chat/${sessionId}/messages`)
+  activeChatMessages.value = res.messages
+  if (res.messages.length) chatLastCreatedAt = res.messages[res.messages.length - 1].createdAt
+  nextTick(() => {
+    if (chatMessagesEl.value) chatMessagesEl.value.scrollTop = chatMessagesEl.value.scrollHeight
+  })
+}
+
+async function pollChatMessages(sessionId: string) {
+  try {
+    const url = chatLastCreatedAt
+      ? `/api/chat/${sessionId}/messages?after=${encodeURIComponent(chatLastCreatedAt)}`
+      : `/api/chat/${sessionId}/messages`
+    const res = await $fetch<{ messages: any[] }>(url)
+    if (res.messages.length) {
+      const existingIds = new Set(activeChatMessages.value.filter((m: any) => !m.id.startsWith('tmp-')).map((m: any) => m.id))
+      const incoming = res.messages.filter((m: any) => !existingIds.has(m.id))
+      if (incoming.length) {
         activeChatMessages.value = activeChatMessages.value.filter((m: any) => !m.id.startsWith('tmp-'))
-        activeChatMessages.value.push(...newMsgs)
+        activeChatMessages.value.push(...incoming)
+        chatLastCreatedAt = incoming[incoming.length - 1].createdAt
+        nextTick(() => {
+          if (chatMessagesEl.value) chatMessagesEl.value.scrollTop = chatMessagesEl.value.scrollHeight
+        })
       }
     }
-    nextTick(() => {
-      if (chatMessagesEl.value) chatMessagesEl.value.scrollTop = chatMessagesEl.value.scrollHeight
-    })
+  } catch {}
+  if (activeChatSession.value?.id === sessionId) {
+    chatPollTimer = setTimeout(() => pollChatMessages(sessionId), 3000)
   }
+}
+
+function startChatPolling(sessionId: string) {
+  stopChatPolling()
+  chatPollTimer = setTimeout(() => pollChatMessages(sessionId), 3000)
+}
+
+function stopChatPolling() {
+  if (chatPollTimer) { clearTimeout(chatPollTimer); chatPollTimer = null }
 }
 
 async function sendAdminReply() {
   if (!adminReply.value.trim() || !activeChatSession.value) return
   const msg = adminReply.value.trim()
   adminReply.value = ''
-  // Optimistic update — show message immediately before SSE poll
+  // Optimistic update
   activeChatMessages.value.push({ id: `tmp-${Date.now()}`, sender: 'admin', body: msg, createdAt: new Date().toISOString() })
   nextTick(() => {
     if (chatMessagesEl.value) chatMessagesEl.value.scrollTop = chatMessagesEl.value.scrollHeight
@@ -1054,7 +1081,7 @@ async function sendAdminReply() {
   refreshChat()
 }
 
-onUnmounted(() => chatSSE?.close())
+onUnmounted(() => stopChatPolling())
 
 // ── /Chat ──
 

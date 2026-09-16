@@ -29,7 +29,7 @@
             <span v-if="itemCount > 0" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full text-[10px] font-bold flex items-center justify-center px-1" style="background:#fabc3f;color:#090b0c">{{ itemCount }}</span>
           </NuxtLink>
           <!-- Hamburger (mobile only) -->
-          <button class="flex md:hidden items-center justify-center w-9 h-9 rounded-full transition-colors" :style="scrolled ? 'background:rgba(9,11,12,0.06)' : 'background:rgba(255,255,255,0.15)'" @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Menu">
+          <button class="flex items-center justify-center w-9 h-9 rounded-full transition-colors" :style="`display:${windowWidth >= 768 ? 'none' : 'flex'};${scrolled ? 'background:rgba(9,11,12,0.06)' : 'background:rgba(255,255,255,0.15)'}`" @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Menu">
             <svg v-if="!mobileMenuOpen" class="w-4 h-4" :style="scrolled ? 'color:#090b0c' : 'color:white'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             <svg v-else class="w-4 h-4" :style="scrolled ? 'color:#090b0c' : 'color:white'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -359,6 +359,7 @@ const activeCategory = ref<string | null>(null)
 const activeType = ref('ALL')
 const scrolled = ref(false)
 const mobileMenuOpen = ref(false)
+const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
 
 const freeShippingMin = useRuntimeConfig().public.freeShippingMin
@@ -402,9 +403,14 @@ function scrollTo(id: string) {
 }
 
 onMounted(() => {
-  const handler = () => { scrolled.value = window.scrollY > 60 }
-  window.addEventListener('scroll', handler, { passive: true })
-  onUnmounted(() => window.removeEventListener('scroll', handler))
+  const scrollHandler = () => { scrolled.value = window.scrollY > 60 }
+  const resizeHandler = () => { windowWidth.value = window.innerWidth }
+  window.addEventListener('scroll', scrollHandler, { passive: true })
+  window.addEventListener('resize', resizeHandler, { passive: true })
+  onUnmounted(() => {
+    window.removeEventListener('scroll', scrollHandler)
+    window.removeEventListener('resize', resizeHandler)
+  })
 })
 </script>
 
