@@ -412,7 +412,7 @@ const shippingLabel = computed(() => {
 })
 
 const shippingCostDisplay = computed(() => finalShippingCost.value === 0 ? 'GRATIS' : formatPrice(finalShippingCost.value))
-const selectedPaymentMethodLabel = computed(() => paymentMethods.find(p => p.code === form.paymentMethod)?.name || '-')
+const selectedPaymentMethodLabel = computed(() => paymentMethods.value.find((p: any) => p.code === form.paymentMethod)?.name || '-')
 const totalWeight = computed(() => cartItems.value.reduce((sum, item) => sum + (item.qty * 300), 0))
 
 let citySearchTimeout: ReturnType<typeof setTimeout>
