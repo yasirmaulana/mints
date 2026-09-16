@@ -24,7 +24,10 @@
     <!-- Info -->
     <div class="p-3 flex flex-col gap-2 flex-1">
       <p class="font-semibold text-gray-900 text-sm leading-tight line-clamp-2">{{ product.title }}</p>
-      <p class="text-brand-600 font-bold text-base">Rp {{ formatPrice(product.price) }}</p>
+      <div class="flex flex-wrap items-end gap-2">
+        <p class="text-brand-600 font-bold text-base">Rp {{ formatPrice(product.price) }}</p>
+        <p v-if="product.originalPrice" class="text-xs line-through text-gray-400">Rp {{ formatPrice(product.originalPrice) }}</p>
+      </div>
 
       <div class="flex gap-2 mt-auto">
         <button class="btn-secondary-full" @click="$emit('detail', product)">

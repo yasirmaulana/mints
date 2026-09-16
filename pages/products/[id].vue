@@ -94,7 +94,10 @@
             <!-- Title & price -->
             <div class="border-b pb-5" style="border-color:rgba(9,11,12,0.1)">
               <h1 class="text-[2rem] font-normal leading-[1.1] tracking-tight md:text-[2.5rem]">{{ product.title }}</h1>
-              <p class="mt-3 text-[1.75rem] font-normal tabular-nums tracking-tight">Rp&nbsp;{{ formatPrice(product.price) }}</p>
+              <div class="mt-3 flex flex-wrap items-end gap-3">
+                <p class="text-[1.75rem] font-normal tabular-nums tracking-tight">Rp&nbsp;{{ formatPrice(product.price) }}</p>
+                <p v-if="product.originalPrice" class="text-base line-through tabular-nums" style="color:rgba(9,11,12,0.4)">Rp&nbsp;{{ formatPrice(product.originalPrice) }}</p>
+              </div>
             </div>
 
             <!-- Pre-order notice -->

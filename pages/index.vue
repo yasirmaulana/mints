@@ -242,7 +242,10 @@
                   <p class="text-sm font-normal leading-snug tracking-tight truncate">{{ product.title }}</p>
                   <p v-if="product.category" class="mt-0.5 text-xs" style="color:rgba(9,11,12,0.45)">{{ product.category.name }}</p>
                 </div>
-                <p class="text-sm font-normal shrink-0 tabular-nums">Rp&nbsp;{{ formatPrice(product.price) }}</p>
+                <div class="shrink-0 text-right">
+                  <p class="text-sm font-normal tabular-nums">Rp&nbsp;{{ formatPrice(product.price) }}</p>
+                  <p v-if="product.originalPrice" class="text-[11px] line-through tabular-nums" style="color:rgba(9,11,12,0.4)">Rp&nbsp;{{ formatPrice(product.originalPrice) }}</p>
+                </div>
               </div>
               <!-- Size chips -->
               <div v-if="product.variants?.length" class="mt-2 flex flex-wrap gap-1">

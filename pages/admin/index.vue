@@ -654,6 +654,10 @@
               <input v-model="productForm.price" type="number" placeholder="350000" class="input-field" required />
             </div>
             <div>
+              <label class="label-text">Harga Asli (Rp) <span class="text-xs text-gray-400 font-normal">— opsional, untuk harga coret</span></label>
+              <input v-model="productForm.originalPrice" type="number" placeholder="500000" class="input-field" />
+            </div>
+            <div>
               <label class="label-text">Berat (gram)</label>
               <input v-model="productForm.weight" type="number" placeholder="500" class="input-field" />
             </div>
@@ -1285,7 +1289,7 @@ const productFile = ref<File | null>(null)
 const extraFiles = ref<File[]>([])
 const PRODUCT_SIZES = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'Free Size']
 const productForm = reactive({
-  title: '', price: '', sessionId: '', description: '',
+  title: '', price: '', originalPrice: '', sessionId: '', description: '',
   categoryId: '', productType: 'REGULAR', material: '', weight: '',
   estimatedReadyDate: '',
   variants: PRODUCT_SIZES.map(size => ({ size, stock: 0 }))
@@ -1295,6 +1299,7 @@ function openProductForm(product?: any) {
   editingProduct.value = product || null
   productForm.title = product?.title || ''
   productForm.price = product?.price ? String(product.price) : ''
+  productForm.originalPrice = product?.originalPrice ? String(product.originalPrice) : ''
   productForm.sessionId = product?.sessionId || ''
   productForm.description = product?.description || ''
   productForm.categoryId = product?.categoryId || ''
@@ -1343,6 +1348,7 @@ async function saveProduct() {
     const fd = new FormData()
     fd.append('title', productForm.title)
     fd.append('price', productForm.price)
+    if (productForm.originalPrice) fd.append('originalPrice', productForm.originalPrice)
     fd.append('sessionId', productForm.sessionId)
     fd.append('description', productForm.description)
     fd.append('categoryId', productForm.categoryId)

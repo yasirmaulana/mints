@@ -123,7 +123,10 @@
             <div class="p-4 flex flex-col gap-3 flex-1">
               <div>
                 <p class="text-sm font-semibold leading-snug line-clamp-2 mb-1">{{ product.title }}</p>
-                <p class="text-base font-bold tabular-nums" style="color:#090b0c">Rp {{ formatPrice(product.price) }}</p>
+                <div class="flex flex-wrap items-end gap-2">
+                  <p class="text-base font-bold tabular-nums" style="color:#090b0c">Rp {{ formatPrice(product.price) }}</p>
+                  <p v-if="product.originalPrice" class="text-xs line-through tabular-nums" style="color:rgba(9,11,12,0.4)">Rp {{ formatPrice(product.originalPrice) }}</p>
+                </div>
               </div>
               <div class="flex gap-2 mt-auto">
                 <button
