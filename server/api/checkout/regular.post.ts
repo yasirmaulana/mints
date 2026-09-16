@@ -59,6 +59,8 @@ export default defineEventHandler(async (event) => {
       const order = await tx.order.create({
         data: {
           productId: item.productId,
+          variantId: item.variantId || null,
+          qty: item.qty || 1,
           buyerId: buyerId || null,
           buyerName: body.buyerName,
           buyerPhone: body.buyerPhone,
@@ -72,11 +74,6 @@ export default defineEventHandler(async (event) => {
           source: orderSource
         }
       })
-
-      // Flash-sale items are typically one-off; mark sold immediately
-      if (item.source === 'FLASH_SALE') {
-        await tx.product.update({ where: { id: item.productId }, data: { status: 'SOLD_OUT' } })
-      }
 
       createdOrders.push({ orderId: order.id, title: product.title })
     }

@@ -184,14 +184,6 @@
       </Transition>
     </ClientOnly>
 
-    <!-- Toast -->
-    <Transition name="slide-up">
-      <div v-if="toast.visible" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[70] pointer-events-none">
-        <div class="rounded-full px-5 py-3 text-sm font-normal shadow-xl" style="background:#090b0c;color:white">
-          ✓ {{ toast.msg }}
-        </div>
-      </div>
-    </Transition>
 
     <!-- Chat widget -->
     <ClientOnly>
@@ -221,8 +213,6 @@ const gallery = computed(() => product.value ? [product.value.imageUrl, ...(prod
 const selectedVariant = ref<Variant | null>(null)
 const lightbox = ref<string | null>(null)
 const addedToCart = ref(false)
-const toast = reactive({ visible: false, msg: '' })
-let toastTimer: ReturnType<typeof setTimeout>
 
 function variantStyle(v: Variant) {
   if (selectedVariant.value?.id === v.id) return 'background:#090b0c;color:white'
@@ -243,12 +233,6 @@ const ctaStyle = computed(() => {
   return 'background:#090b0c;color:white'
 })
 
-function showToast(msg: string) {
-  clearTimeout(toastTimer)
-  Object.assign(toast, { visible: true, msg })
-  toastTimer = setTimeout(() => { toast.visible = false }, 2500)
-}
-
 function handleAddToCart() {
   if (!product.value) return
   addItem({
@@ -260,7 +244,6 @@ function handleAddToCart() {
     size: selectedVariant.value?.size ?? null
   })
   addedToCart.value = true
-  showToast('Produk ditambahkan ke keranjang')
   setTimeout(() => { addedToCart.value = false }, 2500)
 }
 

@@ -1,4 +1,4 @@
-const ALLOWED_KEYS = new Set(['order_confirmed', 'order_paid', 'order_shipped', 'order_cancelled', 'order_offline'])
+const ALLOWED_KEYS = new Set(['single', 'bulk', 'order_confirmed', 'order_paid', 'order_shipped', 'order_cancelled', 'order_offline'])
 
 export default defineEventHandler(async (event) => {
   await requireAdminSession(event)

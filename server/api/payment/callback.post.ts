@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
 
   const payment = await prisma.payment.findUnique({
     where: { duitkuReference: merchantOrderId },
-    include: { order: true }
+    include: { order: { select: { id: true, buyerName: true, buyerPhone: true, productId: true, variantId: true, qty: true } } }
   })
   if (!payment) {
     throw createError({ statusCode: 404, statusMessage: 'Payment not found' })
@@ -60,17 +60,29 @@ export default defineEventHandler(async (event) => {
   } else if (resultCode === '01') {
     // Pending — no state change
   } else {
-    // Failed/cancelled
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: 'failed', rawCallback: body }
-      }),
-      prisma.order.update({
-        where: { id: payment.orderId },
-        data: { status: 'CANCELLED' }
-      })
-    ])
+    // Failed/cancelled — restore variant stock if applicable
+    const order = payment.order
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.update({ where: { id: payment.id }, data: { status: 'failed', rawCallback: body } })
+      await tx.order.update({ where: { id: payment.orderId }, data: { status: 'CANCELLED' } })
+
+      if (order?.variantId) {
+        await tx.productVariant.update({
+          where: { id: order.variantId },
+          data: { stock: { increment: order.qty } }
+        })
+        const totalStock = await tx.productVariant.aggregate({
+          where: { productId: order.productId },
+          _sum: { stock: true }
+        })
+        await tx.product.update({
+          where: { id: order.productId },
+          data: { status: (totalStock._sum.stock ?? 0) > 0 ? 'AVAILABLE' : 'SOLD_OUT' }
+        })
+      } else if (order?.productId) {
+        await tx.product.update({ where: { id: order.productId }, data: { status: 'AVAILABLE' } })
+      }
+    })
   }
 
   return { success: true }

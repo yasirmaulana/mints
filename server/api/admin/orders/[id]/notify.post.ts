@@ -4,7 +4,7 @@ export default defineEventHandler(async (event) => {
 
   const order = await prisma.order.findUnique({
     where: { id },
-    include: { product: true }
+    include: { product: true, payment: { select: { paymentUrl: true } } }
   })
 
   if (!order) throw createError({ statusCode: 404, statusMessage: 'Order tidak ditemukan' })
@@ -13,7 +13,8 @@ export default defineEventHandler(async (event) => {
     order.buyerPhone,
     order.buyerName,
     order.product.title,
-    Number(order.product.price)
+    Number(order.product.price),
+    order.payment?.paymentUrl
   )
 
   await prisma.order.update({
