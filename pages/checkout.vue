@@ -311,15 +311,47 @@
             </div>
           </div>
 
-          <button
-            class="w-full rounded-full py-3.5 text-sm font-normal transition-opacity"
-            :style="placing ? 'background:rgba(9,11,12,0.4);color:white;cursor:not-allowed' : 'background:#090b0c;color:white'"
-            :disabled="placing"
-            @click="placeOrder"
-          >{{ placing ? 'Memproses…' : 'Buat Pesanan & Bayar' }}</button>
+          <!-- State: stok habis -->
+          <div v-if="soldOutError" class="rounded-2xl overflow-hidden" style="border:1px solid rgba(239,68,68,0.2)">
+            <div class="px-5 pt-5 pb-4 space-y-1" style="background:rgba(239,68,68,0.05)">
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 shrink-0" style="color:rgb(185,28,28)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                </svg>
+                <p class="text-sm font-semibold" style="color:rgb(185,28,28)">Stok habis saat checkout</p>
+              </div>
+              <p class="text-sm pl-7" style="color:rgba(9,11,12,0.6)">
+                <strong style="color:rgb(153,27,27)">{{ soldOutError }}</strong> sudah terjual oleh pembeli lain sesaat sebelum pesananmu diproses.
+              </p>
+            </div>
+            <div class="px-5 py-4 space-y-2" style="background:white">
+              <p class="text-xs" style="color:rgba(9,11,12,0.45)">Item tersebut sudah dihapus dari keranjang. Silakan pilih produk lain.</p>
+              <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                <NuxtLink to="/koleksi" class="flex-1 rounded-full py-2.5 text-sm font-medium text-center transition-colors" style="background:#090b0c;color:white">
+                  Lihat Koleksi
+                </NuxtLink>
+                <NuxtLink to="/flash_sale" class="flex-1 rounded-full py-2.5 text-sm font-medium text-center transition-colors" style="background:rgba(9,11,12,0.06);color:#090b0c">
+                  Flash Sale
+                </NuxtLink>
+                <NuxtLink to="/" class="flex-1 rounded-full py-2.5 text-sm font-medium text-center transition-colors" style="background:rgba(9,11,12,0.06);color:#090b0c">
+                  Beranda
+                </NuxtLink>
+              </div>
+            </div>
+          </div>
 
-          <!-- Error -->
-          <div v-if="orderError" class="rounded-2xl p-4 text-sm" style="background:rgba(239,68,68,0.08);color:rgb(185,28,28)">{{ orderError }}</div>
+          <!-- Tombol normal (sembunyikan jika sold out) -->
+          <template v-else>
+            <button
+              class="w-full rounded-full py-3.5 text-sm font-normal transition-opacity"
+              :style="placing ? 'background:rgba(9,11,12,0.4);color:white;cursor:not-allowed' : 'background:#090b0c;color:white'"
+              :disabled="placing"
+              @click="placeOrder"
+            >{{ placing ? 'Memproses…' : 'Buat Pesanan & Bayar' }}</button>
+
+            <!-- Error umum -->
+            <div v-if="orderError" class="rounded-2xl p-4 text-sm" style="background:rgba(239,68,68,0.08);color:rgb(185,28,28)">{{ orderError }}</div>
+          </template>
         </div>
 
       </template>
@@ -331,7 +363,7 @@
 definePageMeta({ middleware: 'buyer' })
 useSeoMeta({ title: 'Checkout — MINTS' })
 
-const { cartItems, itemCount, subtotal, freeShippingMin, clearCart } = useCart()
+const { cartItems, itemCount, subtotal, freeShippingMin, clearCart, removeItem } = useCart()
 const { user, fetchMe } = useAuth()
 const router = useRouter()
 
@@ -363,6 +395,7 @@ const selectedService = ref<any>(null)
 const loadingShipping = ref(false)
 const placing = ref(false)
 const orderError = ref('')
+const soldOutError = ref('') // nama produk yang habis, kosong = tidak ada error sold out
 
 const couriers = ['jne', 'jnt', 'sicepat', 'pos', 'tiki']
 
@@ -464,6 +497,7 @@ function formatPrice(n: number) {
 async function placeOrder() {
   placing.value = true
   orderError.value = ''
+  soldOutError.value = ''
   try {
     const res = await $fetch<any>('/api/checkout/regular', {
       method: 'POST',
@@ -500,7 +534,20 @@ async function placeOrder() {
       router.push('/account/orders')
     }
   } catch (err: any) {
-    orderError.value = err?.data?.statusMessage || 'Terjadi kesalahan. Silakan coba lagi.'
+    const msg: string = err?.data?.statusMessage || ''
+    // Deteksi error "sudah habis terjual" — ekstrak nama produk dari pesan server
+    // Format server: "<Nama Produk> sudah habis terjual"
+    const soldOutMatch = msg.match(/^(.+?)\s+sudah habis terjual$/i)
+    if (soldOutMatch) {
+      soldOutError.value = soldOutMatch[1]
+      // Hapus item yang sold out dari cart
+      const soldOutTitle = soldOutMatch[1].toLowerCase()
+      cartItems.value
+        .filter((i: any) => i.title.toLowerCase() === soldOutTitle)
+        .forEach((i: any) => removeItem(i.productId, i.variantId))
+    } else {
+      orderError.value = msg || 'Terjadi kesalahan. Silakan coba lagi.'
+    }
   } finally {
     placing.value = false
   }
