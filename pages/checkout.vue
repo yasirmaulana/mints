@@ -106,10 +106,10 @@
                     :key="city.city_id"
                     class="w-full text-left px-4 py-2.5 text-sm transition-colors"
                     style="color:#090b0c"
-                    @mouseover="$event.currentTarget.style.background='rgba(9,11,12,0.04)'"
-                    @mouseleave="$event.currentTarget.style.background='transparent'"
+                    @mouseover="($event.currentTarget as HTMLElement).style.background='rgba(9,11,12,0.04)'"
+                    @mouseleave="($event.currentTarget as HTMLElement).style.background='transparent'"
                     @click="selectCity(city)"
-                  >{{ city.type }} {{ city.city_name }}, {{ city.province }}</button>
+                  >{{ city.label || `${city.type} ${city.city_name}, ${city.province}` }}</button>
                 </div>
               </div>
               <p v-if="form.cityName" class="text-xs mt-2 font-normal" style="color:rgba(9,11,12,0.5)">Dipilih: {{ form.cityName }}</p>
@@ -403,7 +403,7 @@ function searchCities() {
 
 function selectCity(city: any) {
   form.cityId = city.city_id
-  form.cityName = `${city.type} ${city.city_name}`
+  form.cityName = city.label || `${city.type} ${city.city_name}`
   citySearch.value = `${city.type} ${city.city_name}`
   showCityDropdown.value = false
 }
