@@ -1,4 +1,6 @@
 export default defineEventHandler(async (event) => {
+  await requireAdminSession(event)
+
   const id = getRouterParam(event, 'id')
   const { status } = await readBody(event)
 

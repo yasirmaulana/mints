@@ -1,9 +1,0 @@
-{
-  "pid": 86527,
-  "startedAt": 1789466066977,
-  "command": "dev",
-  "cwd": "/home/yasir/Documents/Project/mints",
-  "port": 3000,
-  "hostname": "127.0.0.1",
-  "url": "http://127.0.0.1:3000"
-}

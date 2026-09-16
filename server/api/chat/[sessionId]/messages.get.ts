@@ -22,18 +22,15 @@ export default defineEventHandler(async (event) => {
   })
   sendEvent({ type: 'init', messages: existing })
 
-  // Poll for new messages every 2s
-  let lastId = existing[existing.length - 1]?.id || ''
+  // Poll for new messages every 2s — use createdAt, not id (UUID ordering is alphabetical, not chronological)
+  let lastCreatedAt: Date = existing.length ? existing[existing.length - 1].createdAt : new Date(0)
   const interval = setInterval(async () => {
     const newMsgs = await prisma.chatMessage.findMany({
-      where: {
-        sessionId,
-        ...(lastId ? { id: { gt: lastId } } : {})
-      },
+      where: { sessionId, createdAt: { gt: lastCreatedAt } },
       orderBy: { createdAt: 'asc' }
     })
     if (newMsgs.length) {
-      lastId = newMsgs[newMsgs.length - 1].id
+      lastCreatedAt = newMsgs[newMsgs.length - 1].createdAt
       sendEvent({ type: 'messages', messages: newMsgs })
     }
   }, 2000)

@@ -1,12 +1,8 @@
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname
-  if (!path.startsWith('/admin') || path === '/admin/login') return
 
-  // Hanya berlaku untuk API admin, bukan halaman (halaman di-handle route middleware)
-  if (!path.startsWith('/api/admin')) return
+  // Proteksi semua /api/admin/* kecuali login
+  if (!path.startsWith('/api/admin/') || path === '/api/admin/login') return
 
-  const session = getCookie(event, 'admin_session')
-  if (session !== 'authenticated') {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-  }
+  await requireAdminSession(event)
 })

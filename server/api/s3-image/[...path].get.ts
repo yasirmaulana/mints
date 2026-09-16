@@ -3,8 +3,16 @@ import { Readable } from 'stream'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
-  const path = getRouterParam(event, 'path')
-  if (!path) throw createError({ statusCode: 400 })
+  const rawPath = getRouterParam(event, 'path')
+  if (!rawPath) throw createError({ statusCode: 400 })
+
+  // Prevent path traversal — only allow paths under known prefixes
+  const ALLOWED_PREFIXES = ['products/', 'payments/', 'uploads/']
+  const normalised = rawPath.replace(/\.\.\//g, '').replace(/^\/+/, '')
+  if (!ALLOWED_PREFIXES.some(p => normalised.startsWith(p))) {
+    throw createError({ statusCode: 403, statusMessage: 'Akses tidak diizinkan' })
+  }
+  const path = normalised
 
   const client = new S3Client({
     region: config.s3Region,

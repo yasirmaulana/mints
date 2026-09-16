@@ -5,9 +5,9 @@
     <header class="fixed left-0 right-0 z-50 px-4 py-4 md:px-8 transition-colors duration-300" :style="scrolled ? 'background:rgba(245,245,242,0.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(9,11,12,0.06)' : 'background:transparent'">
       <div class="relative flex h-10 items-center max-w-6xl mx-auto">
         <!-- Logo -->
-        <NuxtLink to="/" class="flex items-center font-black text-xl tracking-tighter" style="font-family:'Inter Tight',sans-serif;color:#090b0c;letter-spacing:-0.04em">MINTS</NuxtLink>
+        <NuxtLink to="/" class="flex items-center font-black text-xl tracking-tighter transition-colors duration-300" :style="`font-family:'Inter Tight',sans-serif;letter-spacing:-0.04em;color:${scrolled ? '#090b0c' : 'white'}`">MINTS</NuxtLink>
 
-        <!-- Center pill nav -->
+        <!-- Center pill nav (desktop only) -->
         <nav class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full border px-2 py-1.5 backdrop-blur-md md:flex" style="border-color:rgba(9,11,12,0.08);background:rgba(255,255,255,0.7)">
           <a href="#" class="rounded-full px-4 py-2 text-sm transition-colors" style="color:rgba(9,11,12,0.7)" @mouseover="$event.currentTarget.style.background='rgba(0,0,0,0.05)'" @mouseleave="$event.currentTarget.style.background='transparent'">Beranda</a>
           <a href="#produk" class="rounded-full px-4 py-2 text-sm transition-colors" style="color:rgba(9,11,12,0.7)" @mouseover="$event.currentTarget.style.background='rgba(0,0,0,0.05)'" @mouseleave="$event.currentTarget.style.background='transparent'">Belanja</a>
@@ -22,13 +22,35 @@
             <NuxtLink to="/account" class="hidden sm:block rounded-full px-4 py-2 text-sm transition-colors" style="color:rgba(9,11,12,0.7)">Akun</NuxtLink>
           </template>
           <NuxtLink v-else to="/login" class="hidden sm:block rounded-full px-5 py-2.5 text-sm font-normal transition-opacity hover:opacity-85" style="background:#090b0c;color:white">Masuk</NuxtLink>
-          <NuxtLink to="/cart" class="relative flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-normal transition-opacity hover:opacity-85" style="background:#090b0c;color:white">
+          <!-- Cart button -->
+          <NuxtLink to="/cart" class="relative flex items-center gap-2 rounded-full px-3 py-2.5 text-sm font-normal transition-opacity hover:opacity-85 sm:px-5" style="background:#090b0c;color:white">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.98-1.61L23 6H6"/></svg>
-            Keranjang
+            <span class="hidden sm:inline">Keranjang</span>
             <span v-if="itemCount > 0" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full text-[10px] font-bold flex items-center justify-center px-1" style="background:#fabc3f;color:#090b0c">{{ itemCount }}</span>
           </NuxtLink>
+          <!-- Hamburger (mobile only) -->
+          <button class="flex md:hidden items-center justify-center w-9 h-9 rounded-full transition-colors" :style="scrolled ? 'background:rgba(9,11,12,0.06)' : 'background:rgba(255,255,255,0.15)'" @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Menu">
+            <svg v-if="!mobileMenuOpen" class="w-4 h-4" :style="scrolled ? 'color:#090b0c' : 'color:white'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <svg v-else class="w-4 h-4" :style="scrolled ? 'color:#090b0c' : 'color:white'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
         </div>
       </div>
+
+      <!-- Mobile menu drawer -->
+      <Transition name="slide-down">
+        <div v-if="mobileMenuOpen" class="md:hidden mt-3 rounded-2xl p-4 flex flex-col gap-1" style="background:rgba(255,255,255,0.96);backdrop-filter:blur(16px);border:1px solid rgba(9,11,12,0.08)">
+          <a href="#" class="rounded-xl px-4 py-3 text-sm font-normal transition-colors" style="color:#090b0c" @click="mobileMenuOpen = false">Beranda</a>
+          <a href="#produk" class="rounded-xl px-4 py-3 text-sm font-normal transition-colors" style="color:#090b0c" @click="mobileMenuOpen = false">Belanja</a>
+          <NuxtLink to="/koleksi" class="rounded-xl px-4 py-3 text-sm font-normal transition-colors" style="color:#090b0c" @click="mobileMenuOpen = false">Koleksi</NuxtLink>
+          <NuxtLink to="/track" class="rounded-xl px-4 py-3 text-sm font-normal transition-colors" style="color:#090b0c" @click="mobileMenuOpen = false">Lacak Paket</NuxtLink>
+          <div class="my-1 border-t" style="border-color:rgba(9,11,12,0.08)" />
+          <template v-if="isLoggedIn">
+            <NuxtLink to="/account/orders" class="rounded-xl px-4 py-3 text-sm font-normal" style="color:#090b0c" @click="mobileMenuOpen = false">Pesanan Saya</NuxtLink>
+            <NuxtLink to="/account" class="rounded-xl px-4 py-3 text-sm font-normal" style="color:#090b0c" @click="mobileMenuOpen = false">Akun</NuxtLink>
+          </template>
+          <NuxtLink v-else to="/login" class="mt-1 rounded-xl px-4 py-3 text-sm font-normal text-center transition-opacity hover:opacity-85" style="background:#090b0c;color:white" @click="mobileMenuOpen = false">Masuk</NuxtLink>
+        </div>
+      </Transition>
     </header>
 
     <!-- Hero -->
@@ -150,14 +172,14 @@
             </h2>
           </div>
           <!-- Search + type filter -->
-          <div class="flex flex-wrap items-center gap-2">
-            <div class="relative">
+          <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div class="relative flex-1 sm:flex-none sm:w-[180px]">
               <input
                 v-model="search"
                 type="text"
                 placeholder="Cari produk..."
                 class="h-9 rounded-full border pl-9 pr-4 text-sm focus:outline-none"
-                style="border-color:rgba(9,11,12,0.15);background:white;color:#090b0c;width:180px"
+                style="border-color:rgba(9,11,12,0.15);background:white;color:#090b0c;min-width:0;width:100%;max-width:180px"
               />
               <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style="color:rgba(9,11,12,0.4)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
             </div>
@@ -174,7 +196,7 @@
         </div>
 
         <!-- Loading skeleton -->
-        <div v-if="pending" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div v-if="pending" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <div v-for="i in 8" :key="i" class="rounded-3xl aspect-[3/4] animate-pulse" style="background:rgba(9,11,12,0.06)" />
         </div>
 
@@ -186,7 +208,7 @@
         </div>
 
         <!-- Grid -->
-        <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <div
             v-for="product in filteredProducts"
             :key="product.id"
@@ -336,6 +358,7 @@ const search = ref('')
 const activeCategory = ref<string | null>(null)
 const activeType = ref('ALL')
 const scrolled = ref(false)
+const mobileMenuOpen = ref(false)
 
 
 const freeShippingMin = useRuntimeConfig().public.freeShippingMin
@@ -384,3 +407,15 @@ onMounted(() => {
   onUnmounted(() => window.removeEventListener('scroll', handler))
 })
 </script>
+
+<style scoped>
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+</style>

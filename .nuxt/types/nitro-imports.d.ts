@@ -13,8 +13,10 @@ declare global {
   const cachedEventHandler: typeof import('../../node_modules/nitropack/dist/runtime/internal/cache').cachedEventHandler
   const cachedFunction: typeof import('../../node_modules/nitropack/dist/runtime/internal/cache').cachedFunction
   const callNodeListener: typeof import('../../node_modules/h3').callNodeListener
+  const checkRateLimit: typeof import('../../server/utils/rate-limit').checkRateLimit
   const clearResponseHeaders: typeof import('../../node_modules/h3').clearResponseHeaders
   const clearSession: typeof import('../../node_modules/h3').clearSession
+  const createAdminToken: typeof import('../../server/utils/auth').createAdminToken
   const createApp: typeof import('../../node_modules/h3').createApp
   const createAppEventHandler: typeof import('../../node_modules/h3').createAppEventHandler
   const createError: typeof import('../../node_modules/h3').createError
@@ -135,6 +137,7 @@ declare global {
   const useRuntimeConfig: typeof import('../../node_modules/nitropack/dist/runtime/internal/config').useRuntimeConfig
   const useSession: typeof import('../../node_modules/h3').useSession
   const useStorage: typeof import('../../node_modules/nitropack/dist/runtime/internal/storage').useStorage
+  const verifyAdminToken: typeof import('../../server/utils/auth').verifyAdminToken
   const verifyTurnstile: typeof import('../../server/utils/turnstile').verifyTurnstile
   const writeEarlyHints: typeof import('../../node_modules/h3').writeEarlyHints
 }
@@ -158,10 +161,11 @@ export { defineTask, runTask } from 'nitropack/runtime/internal/task';
 export { defineNitroErrorHandler } from 'nitropack/runtime/internal/error/utils';
 export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsURL } from '/home/yasir/Documents/Project/mints/node_modules/@nuxt/nitro-server/dist/runtime/utils/paths';
 export { defineAppConfig } from '/home/yasir/Documents/Project/mints/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
-export { requireAdminSession } from '/home/yasir/Documents/Project/mints/server/utils/auth';
+export { createAdminToken, verifyAdminToken, requireAdminSession } from '/home/yasir/Documents/Project/mints/server/utils/auth';
 export { requireBuyerSession } from '/home/yasir/Documents/Project/mints/server/utils/buyer-auth';
 export { duitkuSignature, duitkuCallbackSignature, getDuitkuBaseUrl } from '/home/yasir/Documents/Project/mints/server/utils/duitku';
 export { sendPaymentNotice, getBulkTemplate } from '/home/yasir/Documents/Project/mints/server/utils/fonnte';
 export { prisma } from '/home/yasir/Documents/Project/mints/server/utils/prisma';
+export { checkRateLimit } from '/home/yasir/Documents/Project/mints/server/utils/rate-limit';
 export { getS3Client, uploadToS3 } from '/home/yasir/Documents/Project/mints/server/utils/s3';
 export { verifyTurnstile } from '/home/yasir/Documents/Project/mints/server/utils/turnstile';

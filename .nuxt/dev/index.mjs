@@ -943,8 +943,8 @@ const _inlineRuntimeConfig = {
   "fonnteUrl": "https://api.fonnte.com/send",
   "fonnteApiKey": "UnrEBcungbTmdX9H918A",
   "adminUsername": "admin",
-  "adminPassword": "admin123",
-  "sessionSecret": "change-me-in-production",
+  "adminPassword": "N@m44jjiswt",
+  "sessionSecret": "16df910ab2f0e7f0c56c2adb0f45779314f8a810d28b45c9882da71bffaf113a",
   "s3AccessKey": "XQKLH2YX1ZKL2PCQEYR6",
   "s3SecretKey": "u3c7aKpHLkVsoB8N2zVmvB/yAZbuxuqAnoiMbFrN",
   "s3Bucket": "flashsale-bucket-ktc6wa",
@@ -2470,7 +2470,22 @@ _vjSbgTEPcvP0HEi0K1qft2ncAMxEKqgheZndV1buhI,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"30bfd-wSjzR7nHGGUeeOXvbCWAt0WdgTY\"",
+    "mtime": "2026-09-16T03:11:13.096Z",
+    "size": 199677,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"acccc-PTnwTezafrFKKZW2NXCXr7ZBCFc\"",
+    "mtime": "2026-09-16T03:11:13.096Z",
+    "size": 707788,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2559,14 +2574,58 @@ const _r3Dd_Z = eventHandler((event) => {
   return readAsset(id);
 });
 
-const _O2xcaq = defineEventHandler((event) => {
-  const path = getRequestURL(event).pathname;
-  if (!path.startsWith("/admin") || path === "/admin/login") return;
-  if (!path.startsWith("/api/admin")) return;
-  const session = getCookie(event, "admin_session");
-  if (session !== "authenticated") {
+const TOKEN_VERSION = "v1";
+function getSecret() {
+  const s = useRuntimeConfig().sessionSecret;
+  if (!s) throw createError({ statusCode: 500, statusMessage: "SESSION_SECRET tidak dikonfigurasi" });
+  return s;
+}
+async function hmacSign(secret, data) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(data));
+  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+async function hmacVerify(secret, data, sig) {
+  const expected = await hmacSign(secret, data);
+  if (expected.length !== sig.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ sig.charCodeAt(i);
+  return diff === 0;
+}
+async function createAdminToken() {
+  const ts = Date.now().toString();
+  const secret = getSecret();
+  const sig = await hmacSign(secret, `${TOKEN_VERSION}.${ts}`);
+  return `${TOKEN_VERSION}.${ts}.${sig}`;
+}
+async function verifyAdminToken(token, maxAgeMs = 8 * 60 * 60 * 1e3) {
+  if (!token) return false;
+  const parts = token.split(".");
+  if (parts.length !== 3 || parts[0] !== TOKEN_VERSION) return false;
+  const [, ts, sig] = parts;
+  const age = Date.now() - parseInt(ts);
+  if (isNaN(age) || age > maxAgeMs || age < 0) return false;
+  const secret = getSecret();
+  return hmacVerify(secret, `${TOKEN_VERSION}.${ts}`, sig);
+}
+async function requireAdminSession(event) {
+  const token = getCookie(event, "admin_session");
+  if (!await verifyAdminToken(token)) {
     throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
   }
+}
+
+const _O2xcaq = defineEventHandler(async (event) => {
+  const path = getRequestURL(event).pathname;
+  if (!path.startsWith("/api/admin/") || path === "/api/admin/login") return;
+  await requireAdminSession(event);
 });
 
 const _PenuE5 = defineEventHandler((event) => {
@@ -2668,13 +2727,6 @@ function publicAssetsURL(...path) {
 	return path.length ? joinRelativeURL(publicBase, ...path) : publicBase;
 }
 
-function requireAdminSession(event) {
-  const session = getCookie(event, "admin_session");
-  if (!session || session !== "authenticated") {
-    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
-  }
-}
-
 var _a;
 const globalForPrisma = globalThis;
 function buildPrisma() {
@@ -2751,6 +2803,28 @@ Setelah transfer, kirimkan bukti pembayaran ke admin. Terima kasih!`;
   return getTemplate("bulk", DEFAULT_BULK);
 }
 
+const store = /* @__PURE__ */ new Map();
+function checkRateLimit(key, max = 5, windowMs = 15 * 60 * 1e3) {
+  const now = Date.now();
+  let bucket = store.get(key);
+  if (!bucket || now > bucket.resetAt) {
+    bucket = { count: 0, resetAt: now + windowMs };
+    store.set(key, bucket);
+  }
+  bucket.count++;
+  if (bucket.count > max) {
+    throw createError({
+      statusCode: 429,
+      statusMessage: `Terlalu banyak percobaan. Coba lagi dalam ${Math.ceil((bucket.resetAt - now) / 6e4)} menit`
+    });
+  }
+  if (store.size > 1e4) {
+    for (const [k, v] of store) {
+      if (now > v.resetAt) store.delete(k);
+    }
+  }
+}
+
 const MAX_SIZE = 2 * 1024 * 1024;
 function getS3Client() {
   const config = useRuntimeConfig();
@@ -2764,13 +2838,19 @@ function getS3Client() {
     forcePathStyle: true
   });
 }
+const ALLOWED_MIME = /* @__PURE__ */ new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 async function uploadToS3(data, filename, contentType, prefix = "products") {
+  var _a;
+  if (!ALLOWED_MIME.has(contentType)) {
+    throw createError({ statusCode: 400, statusMessage: "Tipe file tidak diizinkan. Gunakan JPG, PNG, WebP, atau GIF" });
+  }
   if (data.length > MAX_SIZE) {
     throw createError({ statusCode: 400, statusMessage: `Ukuran file terlalu besar. Maksimal 2 MB (saat ini ${(data.length / 1024 / 1024).toFixed(1)} MB)` });
   }
   const config = useRuntimeConfig();
   const client = getS3Client();
-  const key = `${prefix}/${Date.now()}-${filename}`;
+  const safeName = ((_a = filename.split(/[/\\]/).pop()) == null ? void 0 : _a.replace(/[^a-zA-Z0-9_\-. ]/g, "_")) || "upload";
+  const key = `${prefix}/${Date.now()}-${safeName}`;
   await client.send(new PutObjectCommand({
     Bucket: config.s3Bucket,
     Key: key,
@@ -2783,7 +2863,10 @@ async function uploadToS3(data, filename, contentType, prefix = "products") {
 async function verifyTurnstile(token, ip) {
   const config = useRuntimeConfig();
   const secret = config.turnstileSecretKey;
-  if (!secret) return;
+  if (!secret) {
+    console.warn("[turnstile] TURNSTILE_SECRET_KEY tidak dikonfigurasi \u2014 verifikasi dilewati");
+    return;
+  }
   const body = new URLSearchParams({ secret, response: token });
   if (ip) body.set("remoteip", ip);
   const res = await $fetch(
@@ -4013,27 +4096,53 @@ const index_get$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const login_post$2 = defineEventHandler(async (event) => {
-  var _a, _b;
+  var _a, _b, _c;
+  const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
+  checkRateLimit(`admin-login:${ip}`, 10, 15 * 60 * 1e3);
   const body = await readBody(event);
   const { username, password, turnstileToken } = body != null ? body : {};
-  await verifyTurnstile(turnstileToken != null ? turnstileToken : "", (_b = (_a = getHeader(event, "x-forwarded-for")) != null ? _a : getRequestIP(event)) != null ? _b : "");
+  await verifyTurnstile(turnstileToken != null ? turnstileToken : "", ip);
   const config = useRuntimeConfig();
-  console.log("[admin/login] body received:", { username, password: password ? "***" : void 0 });
-  console.log("[admin/login] config.adminUsername:", config.adminUsername);
-  console.log("[admin/login] config.adminPassword set:", !!config.adminPassword);
   if (!username || !password) {
-    console.log("[admin/login] missing username or password");
     throw createError({ statusCode: 400, statusMessage: "Username dan password wajib diisi" });
   }
-  if (username !== config.adminUsername || password !== config.adminPassword) {
-    console.log("[admin/login] credential mismatch \u2014 expected username:", config.adminUsername);
+  let authenticated = false;
+  const dbAdmin = await prisma.admin.findUnique({ where: { username } });
+  if (dbAdmin) {
+    authenticated = await bcrypt.compare(password, dbAdmin.password);
+  }
+  if (!authenticated && config.adminUsername && config.adminPassword) {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", enc.encode("compare"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    const [sigUser, sigPass, sigExpUser, sigExpPass] = await Promise.all([
+      crypto.subtle.sign("HMAC", key, enc.encode(username)),
+      crypto.subtle.sign("HMAC", key, enc.encode(password)),
+      crypto.subtle.sign("HMAC", key, enc.encode(config.adminUsername)),
+      crypto.subtle.sign("HMAC", key, enc.encode(config.adminPassword))
+    ]);
+    const userMatch = sigUser.byteLength === sigExpUser.byteLength && new Uint8Array(sigUser).every((b, i) => b === new Uint8Array(sigExpUser)[i]);
+    const passMatch = sigPass.byteLength === sigExpPass.byteLength && new Uint8Array(sigPass).every((b, i) => b === new Uint8Array(sigExpPass)[i]);
+    authenticated = userMatch && passMatch;
+  }
+  if (!authenticated) {
     throw createError({ statusCode: 401, statusMessage: "Username atau password salah" });
   }
-  setCookie(event, "admin_session", "authenticated", {
+  const token = await createAdminToken();
+  const maxAge = 60 * 60 * 8;
+  setCookie(event, "admin_session", token, {
+    httpOnly: true,
+    secure: true,
     sameSite: "strict",
-    maxAge: 60 * 60 * 8
+    maxAge,
+    path: "/"
   });
-  console.log("[admin/login] login success for:", username);
+  setCookie(event, "admin_auth", "1", {
+    httpOnly: false,
+    secure: true,
+    sameSite: "strict",
+    maxAge,
+    path: "/"
+  });
   return { success: true };
 });
 
@@ -4043,7 +4152,8 @@ const login_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const logout_post$2 = defineEventHandler((event) => {
-  deleteCookie(event, "admin_session");
+  deleteCookie(event, "admin_session", { path: "/" });
+  deleteCookie(event, "admin_auth", { path: "/" });
   return { success: true };
 });
 
@@ -4141,6 +4251,7 @@ const shipment_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePro
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const status_patch = defineEventHandler(async (event) => {
+  await requireAdminSession(event);
   const id = getRouterParam(event, "id");
   const { status } = await readBody(event);
   const allowed = ["PENDING_PAYMENT", "PAID", "IN_PRODUCTION", "READY_TO_SHIP", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"];
@@ -4455,15 +4566,18 @@ const waTemplate_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePr
   default: waTemplate_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const ALLOWED_KEYS = /* @__PURE__ */ new Set(["order_confirmed", "order_paid", "order_shipped", "order_cancelled", "order_offline"]);
 const waTemplate_put = defineEventHandler(async (event) => {
-  requireAdminSession(event);
+  await requireAdminSession(event);
   const body = await readBody(event);
+  const entries = Object.entries(body).filter(([key]) => ALLOWED_KEYS.has(key));
+  if (!entries.length) throw createError({ statusCode: 400, statusMessage: "Tidak ada template yang valid" });
   await Promise.all(
-    Object.entries(body).map(
+    entries.map(
       ([key, template]) => prisma.waTemplate.upsert({
         where: { key },
-        update: { template },
-        create: { key, template }
+        update: { template: String(template) },
+        create: { key, template: String(template) }
       })
     )
   );
@@ -4476,10 +4590,12 @@ const waTemplate_put$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePr
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const login_post = defineEventHandler(async (event) => {
-  var _a, _b;
+  var _a, _b, _c;
+  const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
+  checkRateLimit(`buyer-login:${ip}`, 10, 15 * 60 * 1e3);
   const body = await readBody(event);
   const { phone, password, turnstileToken } = body != null ? body : {};
-  await verifyTurnstile(turnstileToken != null ? turnstileToken : "", (_b = (_a = getHeader(event, "x-forwarded-for")) != null ? _a : getRequestIP(event)) != null ? _b : "");
+  await verifyTurnstile(turnstileToken != null ? turnstileToken : "", ip);
   if (!(phone == null ? void 0 : phone.trim()) || !(password == null ? void 0 : password.trim())) {
     throw createError({ statusCode: 400, statusMessage: "Nomor HP dan password wajib diisi" });
   }
@@ -4488,9 +4604,19 @@ const login_post = defineEventHandler(async (event) => {
   if (!buyer || !await bcrypt.compare(password, buyer.password)) {
     throw createError({ statusCode: 401, statusMessage: "Nomor HP atau password salah" });
   }
+  const maxAge = 60 * 60 * 24 * 30;
   setCookie(event, "buyer_session", buyer.id, {
+    httpOnly: true,
+    secure: true,
     sameSite: "strict",
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge,
+    path: "/"
+  });
+  setCookie(event, "buyer_auth", "1", {
+    httpOnly: false,
+    secure: true,
+    sameSite: "strict",
+    maxAge,
     path: "/"
   });
   return { success: true, buyer: { id: buyer.id, name: buyer.name, phone: buyer.phone, email: buyer.email } };
@@ -4503,6 +4629,7 @@ const login_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 
 const logout_post = defineEventHandler((event) => {
   deleteCookie(event, "buyer_session", { path: "/" });
+  deleteCookie(event, "buyer_auth", { path: "/" });
   return { success: true };
 });
 
@@ -4530,10 +4657,12 @@ const me_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const register_post = defineEventHandler(async (event) => {
-  var _a, _b;
+  var _a, _b, _c;
+  const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
+  checkRateLimit(`buyer-register:${ip}`, 5, 60 * 60 * 1e3);
   const body = await readBody(event);
   const { name, phone, password, email, turnstileToken } = body != null ? body : {};
-  await verifyTurnstile(turnstileToken != null ? turnstileToken : "", (_b = (_a = getHeader(event, "x-forwarded-for")) != null ? _a : getRequestIP(event)) != null ? _b : "");
+  await verifyTurnstile(turnstileToken != null ? turnstileToken : "", ip);
   if (!(name == null ? void 0 : name.trim()) || !(phone == null ? void 0 : phone.trim()) || !(password == null ? void 0 : password.trim())) {
     throw createError({ statusCode: 400, statusMessage: "Nama, nomor HP, dan password wajib diisi" });
   }
@@ -4554,9 +4683,19 @@ const register_post = defineEventHandler(async (event) => {
       password: hashed
     }
   });
+  const maxAge = 60 * 60 * 24 * 30;
   setCookie(event, "buyer_session", buyer.id, {
+    httpOnly: true,
+    secure: true,
     sameSite: "strict",
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge,
+    path: "/"
+  });
+  setCookie(event, "buyer_auth", "1", {
+    httpOnly: false,
+    secure: true,
+    sameSite: "strict",
+    maxAge,
     path: "/"
   });
   return { success: true, buyer: { id: buyer.id, name: buyer.name, phone: buyer.phone, email: buyer.email } };
@@ -4677,7 +4816,7 @@ const index_get$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const messages_get = defineEventHandler(async (event) => {
-  var _a, _b;
+  var _a;
   const sessionId = getRouterParam(event, "sessionId");
   const session = await prisma.chatSession.findUnique({ where: { id: sessionId } });
   if (!session) throw createError({ statusCode: 404, statusMessage: "Session tidak ditemukan" });
@@ -4696,17 +4835,14 @@ const messages_get = defineEventHandler(async (event) => {
     orderBy: { createdAt: "asc" }
   });
   sendEvent({ type: "init", messages: existing });
-  let lastId = ((_b = existing[existing.length - 1]) == null ? void 0 : _b.id) || "";
+  let lastCreatedAt = existing.length ? existing[existing.length - 1].createdAt : /* @__PURE__ */ new Date(0);
   const interval = setInterval(async () => {
     const newMsgs = await prisma.chatMessage.findMany({
-      where: {
-        sessionId,
-        ...lastId ? { id: { gt: lastId } } : {}
-      },
+      where: { sessionId, createdAt: { gt: lastCreatedAt } },
       orderBy: { createdAt: "asc" }
     });
     if (newMsgs.length) {
-      lastId = newMsgs[newMsgs.length - 1].id;
+      lastCreatedAt = newMsgs[newMsgs.length - 1].createdAt;
       sendEvent({ type: "messages", messages: newMsgs });
     }
   }, 2e3);
@@ -4752,6 +4888,9 @@ const messages_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePro
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const start_post = defineEventHandler(async (event) => {
+  var _a, _b, _c;
+  const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
+  checkRateLimit(`chat-start:${ip}`, 10, 5 * 60 * 1e3);
   const body = await readBody(event);
   const { buyerPhone, buyerName, productId, orderId, message } = body;
   if (!buyerPhone || !buyerName || !message) {
@@ -4967,8 +5106,16 @@ const track_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
 const index_get$2 = defineEventHandler(async (event) => {
   const { phone } = getQuery$1(event);
   if (!phone) throw createError({ statusCode: 400, statusMessage: "phone wajib diisi" });
+  const phoneStr = String(phone).replace(/\s/g, "");
+  if (!/^(08|628|\+628)\d{7,12}$/.test(phoneStr)) {
+    throw createError({ statusCode: 400, statusMessage: "Format nomor HP tidak valid" });
+  }
+  const buyerId = getCookie(event, "buyer_session");
   const orders = await prisma.order.findMany({
-    where: { buyerPhone: String(phone), source: "REGULAR" },
+    where: {
+      source: "REGULAR",
+      ...buyerId ? { buyerId } : { buyerPhone: phoneStr }
+    },
     include: {
       product: { select: { id: true, title: true, imageUrl: true } },
       payment: { select: { status: true, paymentUrl: true, paidAt: true } },
@@ -5055,11 +5202,15 @@ const createTransaction_post = defineEventHandler(async (event) => {
   if (!orderId || !paymentMethod) {
     throw createError({ statusCode: 400, statusMessage: "orderId dan paymentMethod wajib diisi" });
   }
+  const buyerId = getCookie(event, "buyer_session");
   const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: { product: true }
   });
   if (!order) throw createError({ statusCode: 404, statusMessage: "Order tidak ditemukan" });
+  if (order.buyerId && order.buyerId !== buyerId) {
+    throw createError({ statusCode: 403, statusMessage: "Akses tidak diizinkan" });
+  }
   if (order.status !== "PENDING_PAYMENT") {
     throw createError({ statusCode: 400, statusMessage: "Order sudah diproses atau dibatalkan" });
   }
@@ -5182,8 +5333,14 @@ const status_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 
 const ____path__get = defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
-  const path = getRouterParam(event, "path");
-  if (!path) throw createError({ statusCode: 400 });
+  const rawPath = getRouterParam(event, "path");
+  if (!rawPath) throw createError({ statusCode: 400 });
+  const ALLOWED_PREFIXES = ["products/", "payments/", "uploads/"];
+  const normalised = rawPath.replace(/\.\.\//g, "").replace(/^\/+/, "");
+  if (!ALLOWED_PREFIXES.some((p) => normalised.startsWith(p))) {
+    throw createError({ statusCode: 403, statusMessage: "Akses tidak diizinkan" });
+  }
+  const path = normalised;
   const client = new S3Client({
     region: config.s3Region,
     endpoint: config.s3Endpoint,
