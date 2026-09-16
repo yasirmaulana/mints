@@ -10,9 +10,8 @@
         <!-- Center pill nav (desktop only) -->
         <nav class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full border px-2 py-1.5 backdrop-blur-md md:flex" style="border-color:rgba(9,11,12,0.08);background:rgba(255,255,255,0.7)">
           <a href="#" class="rounded-full px-4 py-2 text-sm transition-colors" style="color:rgba(9,11,12,0.7)" @mouseover="$event.currentTarget.style.background='rgba(0,0,0,0.05)'" @mouseleave="$event.currentTarget.style.background='transparent'">Beranda</a>
-          <a href="#produk" class="rounded-full px-4 py-2 text-sm transition-colors" style="color:rgba(9,11,12,0.7)" @mouseover="$event.currentTarget.style.background='rgba(0,0,0,0.05)'" @mouseleave="$event.currentTarget.style.background='transparent'">Belanja</a>
           <NuxtLink to="/koleksi" class="rounded-full px-4 py-2 text-sm transition-colors" style="color:rgba(9,11,12,0.7)" @mouseover="$event.currentTarget.style.background='rgba(0,0,0,0.05)'" @mouseleave="$event.currentTarget.style.background='transparent'">Koleksi</NuxtLink>
-          <NuxtLink to="/track" class="rounded-full px-4 py-2 text-sm transition-colors" style="color:rgba(9,11,12,0.7)" @mouseover="$event.currentTarget.style.background='rgba(0,0,0,0.05)'" @mouseleave="$event.currentTarget.style.background='transparent'">Lacak Paket</NuxtLink>
+          <NuxtLink to="/flash_sale" class="rounded-full px-4 py-2 text-sm transition-colors" style="color:rgba(9,11,12,0.7)" @mouseover="$event.currentTarget.style.background='rgba(0,0,0,0.05)'" @mouseleave="$event.currentTarget.style.background='transparent'">Flash Sale</NuxtLink>
         </nav>
 
         <!-- Right -->
@@ -29,7 +28,7 @@
             <span v-if="itemCount > 0" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full text-[10px] font-bold flex items-center justify-center px-1" style="background:#fabc3f;color:#090b0c">{{ itemCount }}</span>
           </NuxtLink>
           <!-- Hamburger (mobile only) -->
-          <button class="flex items-center justify-center w-9 h-9 rounded-full transition-colors" :style="`display:${windowWidth >= 768 ? 'none' : 'flex'};${scrolled ? 'background:rgba(9,11,12,0.06)' : 'background:rgba(255,255,255,0.15)'}`" @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Menu">
+          <button class="flex md:hidden items-center justify-center w-9 h-9 rounded-full transition-colors" :style="scrolled ? 'background:rgba(9,11,12,0.06)' : 'background:rgba(255,255,255,0.15)'" @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Menu">
             <svg v-if="!mobileMenuOpen" class="w-4 h-4" :style="scrolled ? 'color:#090b0c' : 'color:white'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             <svg v-else class="w-4 h-4" :style="scrolled ? 'color:#090b0c' : 'color:white'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -40,9 +39,8 @@
       <Transition name="slide-down">
         <div v-if="mobileMenuOpen" class="md:hidden mt-3 rounded-2xl p-4 flex flex-col gap-1" style="background:rgba(255,255,255,0.96);backdrop-filter:blur(16px);border:1px solid rgba(9,11,12,0.08)">
           <a href="#" class="rounded-xl px-4 py-3 text-sm font-normal transition-colors" style="color:#090b0c" @click="mobileMenuOpen = false">Beranda</a>
-          <a href="#produk" class="rounded-xl px-4 py-3 text-sm font-normal transition-colors" style="color:#090b0c" @click="mobileMenuOpen = false">Belanja</a>
           <NuxtLink to="/koleksi" class="rounded-xl px-4 py-3 text-sm font-normal transition-colors" style="color:#090b0c" @click="mobileMenuOpen = false">Koleksi</NuxtLink>
-          <NuxtLink to="/track" class="rounded-xl px-4 py-3 text-sm font-normal transition-colors" style="color:#090b0c" @click="mobileMenuOpen = false">Lacak Paket</NuxtLink>
+          <NuxtLink to="/flash_sale" class="rounded-xl px-4 py-3 text-sm font-normal transition-colors" style="color:#090b0c" @click="mobileMenuOpen = false">Flash Sale</NuxtLink>
           <div class="my-1 border-t" style="border-color:rgba(9,11,12,0.08)" />
           <template v-if="isLoggedIn">
             <NuxtLink to="/account/orders" class="rounded-xl px-4 py-3 text-sm font-normal" style="color:#090b0c" @click="mobileMenuOpen = false">Pesanan Saya</NuxtLink>
@@ -300,7 +298,7 @@
             <ul class="space-y-3 text-sm" style="color:rgba(9,11,12,0.6)">
               <li><NuxtLink to="/koleksi" class="transition-colors hover:text-[#090b0c]">Koleksi</NuxtLink></li>
               <li><NuxtLink to="/account/orders" class="transition-colors hover:text-[#090b0c]">Pesanan Saya</NuxtLink></li>
-              <li><NuxtLink to="/track" class="transition-colors hover:text-[#090b0c]">Lacak Paket</NuxtLink></li>
+              <li><NuxtLink to="/flash_sale" class="transition-colors hover:text-[#090b0c]">Flash Sale</NuxtLink></li>
               <li><NuxtLink to="/cart" class="transition-colors hover:text-[#090b0c]">Keranjang</NuxtLink></li>
             </ul>
           </div>

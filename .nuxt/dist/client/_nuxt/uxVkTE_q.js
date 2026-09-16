@@ -1,0 +1,1 @@
+import{ar as t,C as i}from"./BJu1yRED.js";import{u as o}from"./BPnGOMaV.js";import"./_kx3K7Eb.js";const u=t(a=>{if(!o("admin_auth").value&&a.path.startsWith("/admin")&&a.path!=="/admin/login")return i("/admin/login")});export{u as default};
