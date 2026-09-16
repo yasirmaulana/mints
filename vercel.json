@@ -1,11 +1,5 @@
 {
   "framework": "nuxtjs",
-  "functions": {
-    "server/api/chat/**": { "maxDuration": 10 },
-    "server/api/checkout/**": { "maxDuration": 30 },
-    "server/api/payment/**": { "maxDuration": 30 },
-    "server/api/**": { "maxDuration": 15 }
-  },
   "headers": [
     {
       "source": "/api/products(.*)",
