@@ -256,6 +256,19 @@
             <div class="p-5">
               <p class="text-xs font-normal uppercase tracking-[0.12rem] mb-3" style="color:rgba(9,11,12,0.4)">Metode Pembayaran</p>
               <p class="text-sm font-normal">{{ selectedPaymentMethodLabel }}</p>
+              <!-- Info rekening bank jika memilih Transfer Manual -->
+              <template v-if="form.paymentMethod === 'FT' && paymentConfig?.bankAccounts?.length">
+                <div class="mt-3 space-y-2">
+                  <p class="text-xs font-medium uppercase tracking-wide" style="color:rgba(9,11,12,0.4)">Rekening Tujuan</p>
+                  <div v-for="acc in paymentConfig.bankAccounts" :key="acc.accountNumber" class="flex items-start gap-3 p-3 rounded-xl" style="background:rgba(9,11,12,0.03);border:1px solid rgba(9,11,12,0.06)">
+                    <div class="flex-1">
+                      <p class="text-sm font-semibold">{{ acc.bank }}</p>
+                      <p class="text-sm mt-0.5" style="color:rgba(9,11,12,0.7)">{{ acc.accountNumber }}</p>
+                      <p class="text-xs mt-0.5" style="color:rgba(9,11,12,0.45)">a.n. {{ acc.accountName }}</p>
+                    </div>
+                  </div>
+                </div>
+              </template>
             </div>
           </div>
 
@@ -361,7 +374,7 @@ onMounted(async () => {
   }
 })
 
-const paymentMethods = [
+const GATEWAY_METHODS = [
   { code: 'VC', name: 'Virtual Account BCA', description: 'Transfer via Virtual Account BCA' },
   { code: 'M2', name: 'Virtual Account Mandiri', description: 'Transfer via Virtual Account Mandiri' },
   { code: 'BT', name: 'Virtual Account BRI', description: 'Transfer via Virtual Account BRI' },
@@ -370,8 +383,18 @@ const paymentMethods = [
   { code: 'DA', name: 'DANA', description: 'Bayar dengan DANA' },
   { code: 'SP', name: 'ShopeePay', description: 'Bayar dengan ShopeePay' },
   { code: 'I1', name: 'BCA KlikPay', description: 'Bayar dengan BCA KlikPay' },
-  { code: 'FT', name: 'Transfer Bank', description: 'Transfer ke rekening toko' }
 ]
+
+interface BankAccount { bank: string; accountName: string; accountNumber: string }
+const { data: paymentConfig } = await useFetch<{ gatewayEnabled: boolean; bankAccounts: BankAccount[] }>('/api/payment/settings')
+
+const paymentMethods = computed(() => {
+  const methods = []
+  if (paymentConfig.value?.gatewayEnabled) methods.push(...GATEWAY_METHODS)
+  const banks = paymentConfig.value?.bankAccounts ?? []
+  if (banks.length) methods.push({ code: 'FT', name: 'Transfer Bank Manual', description: `Transfer ke rekening ${banks[0].bank}${banks.length > 1 ? ` (+${banks.length - 1} lainnya)` : ''}` })
+  return methods
+})
 
 const canStep0 = computed(() => form.buyerName.trim().length >= 3 && /^(08|628|\+628)\d{8,12}$/.test(form.buyerPhone))
 const canStep1 = computed(() => form.address.trim().length >= 10 && !!form.cityId)

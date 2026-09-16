@@ -848,6 +848,86 @@
         </div>
       </div>
 
+      <!-- ── Pengaturan Payment ── -->
+      <div class="card p-6 space-y-6 w-full max-w-2xl">
+        <div>
+          <h2 class="text-base font-bold text-gray-900">Pengaturan Pembayaran</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Atur metode pembayaran yang tampil di halaman checkout.</p>
+        </div>
+
+        <!-- Toggle Payment Gateway -->
+        <div class="flex items-center justify-between gap-4 p-4 rounded-xl border" style="border-color:var(--border)">
+          <div>
+            <p class="text-sm font-medium text-gray-800">Payment Gateway (Duitku)</p>
+            <p class="text-xs text-gray-400 mt-0.5">Virtual Account, E-Wallet, dll. Butuh konfigurasi Duitku di environment.</p>
+          </div>
+          <button
+            class="relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors duration-200 focus:outline-none"
+            :style="paymentGatewayEnabled ? 'background:#090b0c' : 'background:#e5e7eb'"
+            @click="togglePaymentGateway"
+          >
+            <span
+              class="inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 mt-0.5"
+              :style="paymentGatewayEnabled ? 'translate:1.25rem' : 'translate:0.125rem'"
+            />
+          </button>
+        </div>
+
+        <!-- Rekening Bank Manual -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-medium text-gray-800">Rekening Bank Manual</p>
+            <button
+              class="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+              style="background:rgba(9,11,12,0.06);color:#090b0c"
+              @click="addBankAccount"
+            >+ Tambah Rekening</button>
+          </div>
+
+          <div v-if="!bankAccounts.length" class="text-xs text-gray-400 py-3 text-center border border-dashed rounded-xl" style="border-color:var(--border)">
+            Belum ada rekening. Klik "+ Tambah Rekening" untuk menambahkan.
+          </div>
+
+          <div v-for="(acc, idx) in bankAccounts" :key="idx" class="flex gap-3 items-start p-4 rounded-xl border" style="border-color:var(--border)">
+            <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label class="label-text text-xs">Nama Bank</label>
+                <input v-model="acc.bank" type="text" placeholder="BCA, Mandiri, BRI…" class="input-field mt-1" />
+              </div>
+              <div>
+                <label class="label-text text-xs">Atas Nama</label>
+                <input v-model="acc.accountName" type="text" placeholder="Nama pemilik rekening" class="input-field mt-1" />
+              </div>
+              <div>
+                <label class="label-text text-xs">Nomor Rekening</label>
+                <input v-model="acc.accountNumber" type="text" placeholder="1234567890" class="input-field mt-1" />
+              </div>
+            </div>
+            <button
+              class="mt-6 p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
+              title="Hapus rekening"
+              @click="bankAccounts.splice(idx, 1)"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button
+            class="btn-primary"
+            :disabled="paymentSaving"
+            @click="savePaymentSettings"
+          >
+            <span v-if="paymentSaving" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+            <span v-else>Simpan Pengaturan Pembayaran</span>
+          </button>
+          <span v-if="paymentSaved" class="text-sm text-green-600 font-medium">Tersimpan ✓</span>
+        </div>
+      </div>
+
       <div class="card p-6 space-y-6 w-full max-w-2xl">
         <h2 class="text-base font-bold text-gray-900">Template Pesan WA</h2>
 
@@ -1697,6 +1777,45 @@ async function saveOriginCity() {
     setTimeout(() => { originSaved.value = false }, 3000)
   } finally {
     originSaving.value = false
+  }
+}
+
+// ── Pengaturan Payment ──
+interface BankAccount { bank: string; accountName: string; accountNumber: string }
+
+const { data: paymentSettingsData } = await useFetch<Record<string, string>>('/api/admin/settings', {
+  query: { keys: 'payment_gateway_enabled,bank_accounts' }
+})
+const paymentGatewayEnabled = ref(paymentSettingsData.value?.payment_gateway_enabled === 'true')
+const bankAccounts = ref<BankAccount[]>(
+  paymentSettingsData.value?.bank_accounts ? JSON.parse(paymentSettingsData.value.bank_accounts) : []
+)
+const paymentSaving = ref(false)
+const paymentSaved = ref(false)
+
+function addBankAccount() {
+  bankAccounts.value.push({ bank: '', accountName: '', accountNumber: '' })
+}
+
+async function togglePaymentGateway() {
+  paymentGatewayEnabled.value = !paymentGatewayEnabled.value
+}
+
+async function savePaymentSettings() {
+  paymentSaving.value = true
+  paymentSaved.value = false
+  try {
+    await $fetch('/api/admin/settings', {
+      method: 'PUT',
+      body: {
+        payment_gateway_enabled: String(paymentGatewayEnabled.value),
+        bank_accounts: JSON.stringify(bankAccounts.value.filter(a => a.bank && a.accountNumber))
+      }
+    })
+    paymentSaved.value = true
+    setTimeout(() => { paymentSaved.value = false }, 3000)
+  } finally {
+    paymentSaving.value = false
   }
 }
 

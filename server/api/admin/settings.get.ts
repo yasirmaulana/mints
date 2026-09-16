@@ -1,4 +1,9 @@
-const ALLOWED_KEYS = new Set(['shipping_origin_city_id', 'shipping_origin_city_label'])
+const ALLOWED_KEYS = new Set([
+  'shipping_origin_city_id',
+  'shipping_origin_city_label',
+  'payment_gateway_enabled',
+  'bank_accounts'
+])
 
 export default defineEventHandler(async (event) => {
   await requireAdminSession(event)
