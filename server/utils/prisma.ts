@@ -5,13 +5,11 @@ import { withAccelerate } from '@prisma/extension-accelerate'
 const globalForPrisma = globalThis as unknown as { prisma: ReturnType<typeof buildPrisma> }
 
 function buildPrisma() {
+  // Hanya pakai Accelerate di production — dev tetap pakai DATABASE_URL langsung
   const accelerateUrl = process.env.ACCELERATE_URL ?? ''
-  const dbUrl = process.env.DATABASE_URL ?? ''
-  // Pakai Accelerate jika ACCELERATE_URL tersedia (production Vercel)
-  const useAccelerate = accelerateUrl.startsWith('prisma+postgres')
-  const client = new PrismaClient({
-    datasources: { db: { url: useAccelerate ? accelerateUrl : dbUrl } }
-  })
+  const useAccelerate = process.env.NODE_ENV === 'production' && accelerateUrl.startsWith('prisma')
+  if (useAccelerate) process.env.DATABASE_URL = accelerateUrl
+  const client = new PrismaClient()
   return useAccelerate ? client.$extends(withAccelerate()) : client
 }
 

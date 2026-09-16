@@ -12,7 +12,6 @@ import { PutObjectCommand, S3Client, GetObjectCommand } from 'file:///home/yasir
 import { Ratelimit } from 'file:///home/yasir/Documents/Project/mints/node_modules/@upstash/ratelimit/dist/index.js';
 import { Redis } from 'file:///home/yasir/Documents/Project/mints/node_modules/@upstash/redis/nodejs.mjs';
 import { PrismaClient } from 'file:///home/yasir/Documents/Project/mints/node_modules/@prisma/client/default.js';
-import { withAccelerate } from 'file:///home/yasir/Documents/Project/mints/node_modules/@prisma/extension-accelerate/dist/index.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file:///home/yasir/Documents/Project/mints/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL, encodePath } from 'file:///home/yasir/Documents/Project/mints/node_modules/ufo/dist/index.mjs';
 import { renderToString } from 'file:///home/yasir/Documents/Project/mints/node_modules/vue/server-renderer/index.mjs';
@@ -2475,16 +2474,16 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"30fa5-MQ4Rox6O7e8oAIRILFS8LYmQCX0\"",
-    "mtime": "2026-09-16T03:55:35.016Z",
+    "etag": "\"30fa5-lbQYOb0aLCi8bTAWMiS60n/CKkY\"",
+    "mtime": "2026-09-16T04:00:48.473Z",
     "size": 200613,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"ad442-oHO4rHLlYIF5bGy7Djpv68B08F0\"",
-    "mtime": "2026-09-16T03:55:35.016Z",
-    "size": 709698,
+    "etag": "\"ad389-1gZ3siL6l+yvA8PohgkadUIWSIY\"",
+    "mtime": "2026-09-16T04:00:48.474Z",
+    "size": 709513,
     "path": "index.mjs.map"
   }
 };
@@ -2732,14 +2731,10 @@ function publicAssetsURL(...path) {
 var _a;
 const globalForPrisma = globalThis;
 function buildPrisma() {
-  var _a2, _b;
-  const accelerateUrl = (_a2 = process.env.ACCELERATE_URL) != null ? _a2 : "";
-  const dbUrl = (_b = process.env.DATABASE_URL) != null ? _b : "";
-  const useAccelerate = accelerateUrl.startsWith("prisma+postgres");
-  const client = new PrismaClient({
-    datasources: { db: { url: useAccelerate ? accelerateUrl : dbUrl } }
-  });
-  return useAccelerate ? client.$extends(withAccelerate()) : client;
+  var _a2;
+  (_a2 = process.env.ACCELERATE_URL) != null ? _a2 : "";
+  const client = new PrismaClient();
+  return client;
 }
 const prisma = (_a = globalForPrisma.prisma) != null ? _a : buildPrisma();
 {
