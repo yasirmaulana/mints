@@ -784,6 +784,70 @@
 
     <!-- ── Tab: Pengaturan WA ── -->
     <div v-else-if="activeTab === 'settings'" class="flex flex-col items-center gap-6 py-4 px-4">
+
+      <!-- ── Pengaturan Ongkir ── -->
+      <div class="card p-6 space-y-5 w-full max-w-2xl">
+        <div>
+          <h2 class="text-base font-bold text-gray-900">Pengaturan Ongkir</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Kota/kecamatan asal pengiriman untuk kalkulasi ongkos kirim.</p>
+        </div>
+
+        <!-- Kota aktif -->
+        <div v-if="originCityLabel" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-50 border border-brand-200">
+          <svg class="w-4 h-4 text-brand-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span class="text-sm font-medium text-brand-800">{{ originCityLabel }}</span>
+        </div>
+        <div v-else class="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
+          <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+          <span class="text-sm text-amber-700">Belum diatur — menggunakan default dari environment.</span>
+        </div>
+
+        <!-- Search kecamatan -->
+        <div class="space-y-2">
+          <label class="label-text block">Cari Kecamatan / Kota Asal</label>
+          <div class="relative">
+            <input
+              v-model="originSearch"
+              type="text"
+              placeholder="Ketik nama kecamatan, kota, atau provinsi..."
+              class="input-field w-full"
+              @input="searchOriginCities"
+            />
+            <div
+              v-if="originCities.length"
+              class="absolute z-20 left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden max-h-56 overflow-y-auto"
+            >
+              <button
+                v-for="city in originCities"
+                :key="city.city_id"
+                class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
+                @click="selectOriginCity(city)"
+              >
+                <span class="font-medium text-gray-800">{{ city.label }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pilihan yang sedang dipilih (sebelum simpan) -->
+        <div v-if="originSelected" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200">
+          <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+          <span class="text-sm text-gray-700">Dipilih: <strong>{{ originSelected.label }}</strong></span>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button
+            class="btn-primary"
+            :disabled="!originSelected || originSaving"
+            @click="saveOriginCity"
+          >
+            <span v-if="originSaving" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+            <span v-else>Simpan Kota Asal</span>
+          </button>
+          <span v-if="originSaved" class="text-sm text-green-600 font-medium">Tersimpan ✓</span>
+        </div>
+      </div>
+
       <div class="card p-6 space-y-6 w-full max-w-2xl">
         <h2 class="text-base font-bold text-gray-900">Template Pesan WA</h2>
 
@@ -1582,6 +1646,58 @@ function orderStatusText(status: string) {
 async function logout() {
   await $fetch('/api/admin/logout', { method: 'POST' })
   await navigateTo('/admin/login')
+}
+
+// ── Pengaturan Ongkir ──
+const { data: originSettings } = await useFetch<Record<string, string>>('/api/admin/settings')
+const originCityLabel = computed(() => originSettings.value?.shipping_origin_city_label || '')
+
+const originSearch = ref('')
+const originCities = ref<any[]>([])
+const originSelected = ref<any>(null)
+const originSaving = ref(false)
+const originSaved = ref(false)
+let originSearchTimeout: ReturnType<typeof setTimeout> | null = null
+
+function searchOriginCities() {
+  if (originSearchTimeout) clearTimeout(originSearchTimeout)
+  originSelected.value = null
+  if (!originSearch.value.trim()) { originCities.value = []; return }
+  originSearchTimeout = setTimeout(async () => {
+    originCities.value = await $fetch('/api/shipping/cities', { query: { search: originSearch.value } })
+  }, 350)
+}
+
+function selectOriginCity(city: any) {
+  originSelected.value = city
+  originSearch.value = ''
+  originCities.value = []
+}
+
+async function saveOriginCity() {
+  if (!originSelected.value) return
+  originSaving.value = true
+  originSaved.value = false
+  try {
+    await $fetch('/api/admin/settings', {
+      method: 'PUT',
+      body: {
+        shipping_origin_city_id: String(originSelected.value.city_id),
+        shipping_origin_city_label: originSelected.value.label
+      }
+    })
+    await refreshNuxtData()
+    originSettings.value = {
+      ...originSettings.value,
+      shipping_origin_city_id: String(originSelected.value.city_id),
+      shipping_origin_city_label: originSelected.value.label
+    }
+    originSelected.value = null
+    originSaved.value = true
+    setTimeout(() => { originSaved.value = false }, 3000)
+  } finally {
+    originSaving.value = false
+  }
 }
 
 // ── WA Template Settings ──
