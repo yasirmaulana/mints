@@ -229,6 +229,7 @@
                 <div class="absolute top-2.5 left-2.5 flex flex-col gap-1">
                   <span v-if="product.productType === 'PRE_ORDER'" class="rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" style="background:#090b0c;color:white">Pre-Order</span>
                   <span v-if="isNew(product)" class="rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" style="background:#fabc3f;color:#090b0c">Baru</span>
+                  <span v-if="product.sessionId" class="rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" style="background:#ef4444;color:white">Flash Sale</span>
                 </div>
               </div>
 
