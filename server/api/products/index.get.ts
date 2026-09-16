@@ -13,11 +13,6 @@ export default defineEventHandler(async (event) => {
   if (status) where.status = String(status)
   if (search) where.title = { contains: String(search), mode: 'insensitive' }
 
-  // Catalog mode: no sessionId → only REGULAR/PRE_ORDER products
-  if (!sessionId) {
-    where.sessionId = null
-  }
-
   const products = await prisma.product.findMany({
     where,
     orderBy: { createdAt: 'desc' },
