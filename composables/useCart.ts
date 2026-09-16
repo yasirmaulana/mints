@@ -9,6 +9,7 @@ export interface CartItem {
   variantId: string | null
   size: string | null
   qty: number
+  source?: 'REGULAR' | 'FLASH_SALE' | 'OFFLINE'
 }
 
 interface CartStore {

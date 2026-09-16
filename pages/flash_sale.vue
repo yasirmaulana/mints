@@ -136,16 +136,10 @@
                 >Detail</button>
                 <button
                   v-if="selectedSession?.isRunning && product.status === 'AVAILABLE'"
-                  class="flex-1 rounded-full py-2 text-xs font-semibold transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="flex-1 rounded-full py-2 text-xs font-semibold transition-opacity hover:opacity-85"
                   style="background:#090b0c;color:white"
-                  :disabled="instantBuyingId === product.id"
-                  @click="openCheckout(product)"
-                >
-                  <span v-if="instantBuyingId === product.id" class="inline-flex items-center justify-center">
-                    <span class="w-3.5 h-3.5 rounded-full border-2 animate-spin" style="border-color:rgba(255,255,255,0.3);border-top-color:white" />
-                  </span>
-                  <span v-else>Beli</span>
-                </button>
+                  @click="buyNow(product)"
+                >Beli</button>
                 <button
                   v-else-if="selectedSession?.isRunning && product.status === 'SOLD_OUT'"
                   class="flex-1 rounded-full py-2 text-xs font-semibold opacity-40 cursor-not-allowed"
@@ -253,7 +247,7 @@
                 v-if="selectedSession?.isRunning && detailProduct?.status === 'AVAILABLE'"
                 class="flex-1 rounded-full py-3 text-sm font-semibold transition-opacity hover:opacity-85"
                 style="background:#090b0c;color:white"
-                @click="() => { showDetailModal = false; openCheckout(detailProduct!) }"
+                @click="() => { showDetailModal = false; buyNow(detailProduct!) }"
               >Beli Sekarang</button>
             </div>
           </div>
@@ -277,71 +271,6 @@
         </div>
       </Transition>
     </ClientOnly>
-
-    <!-- Checkout Modal -->
-    <Transition name="modal">
-      <div v-if="showModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 py-6">
-        <div class="absolute inset-0" style="background:rgba(9,11,12,0.5);backdrop-filter:blur(4px)" @click="showModal = false" />
-        <div class="relative w-full max-w-md rounded-3xl overflow-y-auto p-6" style="background:white;max-height:90vh">
-          <div class="flex items-center gap-4 rounded-2xl p-4 mb-6" style="background:#f5f5f2">
-            <img :src="selectedProduct?.imageUrl" :alt="selectedProduct?.title" class="w-14 h-14 rounded-2xl object-cover flex-shrink-0" />
-            <div class="min-w-0">
-              <p class="text-sm font-semibold leading-tight line-clamp-2">{{ selectedProduct?.title }}</p>
-              <p class="text-base font-bold tabular-nums mt-0.5">Rp {{ formatPrice(selectedProduct?.price) }}</p>
-            </div>
-          </div>
-          <h2 class="text-base font-semibold tracking-tight mb-5">Data Pembeli</h2>
-          <form class="space-y-4" @submit.prevent="submitCheckout">
-            <div>
-              <label class="block text-xs font-medium mb-1.5" style="color:rgba(9,11,12,0.6)">Nama Lengkap <span style="color:#dc2626">*</span></label>
-              <input
-                v-model="form.buyerName"
-                type="text"
-                placeholder="Masukkan nama lengkap"
-                required
-                class="w-full rounded-2xl px-4 py-3 text-sm outline-none transition-colors"
-                style="background:#f5f5f2;border:1px solid rgba(9,11,12,0.1);color:#090b0c"
-                @focus="($event.target as HTMLInputElement).style.borderColor='rgba(9,11,12,0.4)'"
-                @blur="($event.target as HTMLInputElement).style.borderColor='rgba(9,11,12,0.1)'"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-medium mb-1.5" style="color:rgba(9,11,12,0.6)">Nomor HP / WhatsApp <span style="color:#dc2626">*</span></label>
-              <input
-                v-model="form.buyerPhone"
-                type="tel"
-                placeholder="08xx atau 628xx"
-                required
-                class="w-full rounded-2xl px-4 py-3 text-sm outline-none transition-colors"
-                style="background:#f5f5f2;border:1px solid rgba(9,11,12,0.1);color:#090b0c"
-                @focus="($event.target as HTMLInputElement).style.borderColor='rgba(9,11,12,0.4)'"
-                @blur="($event.target as HTMLInputElement).style.borderColor='rgba(9,11,12,0.1)'"
-              />
-              <p class="text-xs mt-1.5" style="color:rgba(9,11,12,0.4)">Format: 08xxxxxx atau 628xxxxxx</p>
-            </div>
-            <div class="flex gap-3 pt-2">
-              <button
-                type="button"
-                class="flex-1 rounded-full py-3 text-sm font-semibold transition-opacity hover:opacity-75"
-                style="background:rgba(9,11,12,0.07);color:#090b0c"
-                @click="showModal = false"
-              >Batal</button>
-              <button
-                type="submit"
-                class="flex-1 rounded-full py-3 text-sm font-semibold transition-opacity hover:opacity-85 disabled:opacity-50 disabled:cursor-not-allowed"
-                style="background:#090b0c;color:white"
-                :disabled="submitting"
-              >
-                <span v-if="submitting" class="inline-flex items-center justify-center">
-                  <span class="w-4 h-4 rounded-full border-2 animate-spin" style="border-color:rgba(255,255,255,0.3);border-top-color:white" />
-                </span>
-                <span v-else>Beli Sekarang</span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Transition>
 
     <!-- Toast -->
     <Transition name="toast">
@@ -401,6 +330,7 @@ interface Product {
   title: string
   description?: string | null
   price: number | string
+  originalPrice?: number | string | null
   imageUrl: string
   images: string[]
   status: 'AVAILABLE' | 'SOLD_OUT'
@@ -411,7 +341,7 @@ interface Product {
 useHead({ title: 'Flash Sale — Mints' })
 
 const { isLoggedIn, fetchMe } = useAuth()
-const { itemCount } = useCart()
+const { itemCount, clearCart, addItem } = useCart()
 
 onMounted(() => fetchMe())
 
@@ -516,11 +446,6 @@ function openDetail(product: Product) {
   showDetailModal.value = true
 }
 
-const showModal = ref(false)
-const submitting = ref(false)
-const instantBuyingId = ref<string | null>(null)
-const selectedProduct = ref<Product | null>(null)
-const form = reactive({ buyerName: '', buyerPhone: '' })
 const soldPhones = ref<Record<string, string>>({})
 const soldToastIdx = ref(0)
 const soldToastVisible = ref(false)
@@ -532,10 +457,6 @@ const soldToast = computed(() => {
   return { title: p.title, maskedPhone: soldPhones.value[p.id] ?? p.maskedPhone }
 })
 
-function maskPhone(phone: string) {
-  return phone.length > 3 ? phone.slice(0, -3) + 'xxx' : 'xxx'
-}
-
 const toast = reactive({ visible: false, type: 'success', title: '', description: '' })
 let toastTimer: ReturnType<typeof setTimeout>
 
@@ -545,81 +466,22 @@ function showToast(type: 'success' | 'error', title: string, description = '') {
   toastTimer = setTimeout(() => { toast.visible = false }, 4000)
 }
 
-function loadBuyerFromStorage() {
-  if (process.client) {
-    try {
-      const saved = localStorage.getItem('flashsale-buyer')
-      if (saved) {
-        const data = JSON.parse(saved)
-        if (data.buyerName) form.buyerName = data.buyerName
-        if (data.buyerPhone) form.buyerPhone = data.buyerPhone
-      }
-    } catch {}
+async function buyNow(product: Product) {
+  if (!isLoggedIn.value) await fetchMe()
+  if (!isLoggedIn.value) {
+    return navigateTo('/login?redirect=/flash_sale')
   }
-}
-
-function saveBuyerToStorage() {
-  if (process.client) {
-    localStorage.setItem('flashsale-buyer', JSON.stringify({
-      buyerName: form.buyerName,
-      buyerPhone: form.buyerPhone
-    }))
-  }
-}
-
-function openCheckout(product: Product) {
-  selectedProduct.value = product
-  loadBuyerFromStorage()
-  if (form.buyerName && form.buyerPhone) {
-    instantCheckout(product, form.buyerName, form.buyerPhone)
-    return
-  }
-  showModal.value = true
-}
-
-async function instantCheckout(product: Product, buyerName: string, buyerPhone: string) {
-  instantBuyingId.value = product.id
-  try {
-    await $fetch('/api/checkout', {
-      method: 'POST',
-      body: { productId: product.id, buyerName, buyerPhone }
-    })
-    soldPhones.value[product.id] = maskPhone(buyerPhone)
-    if (products.value) {
-      const p = products.value.find((p: Product) => p.id === product.id)
-      if (p) p.status = 'SOLD_OUT'
-    }
-    showToast('success', 'Pesanan berhasil!', 'Admin akan segera menghubungi Anda via WhatsApp')
-  } catch (err: any) {
-    showToast('error', 'Gagal melakukan pembelian', err.data?.statusMessage)
-  } finally {
-    instantBuyingId.value = null
-  }
-}
-
-async function submitCheckout() {
-  if (!selectedProduct.value) return
-  submitting.value = true
-  try {
-    const productId = selectedProduct.value.id
-    const phone = form.buyerPhone
-    await $fetch('/api/checkout', {
-      method: 'POST',
-      body: { productId, buyerName: form.buyerName, buyerPhone: phone }
-    })
-    saveBuyerToStorage()
-    showModal.value = false
-    soldPhones.value[productId] = maskPhone(phone)
-    if (products.value) {
-      const p = products.value.find((p: Product) => p.id === productId)
-      if (p) p.status = 'SOLD_OUT'
-    }
-    showToast('success', 'Pesanan berhasil!', 'Admin akan segera menghubungi Anda via WhatsApp')
-  } catch (err: any) {
-    showToast('error', 'Gagal melakukan pembelian', err.data?.statusMessage)
-  } finally {
-    submitting.value = false
-  }
+  clearCart()
+  addItem({
+    productId: product.id,
+    title: product.title,
+    imageUrl: product.imageUrl,
+    price: Number(product.price),
+    variantId: null,
+    size: null,
+    source: 'FLASH_SALE'
+  })
+  navigateTo('/checkout')
 }
 </script>
 

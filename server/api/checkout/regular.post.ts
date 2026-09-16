@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   const freeShippingMin = Number(config.public.freeShippingMin || 500000)
 
   // Validate stock & calculate order total
-  const items: { productId: string; variantId: string | null; qty: number; size: string | null }[] = body.items
+  const items: { productId: string; variantId: string | null; qty: number; size: string | null; source?: string }[] = body.items
 
   const orders = await prisma.$transaction(async (tx) => {
     const createdOrders = []
@@ -55,6 +55,7 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, statusMessage: `${product.title} sudah habis terjual` })
       }
 
+      const orderSource = (item.source as 'REGULAR' | 'FLASH_SALE' | 'OFFLINE') || 'REGULAR'
       const order = await tx.order.create({
         data: {
           productId: item.productId,
@@ -68,9 +69,15 @@ export default defineEventHandler(async (event) => {
           courierService: body.courierService || null,
           shippingCost: Number(body.totalSubtotal) >= freeShippingMin ? 0 : (body.shippingCost || 0),
           status: 'PENDING_PAYMENT',
-          source: 'REGULAR'
+          source: orderSource
         }
       })
+
+      // Flash-sale items are typically one-off; mark sold immediately
+      if (item.source === 'FLASH_SALE') {
+        await tx.product.update({ where: { id: item.productId }, data: { status: 'SOLD_OUT' } })
+      }
+
       createdOrders.push({ orderId: order.id, title: product.title })
     }
 
