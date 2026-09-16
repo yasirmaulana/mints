@@ -237,7 +237,10 @@
               <div class="mt-3 text-center">
                 <p class="text-[10px] uppercase tracking-widest mb-1" style="color:rgba(9,11,12,0.4)">{{ product.category?.name ?? '' }}</p>
                 <p class="text-sm font-normal leading-snug tracking-tight">{{ product.title }}</p>
-                <p class="mt-1.5 text-sm font-medium tabular-nums">Rp {{ formatPrice(product.price) }}</p>
+                <div class="mt-1.5 flex items-center justify-center gap-2">
+                  <p class="text-sm font-medium tabular-nums">Rp {{ formatPrice(product.price) }}</p>
+                  <p v-if="product.originalPrice" class="text-[11px] line-through tabular-nums" style="color:rgba(9,11,12,0.4)">Rp {{ formatPrice(product.originalPrice) }}</p>
+                </div>
               </div>
             </div>
           </div>

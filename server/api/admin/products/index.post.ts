@@ -30,6 +30,7 @@ export default defineEventHandler(async (event) => {
   const material = fields.material || null
   const productType = (fields.productType as 'REGULAR' | 'PRE_ORDER') || 'REGULAR'
   const estimatedReadyDate = fields.estimatedReadyDate ? new Date(fields.estimatedReadyDate) : null
+  const originalPrice = fields.originalPrice ? parseFloat(fields.originalPrice) : null
 
   // Parse variants: JSON array [{size, stock}]
   let variants: { size: string; stock: number }[] = []
@@ -40,6 +41,7 @@ export default defineEventHandler(async (event) => {
   const sharedData = {
     title: fields.title,
     price: parseFloat(fields.price),
+    originalPrice,
     description,
     sessionId,
     categoryId,
