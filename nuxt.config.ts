@@ -1,6 +1,11 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-08-23',
   modules: ['@nuxt/ui'],
+
+  tailwindcss: {
+    cssPath: '~/assets/css/main.css',
+    configPath: '~/tailwind.config.ts',
+  },
   devtools: { enabled: false },
 
   css: ['~/assets/css/main.css'],
