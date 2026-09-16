@@ -100,7 +100,7 @@
                   @input="searchCities"
                   @focus="showCityDropdown = true"
                 />
-                <div v-if="showCityDropdown && cities.length" class="absolute z-10 w-full mt-2 rounded-2xl shadow-lg overflow-hidden max-h-48 overflow-y-auto" style="background:white;border:1px solid rgba(9,11,12,0.1)">
+                <div v-if="showCityDropdown && cities.length" class="absolute z-10 w-full mt-2 shadow-lg max-h-56 overflow-y-auto" style="background:white;border:1px solid rgba(9,11,12,0.1);border-radius:1rem">
                   <button
                     v-for="city in cities"
                     :key="city.city_id"

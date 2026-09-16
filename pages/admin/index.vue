@@ -815,7 +815,7 @@
             />
             <div
               v-if="originCities.length"
-              class="absolute z-20 left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden max-h-56 overflow-y-auto"
+              class="absolute z-20 left-0 right-0 top-full mt-1 bg-white border border-gray-200 shadow-lg max-h-56 overflow-y-auto" style="border-radius:0.75rem"
             >
               <button
                 v-for="city in originCities"
