@@ -522,13 +522,17 @@ async function placeOrder() {
     })
 
     const firstOrderId = res.orders?.[0]?.orderId
-    if (firstOrderId && form.paymentMethod !== 'FT') {
+    if (firstOrderId) {
       const payRes = await $fetch<any>('/api/payment/create-transaction', {
         method: 'POST',
         body: { orderId: firstOrderId, paymentMethod: form.paymentMethod }
       })
       clearCart()
-      window.location.href = payRes.paymentUrl
+      if (payRes.paymentUrl) {
+        window.location.href = payRes.paymentUrl
+      } else {
+        router.push('/account/orders')
+      }
     } else {
       clearCart()
       router.push('/account/orders')

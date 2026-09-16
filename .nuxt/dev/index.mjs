@@ -954,8 +954,8 @@ const _inlineRuntimeConfig = {
   "s3Region": "kencana",
   "rajaOngkirKey": "iRLqlUWb13493535a11ce5ecb4cPiSCo",
   "rajaOngkirOriginCityId": "501",
-  "duitkuMerchantCode": "",
-  "duitkuApiKey": "",
+  "duitkuMerchantCode": "m1234",
+  "duitkuApiKey": "api_key",
   "duitkuIsProduction": "false",
   "duitkuCallbackUrl": "https://mints.id/api/payment/callback",
   "duitkuReturnUrl": "https://mints.id/orders",
@@ -2472,7 +2472,22 @@ _vjSbgTEPcvP0HEi0K1qft2ncAMxEKqgheZndV1buhI,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"32557-JN3iLVBzBvKDWyV0f7c+ajJhgC0\"",
+    "mtime": "2026-09-16T13:07:35.438Z",
+    "size": 206167,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"b1689-rCzawlsIICbyQt+20jFviZtS+7s\"",
+    "mtime": "2026-09-16T13:07:35.439Z",
+    "size": 726665,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -4862,8 +4877,8 @@ const orders_get = defineEventHandler(async (event) => {
     where,
     orderBy: { createdAt: "desc" },
     include: {
-      product: { select: { id: true, title: true, price: true, imageUrl: true } },
-      payment: { select: { status: true, paymentUrl: true, paidAt: true } },
+      product: { select: { id: true, title: true, price: true, imageUrl: true, description: true } },
+      payment: { select: { status: true, paymentUrl: true, paidAt: true, paymentMethod: true, vaNumber: true, expiredAt: true, duitkuReference: true } },
       shipment: { select: { courier: true, trackingNo: true, status: true } }
     }
   });
@@ -5300,15 +5315,32 @@ const createTransaction_post = defineEventHandler(async (event) => {
   if (order.status !== "PENDING_PAYMENT") {
     throw createError({ statusCode: 400, statusMessage: "Order sudah diproses atau dibatalkan" });
   }
+  const merchantOrderId = `MINTS-${orderId.slice(0, 8)}-${Date.now()}`;
+  const expiredAt = new Date(Date.now() + 24 * 60 * 60 * 1e3);
+  if (paymentMethod === "FT") {
+    await prisma.payment.create({
+      data: {
+        orderId,
+        duitkuReference: merchantOrderId,
+        paymentUrl: null,
+        paymentMethod: "FT",
+        vaNumber: null,
+        status: "pending",
+        expiredAt
+      }
+    });
+    return { paymentUrl: null, merchantOrderId };
+  }
   const config = useRuntimeConfig();
   const isProduction = config.duitkuIsProduction === "true";
   const merchantCode = config.duitkuMerchantCode;
   const apiKey = config.duitkuApiKey;
+  if (!merchantCode || !apiKey) {
+    throw createError({ statusCode: 503, statusMessage: "Payment gateway belum dikonfigurasi. Hubungi admin." });
+  }
   const baseUrl = getDuitkuBaseUrl(isProduction);
-  const merchantOrderId = `MINTS-${orderId.slice(0, 8)}-${Date.now()}`;
   const amount = String(Number(order.product.price) + (order.shippingCost || 0));
   const signature = duitkuSignature(merchantCode, merchantOrderId, amount, apiKey);
-  const expiredAt = new Date(Date.now() + 24 * 60 * 60 * 1e3);
   const payload = {
     merchantCode,
     paymentAmount: Number(amount),
@@ -5340,6 +5372,7 @@ const createTransaction_post = defineEventHandler(async (event) => {
       duitkuReference: merchantOrderId,
       paymentUrl: duitkuRes.paymentUrl,
       paymentMethod,
+      vaNumber: duitkuRes.vaNumber || null,
       status: "pending",
       expiredAt
     }
