@@ -458,7 +458,8 @@ async function placeOrder() {
           productId: i.productId,
           variantId: i.variantId || null,
           qty: i.qty,
-          size: i.size || null
+          size: i.size || null,
+          source: i.source || 'REGULAR'
         }))
       }
     })
