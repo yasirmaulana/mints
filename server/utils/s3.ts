@@ -15,14 +15,21 @@ export function getS3Client() {
   })
 }
 
+const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+
 export async function uploadToS3(data: Buffer, filename: string, contentType: string, prefix = 'products'): Promise<string> {
+  if (!ALLOWED_MIME.has(contentType)) {
+    throw createError({ statusCode: 400, statusMessage: 'Tipe file tidak diizinkan. Gunakan JPG, PNG, WebP, atau GIF' })
+  }
   if (data.length > MAX_SIZE) {
     throw createError({ statusCode: 400, statusMessage: `Ukuran file terlalu besar. Maksimal 2 MB (saat ini ${(data.length / 1024 / 1024).toFixed(1)} MB)` })
   }
 
   const config = useRuntimeConfig()
   const client = getS3Client()
-  const key = `${prefix}/${Date.now()}-${filename}`
+  // Sanitize filename — allow only safe chars, strip path components
+  const safeName = filename.split(/[/\\]/).pop()?.replace(/[^a-zA-Z0-9_\-. ]/g, '_') || 'upload'
+  const key = `${prefix}/${Date.now()}-${safeName}`
 
   await client.send(new PutObjectCommand({
     Bucket: config.s3Bucket,

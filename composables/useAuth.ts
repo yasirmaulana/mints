@@ -9,10 +9,12 @@ interface Buyer {
 
 export const useAuth = () => {
   const user = useState<Buyer | null>('buyer', () => null)
-  const isLoggedIn = computed(() => !!useCookie('buyer_session').value && !!user.value)
+  // buyer_session is httpOnly; buyer_auth is the JS-readable login flag
+  const authFlag = useCookie('buyer_auth')
+  const isLoggedIn = computed(() => !!authFlag.value && !!user.value)
 
   async function fetchMe() {
-    if (!useCookie('buyer_session').value) {
+    if (!authFlag.value) {
       user.value = null
       return
     }
@@ -20,13 +22,13 @@ export const useAuth = () => {
       user.value = await $fetch<Buyer>('/api/auth/me')
     } catch {
       user.value = null
-      useCookie('buyer_session').value = null
+      authFlag.value = null
     }
   }
 
   async function logout(redirectTo: string = '/login') {
     await $fetch('/api/auth/logout', { method: 'POST' })
-    useCookie('buyer_session').value = null
+    authFlag.value = null
     user.value = null
     navigateTo(redirectTo)
   }

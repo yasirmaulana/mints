@@ -495,8 +495,8 @@
                 <div
                   class="max-w-xs rounded-2xl px-3 py-2 text-sm"
                   :style="msg.sender === 'admin'
-                    ? 'background: var(--brand-400); color: white; border-bottom-right-radius: 4px'
-                    : 'background: var(--muted); color: var(--foreground); border-bottom-left-radius: 4px'"
+                    ? 'background:#090b0c;color:white;border-bottom-right-radius:4px'
+                    : 'background:rgba(9,11,12,0.08);color:#090b0c;border-bottom-left-radius:4px'"
                 >
                   {{ msg.body }}
                   <p class="text-xs mt-0.5 opacity-60">{{ new Date(msg.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }}</p>
@@ -1020,8 +1020,18 @@ function openChatSession(sess: any) {
   chatSSE = new EventSource(`/api/chat/${sess.id}/messages`)
   chatSSE.onmessage = (e) => {
     const data = JSON.parse(e.data)
-    if (data.type === 'init') activeChatMessages.value = data.messages
-    else if (data.type === 'messages') activeChatMessages.value.push(...data.messages)
+    if (data.type === 'init') {
+      activeChatMessages.value = data.messages
+    } else if (data.type === 'messages') {
+      // Deduplicate: remove any optimistic tmp messages that now have a real id
+      const existingIds = new Set(activeChatMessages.value.filter(m => !m.id.startsWith('tmp-')).map((m: any) => m.id))
+      const newMsgs = data.messages.filter((m: any) => !existingIds.has(m.id))
+      if (newMsgs.length) {
+        // Replace tmp entries with real ones, then append truly new
+        activeChatMessages.value = activeChatMessages.value.filter((m: any) => !m.id.startsWith('tmp-'))
+        activeChatMessages.value.push(...newMsgs)
+      }
+    }
     nextTick(() => {
       if (chatMessagesEl.value) chatMessagesEl.value.scrollTop = chatMessagesEl.value.scrollHeight
     })
@@ -1032,11 +1042,16 @@ async function sendAdminReply() {
   if (!adminReply.value.trim() || !activeChatSession.value) return
   const msg = adminReply.value.trim()
   adminReply.value = ''
+  // Optimistic update — show message immediately before SSE poll
+  activeChatMessages.value.push({ id: `tmp-${Date.now()}`, sender: 'admin', body: msg, createdAt: new Date().toISOString() })
+  nextTick(() => {
+    if (chatMessagesEl.value) chatMessagesEl.value.scrollTop = chatMessagesEl.value.scrollHeight
+  })
   await $fetch(`/api/admin/chat/${activeChatSession.value.id}/reply`, {
     method: 'POST',
     body: { message: msg }
   })
-  await refreshChat()
+  refreshChat()
 }
 
 onUnmounted(() => chatSSE?.close())

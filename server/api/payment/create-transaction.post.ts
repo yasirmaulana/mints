@@ -6,11 +6,18 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'orderId dan paymentMethod wajib diisi' })
   }
 
+  const buyerId = getCookie(event, 'buyer_session')
+
   const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: { product: true }
   })
   if (!order) throw createError({ statusCode: 404, statusMessage: 'Order tidak ditemukan' })
+
+  // Ownership: jika order terikat akun, harus login dengan akun yang sama
+  if (order.buyerId && order.buyerId !== buyerId) {
+    throw createError({ statusCode: 403, statusMessage: 'Akses tidak diizinkan' })
+  }
   if (order.status !== 'PENDING_PAYMENT') {
     throw createError({ statusCode: 400, statusMessage: 'Order sudah diproses atau dibatalkan' })
   }

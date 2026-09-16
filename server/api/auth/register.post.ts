@@ -1,10 +1,13 @@
 import bcrypt from 'bcryptjs'
 
 export default defineEventHandler(async (event) => {
+  const ip = getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
+  checkRateLimit(`buyer-register:${ip}`, 5, 60 * 60 * 1000)
+
   const body = await readBody(event)
   const { name, phone, password, email, turnstileToken } = body ?? {}
 
-  await verifyTurnstile(turnstileToken ?? '', getHeader(event, 'x-forwarded-for') ?? getRequestIP(event) ?? '')
+  await verifyTurnstile(turnstileToken ?? '', ip)
 
   if (!name?.trim() || !phone?.trim() || !password?.trim()) {
     throw createError({ statusCode: 400, statusMessage: 'Nama, nomor HP, dan password wajib diisi' })
@@ -30,9 +33,19 @@ export default defineEventHandler(async (event) => {
     }
   })
 
+  const maxAge = 60 * 60 * 24 * 30
   setCookie(event, 'buyer_session', buyer.id, {
+    httpOnly: true,
+    secure: true,
     sameSite: 'strict',
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge,
+    path: '/'
+  })
+  setCookie(event, 'buyer_auth', '1', {
+    httpOnly: false,
+    secure: true,
+    sameSite: 'strict',
+    maxAge,
     path: '/'
   })
 

@@ -1,7 +1,10 @@
 export async function verifyTurnstile(token: string, ip?: string) {
   const config = useRuntimeConfig()
   const secret = config.turnstileSecretKey
-  if (!secret) return // skip jika belum dikonfigurasi
+  if (!secret) {
+    console.warn('[turnstile] TURNSTILE_SECRET_KEY tidak dikonfigurasi — verifikasi dilewati')
+    return
+  }
 
   const body = new URLSearchParams({ secret, response: token })
   if (ip) body.set('remoteip', ip)
