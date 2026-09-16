@@ -79,7 +79,7 @@ model Product {
   sessionId          String?
   session            FlashSaleConfig? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
   variants           ProductVariant[]
-  order              Order?
+  orders             Order[]
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 }
@@ -117,7 +117,7 @@ model Buyer {
 
 model Order {
   id             String      @id @default(uuid())
-  productId      String      @unique
+  productId      String
   product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   variantId      String?
   qty            Int         @default(1)
@@ -152,6 +152,7 @@ model Payment {
   duitkuReference String    @unique
   paymentUrl      String?
   paymentMethod   String?
+  vaNumber        String?
   status          String    @default("pending")
   paidAt          DateTime?
   expiredAt       DateTime?

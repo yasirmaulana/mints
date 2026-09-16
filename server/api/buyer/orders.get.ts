@@ -21,8 +21,8 @@ export default defineEventHandler(async (event) => {
     where,
     orderBy: { createdAt: 'desc' },
     include: {
-      product: { select: { id: true, title: true, price: true, imageUrl: true } },
-      payment: { select: { status: true, paymentUrl: true, paidAt: true } },
+      product: { select: { id: true, title: true, price: true, imageUrl: true, description: true } },
+      payment: { select: { status: true, paymentUrl: true, paidAt: true, paymentMethod: true, vaNumber: true, expiredAt: true, duitkuReference: true } },
       shipment: { select: { courier: true, trackingNo: true, status: true } }
     }
   })

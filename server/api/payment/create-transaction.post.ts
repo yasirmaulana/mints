@@ -22,17 +22,38 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Order sudah diproses atau dibatalkan' })
   }
 
+  const merchantOrderId = `MINTS-${orderId.slice(0, 8)}-${Date.now()}`
+  const expiredAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+
+  // Transfer Bank Manual — tidak perlu gateway, simpan Payment record langsung
+  if (paymentMethod === 'FT') {
+    await prisma.payment.create({
+      data: {
+        orderId,
+        duitkuReference: merchantOrderId,
+        paymentUrl: null,
+        paymentMethod: 'FT',
+        vaNumber: null,
+        status: 'pending',
+        expiredAt
+      }
+    })
+    return { paymentUrl: null, merchantOrderId }
+  }
+
   const config = useRuntimeConfig()
   const isProduction = config.duitkuIsProduction === 'true'
   const merchantCode = config.duitkuMerchantCode
   const apiKey = config.duitkuApiKey
+
+  if (!merchantCode || !apiKey) {
+    throw createError({ statusCode: 503, statusMessage: 'Payment gateway belum dikonfigurasi. Hubungi admin.' })
+  }
+
   const baseUrl = getDuitkuBaseUrl(isProduction)
 
-  const merchantOrderId = `MINTS-${orderId.slice(0, 8)}-${Date.now()}`
   const amount = String(Number(order.product.price) + (order.shippingCost || 0))
   const signature = duitkuSignature(merchantCode, merchantOrderId, amount, apiKey)
-
-  const expiredAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
   const payload = {
     merchantCode,
@@ -67,6 +88,7 @@ export default defineEventHandler(async (event) => {
       duitkuReference: merchantOrderId,
       paymentUrl: duitkuRes.paymentUrl,
       paymentMethod,
+      vaNumber: duitkuRes.vaNumber || null,
       status: 'pending',
       expiredAt
     }
