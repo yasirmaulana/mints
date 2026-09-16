@@ -70,7 +70,12 @@ declare module "nitropack/types" {
       'patch': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/products/[id]/stock.patch').default>>>>
     }
     '/api/admin/products': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/products/index.get').default>>>>
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/products/index.post').default>>>>
+    }
+    '/api/admin/settings': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/settings.get').default>>>>
+      'put': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/settings.put').default>>>>
     }
     '/api/admin/wa-template': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/wa-template.get').default>>>>
@@ -107,9 +112,6 @@ declare module "nitropack/types" {
     '/api/chat/start': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/chat/start.post').default>>>>
     }
-    '/api/checkout': {
-      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/checkout.post').default>>>>
-    }
     '/api/checkout/regular': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/checkout/regular.post').default>>>>
     }
@@ -128,6 +130,9 @@ declare module "nitropack/types" {
     '/api/payment/create-transaction': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/payment/create-transaction.post').default>>>>
     }
+    '/api/payment/settings': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/payment/settings.get').default>>>>
+    }
     '/api/products/:id': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/products/[id].get').default>>>>
     }
@@ -136,6 +141,9 @@ declare module "nitropack/types" {
     }
     '/api/products/status': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/products/status.get').default>>>>
+    }
+    '/api/products/stock': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/products/stock.get').default>>>>
     }
     '/api/s3-image/**:path': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/s3-image/[...path].get').default>>>>

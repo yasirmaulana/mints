@@ -101,6 +101,7 @@ declare global {
   const removeResponseHeader: typeof import('../../node_modules/h3').removeResponseHeader
   const requireAdminSession: typeof import('../../server/utils/auth').requireAdminSession
   const requireBuyerSession: typeof import('../../server/utils/buyer-auth').requireBuyerSession
+  const resolveBankInfo: typeof import('../../server/utils/fonnte').resolveBankInfo
   const runTask: typeof import('../../node_modules/nitropack/dist/runtime/internal/task').runTask
   const sanitizeStatusCode: typeof import('../../node_modules/h3').sanitizeStatusCode
   const sanitizeStatusMessage: typeof import('../../node_modules/h3').sanitizeStatusMessage
@@ -164,7 +165,7 @@ export { defineAppConfig } from '/home/yasir/Documents/Project/mints/node_module
 export { createAdminToken, verifyAdminToken, requireAdminSession } from '/home/yasir/Documents/Project/mints/server/utils/auth';
 export { requireBuyerSession } from '/home/yasir/Documents/Project/mints/server/utils/buyer-auth';
 export { duitkuSignature, duitkuCallbackSignature, getDuitkuBaseUrl } from '/home/yasir/Documents/Project/mints/server/utils/duitku';
-export { sendPaymentNotice, getBulkTemplate } from '/home/yasir/Documents/Project/mints/server/utils/fonnte';
+export { resolveBankInfo, sendPaymentNotice, getBulkTemplate } from '/home/yasir/Documents/Project/mints/server/utils/fonnte';
 export { prisma } from '/home/yasir/Documents/Project/mints/server/utils/prisma';
 export { checkRateLimit } from '/home/yasir/Documents/Project/mints/server/utils/rate-limit';
 export { getS3Client, uploadToS3 } from '/home/yasir/Documents/Project/mints/server/utils/s3';

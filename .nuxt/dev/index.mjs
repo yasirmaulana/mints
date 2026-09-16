@@ -12,6 +12,7 @@ import { PutObjectCommand, S3Client, GetObjectCommand } from 'file:///home/yasir
 import { Ratelimit } from 'file:///home/yasir/Documents/Project/mints/node_modules/@upstash/ratelimit/dist/index.js';
 import { Redis } from 'file:///home/yasir/Documents/Project/mints/node_modules/@upstash/redis/nodejs.mjs';
 import { PrismaClient } from 'file:///home/yasir/Documents/Project/mints/node_modules/@prisma/client/default.js';
+import { withAccelerate } from 'file:///home/yasir/Documents/Project/mints/node_modules/@prisma/extension-accelerate/dist/index.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file:///home/yasir/Documents/Project/mints/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL, encodePath } from 'file:///home/yasir/Documents/Project/mints/node_modules/ufo/dist/index.mjs';
 import { renderToString } from 'file:///home/yasir/Documents/Project/mints/node_modules/vue/server-renderer/index.mjs';
@@ -2474,16 +2475,16 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"30fa5-lbQYOb0aLCi8bTAWMiS60n/CKkY\"",
-    "mtime": "2026-09-16T04:00:48.473Z",
-    "size": 200613,
+    "etag": "\"32255-bGD9qOREV60W3rVGEAUPxhZiax4\"",
+    "mtime": "2026-09-16T09:34:10.683Z",
+    "size": 205397,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"ad389-1gZ3siL6l+yvA8PohgkadUIWSIY\"",
-    "mtime": "2026-09-16T04:00:48.474Z",
-    "size": 709513,
+    "etag": "\"b0fad-s5ayX9TVfGVL6VLTQVt+SN+iwvY\"",
+    "mtime": "2026-09-16T09:34:10.683Z",
+    "size": 724909,
     "path": "index.mjs.map"
   }
 };
@@ -2732,9 +2733,9 @@ var _a;
 const globalForPrisma = globalThis;
 function buildPrisma() {
   var _a2;
-  (_a2 = process.env.ACCELERATE_URL) != null ? _a2 : "";
+  const url = (_a2 = process.env.DATABASE_URL) != null ? _a2 : "";
   const client = new PrismaClient();
-  return client;
+  return url.startsWith("prisma") ? client.$extends(withAccelerate()) : client;
 }
 const prisma = (_a = globalForPrisma.prisma) != null ? _a : buildPrisma();
 {
@@ -2777,10 +2778,33 @@ async function getTemplate(key, fallback) {
   const row = await prisma.waTemplate.findUnique({ where: { key } });
   return (_a = row == null ? void 0 : row.template) != null ? _a : fallback;
 }
-async function sendPaymentNotice(targetPhone, buyerName, productTitle, price) {
+async function resolveBankInfo(paymentUrl) {
+  const rows = await prisma.storeSettings.findMany({
+    where: { key: { in: ["payment_gateway_enabled", "bank_accounts"] } }
+  });
+  const map = {};
+  for (const r of rows) map[r.key] = r.value;
+  const lines = [];
+  const gatewayEnabled = "payment_gateway_enabled" in map ? map.payment_gateway_enabled === "true" : true;
+  if (gatewayEnabled && paymentUrl) {
+    lines.push(`\u{1F4B3} *Bayar via Payment Gateway:*
+${paymentUrl}`);
+  }
+  const banks = map.bank_accounts ? JSON.parse(map.bank_accounts) : [];
+  if (banks.length) {
+    const bankLines = banks.map((b) => `\u{1F3E6} ${b.bank}
+No. Rekening: *${b.accountNumber}*
+a.n. ${b.accountName}`).join("\n\n");
+    lines.push(lines.length ? `Atau transfer manual:
+${bankLines}` : bankLines);
+  }
+  return lines.length ? lines.join("\n\n") : useRuntimeConfig().bankInfo || "Hubungi admin untuk info pembayaran.";
+}
+async function sendPaymentNotice(targetPhone, buyerName, productTitle, price, paymentUrl) {
   const config = useRuntimeConfig();
   const template = await getTemplate("single", DEFAULT_SINGLE);
-  const message = template.replace(/{{name}}/g, buyerName).replace(/{{product}}/g, productTitle).replace(/{{price}}/g, price.toLocaleString("id-ID")).replace(/{{bank_info}}/g, config.bankInfo || "Bank BCA: 1234567890 a.n. Toko Flash Sale");
+  const bankInfo = await resolveBankInfo(paymentUrl);
+  const message = template.replace(/{{name}}/g, buyerName).replace(/{{product}}/g, productTitle).replace(/{{price}}/g, price.toLocaleString("id-ID")).replace(/{{bank_info}}/g, bankInfo);
   return await $fetch(config.fonnteUrl || "https://api.fonnte.com/send", {
     method: "POST",
     headers: { Authorization: config.fonnteToken },
@@ -2894,24 +2918,6 @@ async function uploadToS3(data, filename, contentType, prefix = "products") {
     ContentType: contentType
   }));
   return `/api/s3-image/${key}`;
-}
-
-async function verifyTurnstile(token, ip) {
-  const config = useRuntimeConfig();
-  const secret = config.turnstileSecretKey;
-  if (!secret) {
-    console.warn("[turnstile] TURNSTILE_SECRET_KEY tidak dikonfigurasi \u2014 verifikasi dilewati");
-    return;
-  }
-  const body = new URLSearchParams({ secret, response: token });
-  if (ip) body.set("remoteip", ip);
-  const res = await $fetch(
-    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-    { method: "POST", body: body.toString(), headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-  );
-  if (!res.success) {
-    throw createError({ statusCode: 400, statusMessage: "Verifikasi keamanan gagal, coba lagi" });
-  }
 }
 
 const warnOnceSet = /* @__PURE__ */ new Set();
@@ -3535,14 +3541,14 @@ const _lazy_6QBRuj = () => Promise.resolve().then(function () { return admins_ge
 const _lazy_f5pdik = () => Promise.resolve().then(function () { return admins_post$1; });
 const _lazy_tuccwz = () => Promise.resolve().then(function () { return _id__delete$7; });
 const _lazy_eLbzjn = () => Promise.resolve().then(function () { return _id__delete$5; });
-const _lazy_ORcWye = () => Promise.resolve().then(function () { return index_get$d; });
+const _lazy_ORcWye = () => Promise.resolve().then(function () { return index_get$f; });
 const _lazy_wqum7U = () => Promise.resolve().then(function () { return index_post$3; });
 const _lazy_Iz56ev = () => Promise.resolve().then(function () { return reply_post$1; });
-const _lazy_5YvuXn = () => Promise.resolve().then(function () { return index_get$b; });
+const _lazy_5YvuXn = () => Promise.resolve().then(function () { return index_get$d; });
 const _lazy_H2aQmh = () => Promise.resolve().then(function () { return config_post$1; });
 const _lazy_drSWYU = () => Promise.resolve().then(function () { return _id__delete$3; });
 const _lazy_a_oKaC = () => Promise.resolve().then(function () { return _id__patch$1; });
-const _lazy_sdn5sA = () => Promise.resolve().then(function () { return index_get$9; });
+const _lazy_sdn5sA = () => Promise.resolve().then(function () { return index_get$b; });
 const _lazy_YvIMUF = () => Promise.resolve().then(function () { return login_post$3; });
 const _lazy_Gmr9wb = () => Promise.resolve().then(function () { return logout_post$3; });
 const _lazy_dYVR1N = () => Promise.resolve().then(function () { return cancel_patch$1; });
@@ -3551,11 +3557,14 @@ const _lazy_uhpb2t = () => Promise.resolve().then(function () { return shipment_
 const _lazy_EmhuoZ = () => Promise.resolve().then(function () { return status_patch$1; });
 const _lazy_wB7Hld = () => Promise.resolve().then(function () { return uploadProof_post$1; });
 const _lazy_UnsqB4 = () => Promise.resolve().then(function () { return bulkNotify_post$1; });
-const _lazy_5199bw = () => Promise.resolve().then(function () { return index_get$7; });
+const _lazy_5199bw = () => Promise.resolve().then(function () { return index_get$9; });
 const _lazy_BAJ9dj = () => Promise.resolve().then(function () { return offline_post$1; });
 const _lazy_IO3x1Y = () => Promise.resolve().then(function () { return _id__delete$1; });
 const _lazy_L75D0g = () => Promise.resolve().then(function () { return stock_patch$1; });
+const _lazy_l7midL = () => Promise.resolve().then(function () { return index_get$7; });
 const _lazy_j5wTIn = () => Promise.resolve().then(function () { return index_post$1; });
+const _lazy_0U0hsm = () => Promise.resolve().then(function () { return settings_get$3; });
+const _lazy_Q2RZmu = () => Promise.resolve().then(function () { return settings_put$1; });
 const _lazy_VfYszK = () => Promise.resolve().then(function () { return waTemplate_get$1; });
 const _lazy_YyNmCg = () => Promise.resolve().then(function () { return waTemplate_put$1; });
 const _lazy_lOShbY = () => Promise.resolve().then(function () { return login_post$1; });
@@ -3569,16 +3578,17 @@ const _lazy_M136m0 = () => Promise.resolve().then(function () { return index_get
 const _lazy_3eA6zu = () => Promise.resolve().then(function () { return messages_get$1; });
 const _lazy_JLeXPB = () => Promise.resolve().then(function () { return messages_post$1; });
 const _lazy_uYpnFX = () => Promise.resolve().then(function () { return start_post$1; });
-const _lazy_olQmxD = () => Promise.resolve().then(function () { return checkout_post$1; });
 const _lazy_ot1jd9 = () => Promise.resolve().then(function () { return regular_post$1; });
 const _lazy__xPjau = () => Promise.resolve().then(function () { return config_get$1; });
 const _lazy_x5EPkY = () => Promise.resolve().then(function () { return track_get$3; });
 const _lazy_XvAQch = () => Promise.resolve().then(function () { return index_get$3; });
 const _lazy_ZeJRPr = () => Promise.resolve().then(function () { return callback_post$1; });
 const _lazy_ER02zJ = () => Promise.resolve().then(function () { return createTransaction_post$1; });
+const _lazy_DNFySx = () => Promise.resolve().then(function () { return settings_get$1; });
 const _lazy_aUWAGC = () => Promise.resolve().then(function () { return _id__get$1; });
 const _lazy_8SDBc4 = () => Promise.resolve().then(function () { return index_get$1; });
 const _lazy_LHWe79 = () => Promise.resolve().then(function () { return status_get$1; });
+const _lazy_FjXQ0x = () => Promise.resolve().then(function () { return stock_get$1; });
 const _lazy_sgku4X = () => Promise.resolve().then(function () { return ____path__get$1; });
 const _lazy_48FSFH = () => Promise.resolve().then(function () { return cities_get$1; });
 const _lazy_ZwHANp = () => Promise.resolve().then(function () { return cost_get$1; });
@@ -3613,7 +3623,10 @@ const handlers = [
   { route: '/api/admin/orders/offline', handler: _lazy_BAJ9dj, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/products/:id', handler: _lazy_IO3x1Y, lazy: true, middleware: false, method: "delete" },
   { route: '/api/admin/products/:id/stock', handler: _lazy_L75D0g, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/admin/products', handler: _lazy_l7midL, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/products', handler: _lazy_j5wTIn, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/settings', handler: _lazy_0U0hsm, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/settings', handler: _lazy_Q2RZmu, lazy: true, middleware: false, method: "put" },
   { route: '/api/admin/wa-template', handler: _lazy_VfYszK, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/wa-template', handler: _lazy_YyNmCg, lazy: true, middleware: false, method: "put" },
   { route: '/api/auth/login', handler: _lazy_lOShbY, lazy: true, middleware: false, method: "post" },
@@ -3627,16 +3640,17 @@ const handlers = [
   { route: '/api/chat/:sessionId/messages', handler: _lazy_3eA6zu, lazy: true, middleware: false, method: "get" },
   { route: '/api/chat/:sessionId/messages', handler: _lazy_JLeXPB, lazy: true, middleware: false, method: "post" },
   { route: '/api/chat/start', handler: _lazy_uYpnFX, lazy: true, middleware: false, method: "post" },
-  { route: '/api/checkout', handler: _lazy_olQmxD, lazy: true, middleware: false, method: "post" },
   { route: '/api/checkout/regular', handler: _lazy_ot1jd9, lazy: true, middleware: false, method: "post" },
   { route: '/api/flash-sale/config', handler: _lazy__xPjau, lazy: true, middleware: false, method: "get" },
   { route: '/api/orders/:id/track', handler: _lazy_x5EPkY, lazy: true, middleware: false, method: "get" },
   { route: '/api/orders', handler: _lazy_XvAQch, lazy: true, middleware: false, method: "get" },
   { route: '/api/payment/callback', handler: _lazy_ZeJRPr, lazy: true, middleware: false, method: "post" },
   { route: '/api/payment/create-transaction', handler: _lazy_ER02zJ, lazy: true, middleware: false, method: "post" },
+  { route: '/api/payment/settings', handler: _lazy_DNFySx, lazy: true, middleware: false, method: "get" },
   { route: '/api/products/:id', handler: _lazy_aUWAGC, lazy: true, middleware: false, method: "get" },
   { route: '/api/products', handler: _lazy_8SDBc4, lazy: true, middleware: false, method: "get" },
   { route: '/api/products/status', handler: _lazy_LHWe79, lazy: true, middleware: false, method: "get" },
+  { route: '/api/products/stock', handler: _lazy_FjXQ0x, lazy: true, middleware: false, method: "get" },
   { route: '/api/s3-image/**:path', handler: _lazy_sgku4X, lazy: true, middleware: false, method: "get" },
   { route: '/api/shipping/cities', handler: _lazy_48FSFH, lazy: true, middleware: false, method: "get" },
   { route: '/api/shipping/cost', handler: _lazy_ZwHANp, lazy: true, middleware: false, method: "get" },
@@ -3986,7 +4000,7 @@ const _id__delete$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   default: _id__delete$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$c = defineEventHandler(async (event) => {
+const index_get$e = defineEventHandler(async (event) => {
   requireAdminSession(event);
   return await prisma.category.findMany({
     orderBy: { name: "asc" },
@@ -3994,9 +4008,9 @@ const index_get$c = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$d = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$f = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$c
+  default: index_get$e
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const index_post$2 = defineEventHandler(async (event) => {
@@ -4047,7 +4061,7 @@ const reply_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   default: reply_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$a = defineEventHandler(async (event) => {
+const index_get$c = defineEventHandler(async (event) => {
   await requireAdminSession(event);
   const sessions = await prisma.chatSession.findMany({
     orderBy: { updatedAt: "desc" },
@@ -4058,9 +4072,9 @@ const index_get$a = defineEventHandler(async (event) => {
   return sessions;
 });
 
-const index_get$b = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$d = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$a
+  default: index_get$c
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const config_post = defineEventHandler(async (event) => {
@@ -4116,7 +4130,7 @@ const _id__patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   default: _id__patch
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$8 = defineEventHandler(async (event) => {
+const index_get$a = defineEventHandler(async (event) => {
   requireAdminSession(event);
   return await prisma.flashSaleConfig.findMany({
     orderBy: { startTime: "asc" },
@@ -4126,9 +4140,9 @@ const index_get$8 = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$b = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$8
+  default: index_get$a
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const login_post$2 = defineEventHandler(async (event) => {
@@ -4136,8 +4150,7 @@ const login_post$2 = defineEventHandler(async (event) => {
   const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
   checkRateLimit(`admin-login:${ip}`, 10, 15 * 60 * 1e3);
   const body = await readBody(event);
-  const { username, password, turnstileToken } = body != null ? body : {};
-  await verifyTurnstile(turnstileToken != null ? turnstileToken : "", ip);
+  const { username, password } = body != null ? body : {};
   const config = useRuntimeConfig();
   if (!username || !password) {
     throw createError({ statusCode: 400, statusMessage: "Username dan password wajib diisi" });
@@ -4201,13 +4214,32 @@ const logout_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
 const cancel_patch = defineEventHandler(async (event) => {
   requireAdminSession(event);
   const id = getRouterParam(event, "id");
-  const order = await prisma.order.findUnique({ where: { id }, select: { status: true, productId: true } });
+  const order = await prisma.order.findUnique({
+    where: { id },
+    select: { status: true, productId: true, variantId: true, qty: true }
+  });
   if (!order) throw createError({ statusCode: 404, statusMessage: "Pesanan tidak ditemukan" });
   if (order.status !== "PENDING_PAYMENT") throw createError({ statusCode: 400, statusMessage: "Hanya pesanan PENDING_PAYMENT yang bisa dibatalkan" });
-  await prisma.$transaction([
-    prisma.order.update({ where: { id }, data: { status: "CANCELLED" } }),
-    prisma.product.update({ where: { id: order.productId }, data: { status: "AVAILABLE" } })
-  ]);
+  await prisma.$transaction(async (tx) => {
+    var _a;
+    await tx.order.update({ where: { id }, data: { status: "CANCELLED" } });
+    if (order.variantId) {
+      await tx.productVariant.update({
+        where: { id: order.variantId },
+        data: { stock: { increment: order.qty } }
+      });
+      const totalStock = await tx.productVariant.aggregate({
+        where: { productId: order.productId },
+        _sum: { stock: true }
+      });
+      await tx.product.update({
+        where: { id: order.productId },
+        data: { status: ((_a = totalStock._sum.stock) != null ? _a : 0) > 0 ? "AVAILABLE" : "SOLD_OUT" }
+      });
+    } else {
+      await tx.product.update({ where: { id: order.productId }, data: { status: "AVAILABLE" } });
+    }
+  });
   return { success: true };
 });
 
@@ -4217,18 +4249,20 @@ const cancel_patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProp
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const notify_post = defineEventHandler(async (event) => {
+  var _a;
   requireAdminSession(event);
   const id = getRouterParam(event, "id");
   const order = await prisma.order.findUnique({
     where: { id },
-    include: { product: true }
+    include: { product: true, payment: { select: { paymentUrl: true } } }
   });
   if (!order) throw createError({ statusCode: 404, statusMessage: "Order tidak ditemukan" });
   await sendPaymentNotice(
     order.buyerPhone,
     order.buyerName,
     order.product.title,
-    Number(order.product.price)
+    Number(order.product.price),
+    (_a = order.payment) == null ? void 0 : _a.paymentUrl
   );
   await prisma.order.update({
     where: { id },
@@ -4332,7 +4366,7 @@ const uploadProof_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.define
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const bulkNotify_post = defineEventHandler(async (event) => {
-  var _a;
+  var _a, _b, _c;
   requireAdminSession(event);
   const { orderIds } = await readBody(event);
   if (!Array.isArray(orderIds) || orderIds.length === 0) {
@@ -4340,7 +4374,7 @@ const bulkNotify_post = defineEventHandler(async (event) => {
   }
   const orders = await prisma.order.findMany({
     where: { id: { in: orderIds }, status: "PENDING_PAYMENT" },
-    include: { product: true }
+    include: { product: true, payment: { select: { paymentUrl: true } } }
   });
   if (!orders.length) {
     throw createError({ statusCode: 404, statusMessage: "Tidak ada pesanan PENDING_PAYMENT yang ditemukan" });
@@ -4358,7 +4392,9 @@ const bulkNotify_post = defineEventHandler(async (event) => {
     const buyerName = phoneOrders[0].buyerName;
     const items = phoneOrders.map((o, i) => `${i + 1}. ${o.product.title} - Rp ${Number(o.product.price).toLocaleString("id-ID")}`).join("\n");
     const total = phoneOrders.reduce((sum, o) => sum + Number(o.product.price), 0);
-    const message = template.replace(/{{name}}/g, buyerName).replace(/{{items}}/g, items).replace(/{{total}}/g, total.toLocaleString("id-ID")).replace(/{{bank_info}}/g, config.bankInfo || "Bank BCA: 1234567890 a.n. Toko Flash Sale");
+    const paymentUrl = (_c = (_b = phoneOrders[0].payment) == null ? void 0 : _b.paymentUrl) != null ? _c : null;
+    const bankInfo = await resolveBankInfo(paymentUrl);
+    const message = template.replace(/{{name}}/g, buyerName).replace(/{{items}}/g, items).replace(/{{total}}/g, total.toLocaleString("id-ID")).replace(/{{bank_info}}/g, bankInfo);
     await $fetch(config.fonnteUrl || "https://api.fonnte.com/send", {
       method: "POST",
       headers: { Authorization: config.fonnteToken },
@@ -4383,13 +4419,19 @@ const bulkNotify_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineP
   default: bulkNotify_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$6 = defineEventHandler(async (event) => {
+const index_get$8 = defineEventHandler(async (event) => {
   requireAdminSession(event);
   return await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     include: {
       product: {
-        select: { title: true, price: true, imageUrl: true, sessionId: true }
+        select: {
+          title: true,
+          price: true,
+          imageUrl: true,
+          sessionId: true,
+          variants: { select: { id: true, size: true } }
+        }
       },
       payment: { select: { status: true, paymentUrl: true, paidAt: true } },
       shipment: { select: { courier: true, trackingNo: true, status: true } }
@@ -4397,9 +4439,9 @@ const index_get$6 = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$6
+  default: index_get$8
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const offline_post = defineEventHandler(async (event) => {
@@ -4478,6 +4520,28 @@ const stock_patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   default: stock_patch
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const index_get$6 = defineEventHandler(async (event) => {
+  const { categoryId, productType, status, search } = getQuery$1(event);
+  const where = {};
+  if (categoryId) where.categoryId = String(categoryId);
+  if (productType) where.productType = String(productType);
+  if (status) where.status = String(status);
+  if (search) where.title = { contains: String(search), mode: "insensitive" };
+  return prisma.product.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    include: {
+      category: { select: { id: true, name: true, slug: true } },
+      variants: { orderBy: { size: "asc" } }
+    }
+  });
+});
+
+const index_get$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$6
+}, Symbol.toStringTag, { value: 'Module' }));
+
 const index_post = defineEventHandler(async (event) => {
   var _a;
   requireAdminSession(event);
@@ -4506,6 +4570,7 @@ const index_post = defineEventHandler(async (event) => {
   const material = fields.material || null;
   const productType = fields.productType || "REGULAR";
   const estimatedReadyDate = fields.estimatedReadyDate ? new Date(fields.estimatedReadyDate) : null;
+  const originalPrice = fields.originalPrice ? parseFloat(fields.originalPrice) : null;
   let variants = [];
   if (fields.variants) {
     try {
@@ -4516,6 +4581,7 @@ const index_post = defineEventHandler(async (event) => {
   const sharedData = {
     title: fields.title,
     price: parseFloat(fields.price),
+    originalPrice,
     description,
     sessionId,
     categoryId,
@@ -4564,6 +4630,57 @@ const index_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   default: index_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const ALLOWED_KEYS$2 = /* @__PURE__ */ new Set([
+  "shipping_origin_city_id",
+  "shipping_origin_city_label",
+  "payment_gateway_enabled",
+  "bank_accounts"
+]);
+const settings_get$2 = defineEventHandler(async (event) => {
+  await requireAdminSession(event);
+  const { keys } = getQuery$1(event);
+  const requestedKeys = keys ? keys.split(",").filter((k) => ALLOWED_KEYS$2.has(k)) : [...ALLOWED_KEYS$2];
+  const rows = await prisma.storeSettings.findMany({
+    where: { key: { in: requestedKeys } }
+  });
+  const result = {};
+  for (const row of rows) result[row.key] = row.value;
+  return result;
+});
+
+const settings_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: settings_get$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const ALLOWED_KEYS$1 = /* @__PURE__ */ new Set([
+  "shipping_origin_city_id",
+  "shipping_origin_city_label",
+  "payment_gateway_enabled",
+  "bank_accounts"
+]);
+const settings_put = defineEventHandler(async (event) => {
+  await requireAdminSession(event);
+  const body = await readBody(event);
+  const entries = Object.entries(body).filter(([k]) => ALLOWED_KEYS$1.has(k));
+  if (!entries.length) throw createError({ statusCode: 400, statusMessage: "Tidak ada key yang valid" });
+  await Promise.all(
+    entries.map(
+      ([key, value]) => prisma.storeSettings.upsert({
+        where: { key },
+        update: { value: String(value) },
+        create: { key, value: String(value) }
+      })
+    )
+  );
+  return { success: true };
+});
+
+const settings_put$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: settings_put
+}, Symbol.toStringTag, { value: 'Module' }));
+
 const DEFAULTS = {
   single: `Halo {{name}},
 
@@ -4602,7 +4719,7 @@ const waTemplate_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePr
   default: waTemplate_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const ALLOWED_KEYS = /* @__PURE__ */ new Set(["order_confirmed", "order_paid", "order_shipped", "order_cancelled", "order_offline"]);
+const ALLOWED_KEYS = /* @__PURE__ */ new Set(["single", "bulk", "order_confirmed", "order_paid", "order_shipped", "order_cancelled", "order_offline"]);
 const waTemplate_put = defineEventHandler(async (event) => {
   await requireAdminSession(event);
   const body = await readBody(event);
@@ -4630,8 +4747,7 @@ const login_post = defineEventHandler(async (event) => {
   const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
   checkRateLimit(`buyer-login:${ip}`, 10, 15 * 60 * 1e3);
   const body = await readBody(event);
-  const { phone, password, turnstileToken } = body != null ? body : {};
-  await verifyTurnstile(turnstileToken != null ? turnstileToken : "", ip);
+  const { phone, password } = body != null ? body : {};
   if (!(phone == null ? void 0 : phone.trim()) || !(password == null ? void 0 : password.trim())) {
     throw createError({ statusCode: 400, statusMessage: "Nomor HP dan password wajib diisi" });
   }
@@ -4697,8 +4813,7 @@ const register_post = defineEventHandler(async (event) => {
   const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
   checkRateLimit(`buyer-register:${ip}`, 5, 60 * 60 * 1e3);
   const body = await readBody(event);
-  const { name, phone, password, email, turnstileToken } = body != null ? body : {};
-  await verifyTurnstile(turnstileToken != null ? turnstileToken : "", ip);
+  const { name, phone, password, email } = body != null ? body : {};
   if (!(name == null ? void 0 : name.trim()) || !(phone == null ? void 0 : phone.trim()) || !(password == null ? void 0 : password.trim())) {
     throw createError({ statusCode: 400, statusMessage: "Nama, nomor HP, dan password wajib diisi" });
   }
@@ -4938,47 +5053,6 @@ const start_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   default: start_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const checkout_post = defineEventHandler(async (event) => {
-  const body = await readBody(event);
-  if (!body.productId || !body.buyerName || !body.buyerPhone) {
-    throw createError({ statusCode: 400, statusMessage: "productId, buyerName, dan buyerPhone wajib diisi" });
-  }
-  const phoneRegex = /^(08|628|\+628)\d{8,12}$/;
-  if (!phoneRegex.test(body.buyerPhone)) {
-    throw createError({ statusCode: 400, statusMessage: "Format nomor HP tidak valid (gunakan format 08xxx atau 628xxx)" });
-  }
-  return await prisma.$transaction(async (tx) => {
-    const updated = await tx.product.updateMany({
-      where: { id: body.productId, status: "AVAILABLE" },
-      data: { status: "SOLD_OUT" }
-    });
-    if (updated.count === 0) {
-      throw createError({ statusCode: 400, statusMessage: "Maaf, produk ini baru saja dibeli oleh pelanggan lain!" });
-    }
-    const order = await tx.order.upsert({
-      where: { productId: body.productId },
-      create: {
-        productId: body.productId,
-        buyerName: body.buyerName,
-        buyerPhone: body.buyerPhone,
-        status: "PENDING_PAYMENT"
-      },
-      update: {
-        buyerName: body.buyerName,
-        buyerPhone: body.buyerPhone,
-        status: "PENDING_PAYMENT",
-        paymentProof: null
-      }
-    });
-    return { success: true, order };
-  });
-});
-
-const checkout_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
-  __proto__: null,
-  default: checkout_post
-}, Symbol.toStringTag, { value: 'Module' }));
-
 const regular_post = defineEventHandler(async (event) => {
   const body = await readBody(event);
   const buyerId = getCookie(event, "buyer_session");
@@ -5025,9 +5099,12 @@ const regular_post = defineEventHandler(async (event) => {
       if (!item.variantId && product.status === "SOLD_OUT") {
         throw createError({ statusCode: 400, statusMessage: `${product.title} sudah habis terjual` });
       }
+      const orderSource = item.source || "REGULAR";
       const order = await tx.order.create({
         data: {
           productId: item.productId,
+          variantId: item.variantId || null,
+          qty: item.qty || 1,
           buyerId: buyerId || null,
           buyerName: body.buyerName,
           buyerPhone: body.buyerPhone,
@@ -5038,7 +5115,7 @@ const regular_post = defineEventHandler(async (event) => {
           courierService: body.courierService || null,
           shippingCost: Number(body.totalSubtotal) >= freeShippingMin ? 0 : body.shippingCost || 0,
           status: "PENDING_PAYMENT",
-          source: "REGULAR"
+          source: orderSource
         }
       });
       createdOrders.push({ orderId: order.id, title: product.title });
@@ -5155,7 +5232,7 @@ const callback_post = defineEventHandler(async (event) => {
   }
   const payment = await prisma.payment.findUnique({
     where: { duitkuReference: merchantOrderId },
-    include: { order: true }
+    include: { order: { select: { id: true, buyerName: true, buyerPhone: true, productId: true, variantId: true, qty: true } } }
   });
   if (!payment) {
     throw createError({ statusCode: 404, statusMessage: "Payment not found" });
@@ -5189,16 +5266,28 @@ const callback_post = defineEventHandler(async (event) => {
       });
     }
   } else if (resultCode === "01") ; else {
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: "failed", rawCallback: body }
-      }),
-      prisma.order.update({
-        where: { id: payment.orderId },
-        data: { status: "CANCELLED" }
-      })
-    ]);
+    const order = payment.order;
+    await prisma.$transaction(async (tx) => {
+      var _a;
+      await tx.payment.update({ where: { id: payment.id }, data: { status: "failed", rawCallback: body } });
+      await tx.order.update({ where: { id: payment.orderId }, data: { status: "CANCELLED" } });
+      if (order == null ? void 0 : order.variantId) {
+        await tx.productVariant.update({
+          where: { id: order.variantId },
+          data: { stock: { increment: order.qty } }
+        });
+        const totalStock = await tx.productVariant.aggregate({
+          where: { productId: order.productId },
+          _sum: { stock: true }
+        });
+        await tx.product.update({
+          where: { id: order.productId },
+          data: { status: ((_a = totalStock._sum.stock) != null ? _a : 0) > 0 ? "AVAILABLE" : "SOLD_OUT" }
+        });
+      } else if (order == null ? void 0 : order.productId) {
+        await tx.product.update({ where: { id: order.productId }, data: { status: "AVAILABLE" } });
+      }
+    });
   }
   return { success: true };
 });
@@ -5278,6 +5367,22 @@ const createTransaction_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.
   default: createTransaction_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const settings_get = defineEventHandler(async () => {
+  const rows = await prisma.storeSettings.findMany({
+    where: { key: { in: ["payment_gateway_enabled", "bank_accounts"] } }
+  });
+  const map = {};
+  for (const row of rows) map[row.key] = row.value;
+  const gatewayEnabled = "payment_gateway_enabled" in map ? map.payment_gateway_enabled === "true" : true;
+  const bankAccounts = map.bank_accounts ? JSON.parse(map.bank_accounts) : [];
+  return { gatewayEnabled, bankAccounts };
+});
+
+const settings_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: settings_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
 const _id__get = defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
   const product = await prisma.product.findUnique({
@@ -5307,9 +5412,6 @@ const index_get = defineEventHandler(async (event) => {
   if (productType) where.productType = String(productType);
   if (status) where.status = String(status);
   if (search) where.title = { contains: String(search), mode: "insensitive" };
-  if (!sessionId) {
-    where.sessionId = null;
-  }
   const products = await prisma.product.findMany({
     where,
     orderBy: { createdAt: "desc" },
@@ -5346,6 +5448,25 @@ const status_get = defineEventHandler(async (event) => {
 const status_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: status_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const stock_get = defineEventHandler(async (event) => {
+  const { variantIds } = getQuery$1(event);
+  if (!variantIds) return {};
+  const ids = variantIds.split(",").filter(Boolean);
+  if (!ids.length) return {};
+  const variants = await prisma.productVariant.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, stock: true }
+  });
+  const result = {};
+  for (const v of variants) result[v.id] = v.stock;
+  return result;
+});
+
+const stock_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: stock_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const ____path__get = defineEventHandler(async (event) => {
@@ -5389,20 +5510,22 @@ const ____path__get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePro
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const cities_get = defineEventHandler(async (event) => {
-  var _a, _b;
+  var _a;
   const { search } = getQuery$1(event);
   const config = useRuntimeConfig();
-  const res = await $fetch("https://api.rajaongkir.com/starter/city", {
-    headers: { key: config.rajaOngkirKey }
+  const res = await $fetch("https://rajaongkir.komerce.id/api/v1/destination/domestic-destination", {
+    headers: { key: config.rajaOngkirKey },
+    query: search ? { search: String(search), limit: 50 } : { limit: 50 }
   });
-  let cities = (_b = (_a = res == null ? void 0 : res.rajaongkir) == null ? void 0 : _a.results) != null ? _b : [];
-  if (search) {
-    const q = String(search).toLowerCase();
-    cities = cities.filter(
-      (c) => c.city_name.toLowerCase().includes(q) || c.type.toLowerCase().includes(q)
-    );
-  }
-  return cities.slice(0, 30);
+  const destinations = (_a = res == null ? void 0 : res.data) != null ? _a : [];
+  return destinations.map((d) => ({
+    city_id: String(d.id),
+    city_name: d.subdistrict_name || d.city_name,
+    type: d.district_name ? d.district_name : "",
+    province: d.province_name,
+    // pass through for display label
+    label: d.label
+  }));
 });
 
 const cities_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
@@ -5411,20 +5534,22 @@ const cities_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const cost_get = defineEventHandler(async (event) => {
-  var _a, _b, _c, _d;
-  const { origin, destination, weight, courier } = getQuery$1(event);
-  if (!origin || !destination || !weight || !courier) {
-    throw createError({ statusCode: 400, statusMessage: "origin, destination, weight, courier wajib diisi" });
+  var _a;
+  const { destination, weight, courier } = getQuery$1(event);
+  if (!destination || !weight || !courier) {
+    throw createError({ statusCode: 400, statusMessage: "destination, weight, courier wajib diisi" });
   }
   const config = useRuntimeConfig();
   const freeShippingMin = Number(config.public.freeShippingMin || 5e5);
+  const dbOrigin = await prisma.storeSettings.findUnique({ where: { key: "shipping_origin_city_id" } });
+  const origin = (dbOrigin == null ? void 0 : dbOrigin.value) || config.rajaOngkirOriginCityId || "501";
   const body = new URLSearchParams({
     origin: String(origin),
     destination: String(destination),
     weight: String(weight),
     courier: String(courier)
   });
-  const res = await $fetch("https://api.rajaongkir.com/starter/cost", {
+  const res = await $fetch("https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost", {
     method: "POST",
     headers: {
       key: config.rajaOngkirKey,
@@ -5432,7 +5557,12 @@ const cost_get = defineEventHandler(async (event) => {
     },
     body: body.toString()
   });
-  const services = (_d = (_c = (_b = (_a = res == null ? void 0 : res.rajaongkir) == null ? void 0 : _a.results) == null ? void 0 : _b[0]) == null ? void 0 : _c.costs) != null ? _d : [];
+  const rawServices = (_a = res == null ? void 0 : res.data) != null ? _a : [];
+  const services = rawServices.map((s) => ({
+    service: s.service,
+    description: s.description,
+    cost: [{ value: s.cost, etd: s.etd, note: "" }]
+  }));
   return { services, freeShippingMin };
 });
 

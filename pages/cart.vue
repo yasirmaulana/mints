@@ -57,6 +57,12 @@
 
               <!-- Controls -->
               <div class="flex flex-col items-end justify-between shrink-0">
+                <!-- Stok warning -->
+                <p
+                  v-if="item.variantId && stockMap[item.variantId] !== undefined && item.qty >= stockMap[item.variantId]"
+                  class="text-[10px] mb-1 text-right"
+                  style="color:rgb(220,38,38)"
+                >Stok tersisa {{ stockMap[item.variantId] }}</p>
                 <!-- Qty -->
                 <div class="flex items-center rounded-full overflow-hidden" style="background:rgba(9,11,12,0.06)">
                   <button
@@ -66,8 +72,9 @@
                   >−</button>
                   <span class="w-7 text-center text-sm tabular-nums font-normal">{{ item.qty }}</span>
                   <button
-                    class="w-8 h-8 flex items-center justify-center text-lg leading-none transition-colors hover:bg-black/10"
+                    class="w-8 h-8 flex items-center justify-center text-lg leading-none transition-colors hover:bg-black/10 disabled:opacity-30 disabled:cursor-not-allowed"
                     style="color:#090b0c"
+                    :disabled="item.variantId ? item.qty >= (stockMap[item.variantId] ?? Infinity) : false"
                     @click="updateQty(item.productId, item.variantId, item.qty + 1)"
                   >+</button>
                 </div>
@@ -155,4 +162,25 @@
 useSeoMeta({ title: 'Keranjang — MINTS' })
 const { cartItems, itemCount, subtotal, freeShippingProgress, freeShippingRemaining, removeItem, updateQty } = useCart()
 function formatPrice(n: number) { return n.toLocaleString('id-ID') }
+
+const stockMap = ref<Record<string, number>>({})
+
+async function fetchStock() {
+  const ids = cartItems.value.map(i => i.variantId).filter(Boolean) as string[]
+  if (!ids.length) return
+  const data = await $fetch<Record<string, number>>('/api/products/stock', {
+    query: { variantIds: ids.join(',') }
+  })
+  stockMap.value = data
+
+  // Auto-cap qty jika melebihi stok
+  for (const item of cartItems.value) {
+    if (item.variantId && data[item.variantId] !== undefined && item.qty > data[item.variantId]) {
+      updateQty(item.productId, item.variantId, data[item.variantId])
+    }
+  }
+}
+
+onMounted(fetchStock)
+watch(cartItems, fetchStock, { deep: false })
 </script>

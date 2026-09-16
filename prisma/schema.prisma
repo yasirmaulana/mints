@@ -119,6 +119,8 @@ model Order {
   id             String      @id @default(uuid())
   productId      String      @unique
   product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId      String?
+  qty            Int         @default(1)
   buyerId        String?
   buyer          Buyer?      @relation(fields: [buyerId], references: [id], onDelete: SetNull)
   buyerName      String

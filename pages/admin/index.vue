@@ -16,7 +16,7 @@
     <div class="max-w-5xl mx-auto px-4 py-8">
       <!-- Tab Nav -->
       <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mb-6">
-        <div class="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+        <div class="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit sm:mx-auto">
           <button
             v-for="tab in tabs"
             :key="tab.key"
@@ -164,10 +164,11 @@
           <div
             v-for="order in filteredOrders"
             :key="order.id"
-            class="card p-4 flex flex-col sm:flex-row sm:items-center gap-4"
+            class="card p-4 flex flex-col sm:flex-row sm:items-center gap-4 cursor-pointer hover:shadow-md transition-shadow"
+            @click="openOrderDetail(order)"
           >
-            <!-- Checkbox -->
-            <div class="shrink-0 w-5 flex items-center self-start sm:self-auto pt-1 sm:pt-0">
+            <!-- Checkbox (stop propagation agar klik checkbox tidak buka modal) -->
+            <div class="shrink-0 w-5 flex items-center self-start sm:self-auto pt-1 sm:pt-0" @click.stop>
               <input
                 v-if="order.status === 'PENDING_PAYMENT'"
                 type="checkbox"
@@ -193,10 +194,16 @@
             <div class="sm:flex-1 min-w-0 space-y-0.5">
               <p class="text-sm font-medium text-gray-800">{{ order.buyerName }}</p>
               <p class="text-xs text-gray-500 font-mono">{{ order.buyerPhone }}</p>
+              <p v-if="order.courierCode" class="text-xs text-gray-500">
+                {{ order.courierCode.toUpperCase() }}
+                <span v-if="order.courierService" class="text-gray-400">· {{ order.courierService }}</span>
+                <span v-if="order.shippingCost === 0" class="text-green-600 font-medium"> · Gratis Ongkir</span>
+                <span v-else-if="order.shippingCost" class="text-gray-400"> · Rp {{ formatPrice(order.shippingCost) }}</span>
+              </p>
               <p class="text-xs text-gray-400">{{ formatDateTime(order.createdAt) }}</p>
             </div>
 
-            <!-- Status + WA info -->
+            <!-- Status badge -->
             <div class="shrink-0 flex flex-col items-start sm:items-end gap-1.5">
               <div class="flex items-center gap-1.5 flex-wrap justify-end">
                 <span
@@ -225,74 +232,168 @@
                   {{ orderStatusText(order.status) }}
                 </span>
               </div>
-              <!-- WA notify info -->
               <span v-if="order.notifyCount > 0" class="inline-flex items-center gap-1 text-[11px] text-green-700 font-medium">
                 <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.554 4.118 1.523 5.845L0 24l6.344-1.493A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.645-.52-5.148-1.424l-.369-.219-3.766.887.935-3.667-.241-.381A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-                {{ order.notifyCount }}x · {{ formatDateTime(order.lastNotifiedAt) }}
-              </span>
-              <span v-else class="inline-flex items-center gap-1 text-[11px] text-gray-400">
-                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.554 4.118 1.523 5.845L0 24l6.344-1.493A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.645-.52-5.148-1.424l-.369-.219-3.766.887.935-3.667-.241-.381A9.96 9.96 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-                Belum dikirim
+                {{ order.notifyCount }}x notif
               </span>
             </div>
+          </div>
+        </div>
 
-            <!-- Actions -->
-            <div class="flex gap-2 shrink-0 flex-wrap">
-              <a
-                v-if="order.paymentProof"
-                :href="order.paymentProof"
-                target="_blank"
-                class="btn-secondary text-xs px-3 py-1.5"
+        <!-- Order Detail Modal -->
+        <div v-if="selectedOrder" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50" @click.self="selectedOrder = null">
+          <div class="bg-white w-full sm:max-w-lg sm:rounded-2xl shadow-2xl flex flex-col max-h-[92dvh]" style="border-radius:1.25rem 1.25rem 0 0" :style="{'border-radius': 'var(--r, 1.25rem 1.25rem 0 0)'}">
+
+            <!-- Modal header -->
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+              <div>
+                <p class="text-xs text-gray-400 font-mono">{{ selectedOrder.id.slice(0, 8).toUpperCase() }}</p>
+                <h3 class="font-bold text-gray-900 text-base leading-tight">Detail Pesanan</h3>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+                  :class="{
+                    'bg-success-50 text-success-700 border border-success-500/30': selectedOrder.status === 'PAID' || selectedOrder.status === 'DELIVERED',
+                    'bg-amber-50 text-amber-700 border border-brand-300': selectedOrder.status === 'PENDING_PAYMENT',
+                    'bg-blue-50 text-blue-700 border border-blue-300': selectedOrder.status === 'IN_PRODUCTION' || selectedOrder.status === 'READY_TO_SHIP' || selectedOrder.status === 'SHIPPED',
+                    'bg-gray-100 text-gray-500 border border-gray-200': selectedOrder.status === 'CANCELLED' || selectedOrder.status === 'REFUNDED',
+                  }"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full" :class="{
+                    'bg-success-700': selectedOrder.status === 'PAID' || selectedOrder.status === 'DELIVERED',
+                    'bg-amber-700': selectedOrder.status === 'PENDING_PAYMENT',
+                    'bg-blue-700': selectedOrder.status === 'IN_PRODUCTION' || selectedOrder.status === 'READY_TO_SHIP' || selectedOrder.status === 'SHIPPED',
+                    'bg-gray-400': selectedOrder.status === 'CANCELLED' || selectedOrder.status === 'REFUNDED',
+                  }"></span>
+                  {{ orderStatusText(selectedOrder.status) }}
+                </span>
+                <button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400" @click="selectedOrder = null">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Modal body (scrollable) -->
+            <div class="overflow-y-auto flex-1 px-5 py-4 space-y-5">
+
+              <!-- Produk -->
+              <div>
+                <p class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2">Produk</p>
+                <div class="flex gap-3">
+                  <img :src="selectedOrder.product.imageUrl" :alt="selectedOrder.product.title" class="w-16 h-16 rounded-xl object-cover shrink-0 border border-gray-100" />
+                  <div class="min-w-0">
+                    <p class="font-semibold text-gray-900 text-sm leading-snug">{{ selectedOrder.product.title }}</p>
+                    <div class="flex flex-wrap gap-2 mt-1.5">
+                      <span v-if="selectedOrder.variantId" class="inline-block text-xs px-2 py-0.5 rounded-lg bg-gray-100 text-gray-700 font-medium">
+                        Ukuran: {{ selectedOrder.product?.variants?.find((v: any) => v.id === selectedOrder.variantId)?.size ?? '—' }}
+                      </span>
+                      <span class="inline-block text-xs px-2 py-0.5 rounded-lg bg-gray-100 text-gray-700">Qty: {{ selectedOrder.qty ?? 1 }}</span>
+                      <span class="inline-block text-xs px-2 py-0.5 rounded-lg bg-brand-50 text-brand-700 font-semibold">Rp {{ formatPrice(selectedOrder.product.price) }}</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">{{ formatDateTime(selectedOrder.createdAt) }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="border-t border-gray-100" />
+
+              <!-- Pembeli -->
+              <div>
+                <p class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2">Pembeli</p>
+                <div class="space-y-1.5 text-sm">
+                  <div class="flex gap-2"><span class="text-gray-400 w-20 shrink-0">Nama</span><span class="font-medium text-gray-800">{{ selectedOrder.buyerName }}</span></div>
+                  <div class="flex gap-2"><span class="text-gray-400 w-20 shrink-0">HP</span><span class="font-mono text-gray-700">{{ selectedOrder.buyerPhone }}</span></div>
+                  <div v-if="selectedOrder.address" class="flex gap-2"><span class="text-gray-400 w-20 shrink-0">Alamat</span><span class="text-gray-700">{{ selectedOrder.address }}</span></div>
+                  <div v-if="selectedOrder.cityName" class="flex gap-2"><span class="text-gray-400 w-20 shrink-0">Kota</span><span class="text-gray-700">{{ selectedOrder.cityName }}</span></div>
+                </div>
+              </div>
+
+              <div class="border-t border-gray-100" />
+
+              <!-- Pengiriman -->
+              <div>
+                <p class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2">Pengiriman</p>
+                <div class="space-y-1.5 text-sm">
+                  <template v-if="selectedOrder.courierCode">
+                    <div class="flex gap-2"><span class="text-gray-400 w-20 shrink-0">Kurir</span><span class="font-medium text-gray-800">{{ selectedOrder.courierCode.toUpperCase() }} <span v-if="selectedOrder.courierService" class="text-gray-500 font-normal">· {{ selectedOrder.courierService }}</span></span></div>
+                    <div class="flex gap-2"><span class="text-gray-400 w-20 shrink-0">Ongkir</span>
+                      <span v-if="selectedOrder.shippingCost === 0" class="text-green-600 font-medium">Gratis Ongkir</span>
+                      <span v-else class="text-gray-700">Rp {{ formatPrice(selectedOrder.shippingCost) }}</span>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <p class="text-gray-400 text-xs">Belum ada info pengiriman</p>
+                  </template>
+                  <template v-if="selectedOrder.shipment?.trackingNo">
+                    <div class="flex gap-2"><span class="text-gray-400 w-20 shrink-0">Resi</span><span class="font-mono text-gray-800">{{ selectedOrder.shipment.trackingNo }}</span></div>
+                    <div class="flex gap-2"><span class="text-gray-400 w-20 shrink-0">Status</span><span class="text-gray-700">{{ selectedOrder.shipment.status }}</span></div>
+                    <a :href="`/track?no=${selectedOrder.shipment.trackingNo}&courier=${selectedOrder.shipment.courier}`" target="_blank" class="inline-flex items-center gap-1 text-xs text-brand-600 font-medium hover:underline">
+                      Lacak Paket →
+                    </a>
+                  </template>
+                </div>
+              </div>
+
+              <div class="border-t border-gray-100" />
+
+              <!-- Pembayaran -->
+              <div>
+                <p class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2">Pembayaran</p>
+                <div class="space-y-1.5 text-sm">
+                  <div class="flex gap-2">
+                    <span class="text-gray-400 w-20 shrink-0">Status</span>
+                    <span :class="selectedOrder.payment?.status === 'paid' ? 'text-green-600 font-medium' : 'text-gray-700'">
+                      {{ selectedOrder.payment?.status === 'paid' ? 'Lunas' : selectedOrder.payment?.status === 'pending' ? 'Menunggu' : selectedOrder.payment?.status ?? 'Manual' }}
+                    </span>
+                  </div>
+                  <div v-if="selectedOrder.payment?.paidAt" class="flex gap-2"><span class="text-gray-400 w-20 shrink-0">Dibayar</span><span class="text-gray-700">{{ formatDateTime(selectedOrder.payment.paidAt) }}</span></div>
+                  <div v-if="selectedOrder.notifyCount > 0" class="flex gap-2"><span class="text-gray-400 w-20 shrink-0">WA Notif</span><span class="text-gray-700">{{ selectedOrder.notifyCount }}x · terakhir {{ formatDateTime(selectedOrder.lastNotifiedAt) }}</span></div>
+                </div>
+                <!-- Bukti transfer -->
+                <a v-if="selectedOrder.paymentProof" :href="selectedOrder.paymentProof" target="_blank" class="mt-3 block">
+                  <img :src="selectedOrder.paymentProof" alt="Bukti Transfer" class="rounded-xl border border-gray-100 max-h-40 object-contain" />
+                  <p class="text-xs text-brand-600 mt-1">Lihat bukti transfer →</p>
+                </a>
+              </div>
+            </div>
+
+            <!-- Modal footer — aksi -->
+            <div v-if="selectedOrder.status !== 'CANCELLED' && selectedOrder.status !== 'REFUNDED'" class="shrink-0 border-t border-gray-100 px-5 py-4 flex flex-wrap gap-2" @click.stop>
+              <button
+                class="btn-secondary text-xs px-3 py-2"
+                :disabled="notifying === selectedOrder.id"
+                @click="notifyOrder(selectedOrder.id)"
               >
-                Bukti
-              </a>
-              <template v-if="order.status !== 'CANCELLED'">
-                <button
-                  class="btn-secondary text-xs px-3 py-1.5"
-                  :disabled="notifying === order.id"
-                  @click="notifyOrder(order.id)"
-                >
-                  <span v-if="notifying === order.id" class="inline-block h-3 w-3 rounded-full border border-gray-400 border-t-transparent animate-spin"></span>
-                  <span v-else>WA</span>
-                </button>
-                <button
-                  v-if="order.status === 'PENDING_PAYMENT'"
-                  class="btn-primary text-xs px-3 py-1.5"
-                  @click="openUploadProof(order.id)"
-                >
-                  Upload Bukti
-                </button>
-                <button
-                  v-if="order.status === 'PAID' || order.status === 'IN_PRODUCTION' || order.status === 'READY_TO_SHIP'"
-                  class="btn-secondary text-xs px-3 py-1.5"
-                  @click="openShipmentForm(order.id)"
-                >
-                  {{ order.shipment?.trackingNo ? 'Edit Resi' : 'Input Resi' }}
-                </button>
-                <button
-                  v-if="order.status === 'PENDING_PAYMENT'"
-                  class="text-xs px-3 py-1.5 rounded-lg border border-error-200 text-error-600 hover:bg-error-50 transition-colors"
-                  :disabled="cancelling === order.id"
-                  @click="cancelOrder(order.id)"
-                >
-                  <span v-if="cancelling === order.id" class="inline-block h-3 w-3 rounded-full border border-error-400 border-t-transparent animate-spin"></span>
-                  <span v-else>Batalkan</span>
-                </button>
-                <select
-                  v-model="order.status"
-                  class="text-xs px-2 py-1.5 rounded-lg border border-gray-200 bg-white"
-                  @change="updateOrderStatus(order.id, ($event.target as HTMLSelectElement).value)"
-                >
-                  <option v-for="s in allowedOrderStatuses" :key="s" :value="s">{{ orderStatusText(s) }}</option>
-                </select>
-              </template>
-            </div>
-
-            <!-- Shipment info -->
-            <div v-if="order.shipment?.trackingNo" class="w-full pt-2 mt-1 border-t border-gray-100 text-xs text-gray-500 flex items-center gap-2">
-              <span class="font-semibold text-gray-700">{{ order.shipment.courier?.toUpperCase() }}</span>
-              <span class="font-mono">{{ order.shipment.trackingNo }}</span>
-              <a :href="`/track?no=${order.shipment.trackingNo}&courier=${order.shipment.courier}`" target="_blank" class="text-brand-500 font-medium">Lacak →</a>
+                <span v-if="notifying === selectedOrder.id" class="inline-block h-3 w-3 rounded-full border border-gray-400 border-t-transparent animate-spin"></span>
+                <span v-else>Kirim WA</span>
+              </button>
+              <button
+                v-if="selectedOrder.status === 'PENDING_PAYMENT'"
+                class="btn-primary text-xs px-3 py-2"
+                @click="openUploadProof(selectedOrder.id)"
+              >Upload Bukti</button>
+              <button
+                v-if="selectedOrder.status === 'PAID' || selectedOrder.status === 'IN_PRODUCTION' || selectedOrder.status === 'READY_TO_SHIP'"
+                class="btn-secondary text-xs px-3 py-2"
+                @click="openShipmentForm(selectedOrder.id)"
+              >{{ selectedOrder.shipment?.trackingNo ? 'Edit Resi' : 'Input Resi' }}</button>
+              <button
+                v-if="selectedOrder.status === 'PENDING_PAYMENT'"
+                class="text-xs px-3 py-2 rounded-lg border border-error-200 text-error-600 hover:bg-error-50 transition-colors"
+                :disabled="cancelling === selectedOrder.id"
+                @click="cancelOrder(selectedOrder.id)"
+              >
+                <span v-if="cancelling === selectedOrder.id" class="inline-block h-3 w-3 rounded-full border border-error-400 border-t-transparent animate-spin"></span>
+                <span v-else>Batalkan</span>
+              </button>
+              <select
+                v-model="selectedOrder.status"
+                class="text-xs px-2 py-2 rounded-lg border border-gray-200 bg-white ml-auto"
+                @change="updateOrderStatus(selectedOrder.id, ($event.target as HTMLSelectElement).value)"
+              >
+                <option v-for="s in allowedOrderStatuses" :key="s" :value="s">{{ orderStatusText(s) }}</option>
+              </select>
             </div>
           </div>
         </div>
@@ -512,37 +613,40 @@
       </div>
 
       <!-- ── Tab: Konfigurasi ── -->
-      <div v-else-if="activeTab === 'config'">
-        <div class="flex items-start gap-6 flex-col md:flex-row">
-          <!-- Form tambah sesi -->
-          <div class="w-full max-w-sm shrink-0">
-            <h2 class="text-lg font-bold text-gray-900 mb-4">Tambah Sesi Flash Sale</h2>
-            <div class="card p-5">
-              <form class="space-y-4" @submit.prevent="saveConfig">
-                <div>
-                  <label class="label-text">Judul Sesi</label>
-                  <input v-model="configForm.title" type="text" placeholder="Flash Sale Pagi" class="input-field" />
-                </div>
-                <div>
-                  <label class="label-text">Waktu Mulai <span class="text-error-600">*</span></label>
-                  <input v-model="configForm.startTime" type="datetime-local" class="input-field" required />
-                </div>
-                <div>
-                  <label class="label-text">Waktu Selesai <span class="text-error-600">*</span></label>
-                  <input v-model="configForm.endTime" type="datetime-local" class="input-field" required />
-                </div>
-                <button type="submit" class="btn-primary-full" :disabled="savingConfig">
-                  <span v-if="savingConfig" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin"></span>
-                  <span v-else>+ Tambah Sesi</span>
-                </button>
-              </form>
-            </div>
+      <div v-else-if="activeTab === 'config'" class="space-y-6">
+        <!-- Form tambah sesi -->
+        <div class="card p-6">
+          <div class="mb-4">
+            <h2 class="text-base font-bold text-gray-900">Tambah Sesi Flash Sale</h2>
           </div>
+          <form class="space-y-4" @submit.prevent="saveConfig">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="label-text">Judul Sesi</label>
+                <input v-model="configForm.title" type="text" placeholder="Flash Sale Pagi" class="input-field" />
+              </div>
+              <div>
+                <label class="label-text">Waktu Mulai <span class="text-error-600">*</span></label>
+                <input v-model="configForm.startTime" type="datetime-local" class="input-field" required />
+              </div>
+              <div>
+                <label class="label-text">Waktu Selesai <span class="text-error-600">*</span></label>
+                <input v-model="configForm.endTime" type="datetime-local" class="input-field" required />
+              </div>
+            </div>
+            <div>
+              <button type="submit" class="btn-primary" :disabled="savingConfig">
+                <span v-if="savingConfig" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin"></span>
+                <span v-else>+ Tambah Sesi</span>
+              </button>
+            </div>
+          </form>
+        </div>
 
-          <!-- Daftar sesi -->
-          <div class="flex-1 min-w-0">
+        <!-- Daftar sesi -->
+        <div class="card p-6">
             <div class="flex items-center justify-between mb-4">
-              <h2 class="text-lg font-bold text-gray-900">Jadwal Sesi</h2>
+              <h2 class="text-base font-bold text-gray-900">Jadwal Sesi</h2>
               <button class="btn-secondary text-sm" @click="refreshSessions">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg>
                 Refresh
@@ -632,9 +736,245 @@
                 </div>
               </div>
             </div>
-          </div>
         </div>
       </div>
+
+      <div v-if="activeTab === 'settings'" class="space-y-6">
+
+      <!-- ── Pengaturan Ongkir ── -->
+      <div class="card p-6 space-y-5">
+        <div>
+          <h2 class="text-base font-bold text-gray-900">Pengaturan Ongkir</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Kota/kecamatan asal pengiriman untuk kalkulasi ongkos kirim.</p>
+        </div>
+
+        <!-- Kota aktif -->
+        <div v-if="originCityLabel" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-50 border border-brand-200">
+          <svg class="w-4 h-4 text-brand-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span class="text-sm font-medium text-brand-800">{{ originCityLabel }}</span>
+        </div>
+        <div v-else class="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
+          <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+          <span class="text-sm text-amber-700">Belum diatur — menggunakan default dari environment.</span>
+        </div>
+
+        <!-- Search kecamatan -->
+        <div class="space-y-2">
+          <label class="label-text block">Cari Kecamatan / Kota Asal</label>
+          <div class="relative">
+            <input
+              v-model="originSearch"
+              type="text"
+              placeholder="Ketik nama kecamatan, kota, atau provinsi..."
+              class="input-field w-full"
+              @input="searchOriginCities"
+            />
+            <div
+              v-if="originCities.length"
+              class="absolute z-20 left-0 right-0 top-full mt-1 bg-white border border-gray-200 shadow-lg max-h-56 overflow-y-auto" style="border-radius:0.75rem"
+            >
+              <button
+                v-for="city in originCities"
+                :key="city.city_id"
+                class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
+                @click="selectOriginCity(city)"
+              >
+                <span class="font-medium text-gray-800">{{ city.label }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pilihan yang sedang dipilih (sebelum simpan) -->
+        <div v-if="originSelected" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200">
+          <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+          <span class="text-sm text-gray-700">Dipilih: <strong>{{ originSelected.label }}</strong></span>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button
+            class="btn-primary"
+            :disabled="!originSelected || originSaving"
+            @click="saveOriginCity"
+          >
+            <span v-if="originSaving" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+            <span v-else>Simpan Kota Asal</span>
+          </button>
+          <span v-if="originSaved" class="text-sm text-green-600 font-medium">Tersimpan ✓</span>
+        </div>
+      </div>
+
+      <!-- ── Pengaturan Payment ── -->
+      <div class="card p-6 space-y-6">
+        <div>
+          <h2 class="text-base font-bold text-gray-900">Pengaturan Pembayaran</h2>
+          <p class="text-xs text-gray-400 mt-0.5">Atur metode pembayaran yang tampil di halaman checkout.</p>
+        </div>
+
+        <!-- Toggle Payment Gateway -->
+        <div class="flex items-center justify-between gap-4 p-4 rounded-xl border" style="border-color:var(--border)">
+          <div>
+            <p class="text-sm font-medium text-gray-800">Payment Gateway (Duitku)</p>
+            <p class="text-xs text-gray-400 mt-0.5">Virtual Account, E-Wallet, dll. Butuh konfigurasi Duitku di environment.</p>
+          </div>
+          <button
+            class="relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors duration-200 focus:outline-none"
+            :style="paymentGatewayEnabled ? 'background:#090b0c' : 'background:#e5e7eb'"
+            @click="togglePaymentGateway"
+          >
+            <span
+              class="inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 mt-0.5"
+              :style="paymentGatewayEnabled ? 'translate:1.25rem' : 'translate:0.125rem'"
+            />
+          </button>
+        </div>
+
+        <!-- Rekening Bank Manual -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-medium text-gray-800">Rekening Bank Manual</p>
+            <button
+              class="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+              style="background:rgba(9,11,12,0.06);color:#090b0c"
+              @click="addBankAccount"
+            >+ Tambah Rekening</button>
+          </div>
+
+          <div v-if="!bankAccounts.length" class="text-xs text-gray-400 py-3 text-center border border-dashed rounded-xl" style="border-color:var(--border)">
+            Belum ada rekening. Klik "+ Tambah Rekening" untuk menambahkan.
+          </div>
+
+          <div v-for="(acc, idx) in bankAccounts" :key="idx" class="flex gap-3 items-start p-4 rounded-xl border" style="border-color:var(--border)">
+            <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label class="label-text text-xs">Nama Bank</label>
+                <input v-model="acc.bank" type="text" placeholder="BCA, Mandiri, BRI…" class="input-field mt-1" />
+              </div>
+              <div>
+                <label class="label-text text-xs">Atas Nama</label>
+                <input v-model="acc.accountName" type="text" placeholder="Nama pemilik rekening" class="input-field mt-1" />
+              </div>
+              <div>
+                <label class="label-text text-xs">Nomor Rekening</label>
+                <input v-model="acc.accountNumber" type="text" placeholder="1234567890" class="input-field mt-1" />
+              </div>
+            </div>
+            <button
+              class="mt-6 p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
+              title="Hapus rekening"
+              @click="bankAccounts.splice(idx, 1)"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button
+            class="btn-primary"
+            :disabled="paymentSaving"
+            @click="savePaymentSettings"
+          >
+            <span v-if="paymentSaving" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+            <span v-else>Simpan Pengaturan Pembayaran</span>
+          </button>
+          <span v-if="paymentSaved" class="text-sm text-green-600 font-medium">Tersimpan ✓</span>
+        </div>
+      </div>
+
+      <div class="card p-6 space-y-6">
+        <h2 class="text-base font-bold text-gray-900">Template Pesan WA</h2>
+
+        <div class="space-y-2">
+          <label class="label-text block">Pesan Satu Produk</label>
+          <div class="flex flex-wrap gap-1.5">
+            <code
+              v-for="p in ['{{name}}','{{product}}','{{price}}','{{bank_info}}']"
+              :key="p"
+              class="bg-brand-50 text-brand-700 border border-brand-200 px-1.5 py-0.5 rounded text-xs cursor-pointer hover:bg-brand-100 select-none"
+              @click="insertPlaceholder('single', p)"
+            >{{ p }}</code>
+          </div>
+          <textarea
+            ref="singleTextarea"
+            v-model="waSingle"
+            rows="9"
+            class="input-field font-mono text-xs w-full"
+          />
+        </div>
+
+        <div class="space-y-2">
+          <label class="label-text block">Pesan Bulk (banyak produk, satu nomor)</label>
+          <div class="flex flex-wrap gap-1.5">
+            <code
+              v-for="p in ['{{name}}','{{items}}','{{total}}','{{bank_info}}']"
+              :key="p"
+              class="bg-brand-50 text-brand-700 border border-brand-200 px-1.5 py-0.5 rounded text-xs cursor-pointer hover:bg-brand-100 select-none"
+              @click="insertPlaceholder('bulk', p)"
+            >{{ p }}</code>
+          </div>
+          <textarea
+            ref="bulkTextarea"
+            v-model="waBulk"
+            rows="11"
+            class="input-field font-mono text-xs w-full"
+          />
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button class="btn-primary" :disabled="waTemplateSaving" @click="saveWaTemplates">
+            <span v-if="waTemplateSaving" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+            <span v-else>Simpan Template</span>
+          </button>
+          <span v-if="waTemplateSaved" class="text-sm text-green-600 font-medium">Tersimpan</span>
+        </div>
+      </div>
+
+      <!-- Kelola Admin -->
+      <div class="card p-6 space-y-5">
+        <h2 class="text-base font-bold text-gray-900">Kelola Admin</h2>
+
+        <!-- Daftar admin -->
+        <div class="divide-y divide-gray-100">
+          <div v-for="a in adminList" :key="a.id" class="flex items-center justify-between py-3">
+            <div>
+              <p class="text-sm font-medium text-gray-800">{{ a.username }}</p>
+              <p class="text-xs text-gray-400">Dibuat {{ formatDateTime(a.createdAt) }}</p>
+            </div>
+            <button
+              class="text-xs text-red-500 hover:text-red-700 disabled:opacity-40"
+              :disabled="deletingAdminId === a.id"
+              @click="deleteAdmin(a.id)"
+            >
+              <span v-if="deletingAdminId === a.id" class="inline-block h-3 w-3 rounded-full border-2 border-red-300 border-t-red-500 animate-spin" />
+              <span v-else>Hapus</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Form tambah admin -->
+        <div class="border-t pt-4 space-y-3">
+          <p class="text-sm font-semibold text-gray-700">Tambah Admin Baru</p>
+          <div class="space-y-2">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Username</label>
+              <input v-model="adminForm.username" type="text" placeholder="Masukkan username" class="input-field w-full" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Password</label>
+              <input v-model="adminForm.password" type="password" placeholder="Min. 6 karakter" class="input-field w-full" />
+            </div>
+          </div>
+          <button class="btn-primary w-full" :disabled="addingAdmin || !adminForm.username || !adminForm.password" @click="addAdmin">
+            <span v-if="addingAdmin" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+            <span v-else>Tambah Admin</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     </div>
 
     <!-- Modal: Form Produk -->
@@ -782,243 +1122,6 @@
       </div>
     </div>
 
-    <!-- ── Tab: Pengaturan WA ── -->
-    <div v-else-if="activeTab === 'settings'" class="flex flex-col items-center gap-6 py-4 px-4">
-
-      <!-- ── Pengaturan Ongkir ── -->
-      <div class="card p-6 space-y-5 w-full max-w-2xl">
-        <div>
-          <h2 class="text-base font-bold text-gray-900">Pengaturan Ongkir</h2>
-          <p class="text-xs text-gray-400 mt-0.5">Kota/kecamatan asal pengiriman untuk kalkulasi ongkos kirim.</p>
-        </div>
-
-        <!-- Kota aktif -->
-        <div v-if="originCityLabel" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-50 border border-brand-200">
-          <svg class="w-4 h-4 text-brand-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-          <span class="text-sm font-medium text-brand-800">{{ originCityLabel }}</span>
-        </div>
-        <div v-else class="flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
-          <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-          <span class="text-sm text-amber-700">Belum diatur — menggunakan default dari environment.</span>
-        </div>
-
-        <!-- Search kecamatan -->
-        <div class="space-y-2">
-          <label class="label-text block">Cari Kecamatan / Kota Asal</label>
-          <div class="relative">
-            <input
-              v-model="originSearch"
-              type="text"
-              placeholder="Ketik nama kecamatan, kota, atau provinsi..."
-              class="input-field w-full"
-              @input="searchOriginCities"
-            />
-            <div
-              v-if="originCities.length"
-              class="absolute z-20 left-0 right-0 top-full mt-1 bg-white border border-gray-200 shadow-lg max-h-56 overflow-y-auto" style="border-radius:0.75rem"
-            >
-              <button
-                v-for="city in originCities"
-                :key="city.city_id"
-                class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0"
-                @click="selectOriginCity(city)"
-              >
-                <span class="font-medium text-gray-800">{{ city.label }}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pilihan yang sedang dipilih (sebelum simpan) -->
-        <div v-if="originSelected" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200">
-          <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
-          <span class="text-sm text-gray-700">Dipilih: <strong>{{ originSelected.label }}</strong></span>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <button
-            class="btn-primary"
-            :disabled="!originSelected || originSaving"
-            @click="saveOriginCity"
-          >
-            <span v-if="originSaving" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
-            <span v-else>Simpan Kota Asal</span>
-          </button>
-          <span v-if="originSaved" class="text-sm text-green-600 font-medium">Tersimpan ✓</span>
-        </div>
-      </div>
-
-      <!-- ── Pengaturan Payment ── -->
-      <div class="card p-6 space-y-6 w-full max-w-2xl">
-        <div>
-          <h2 class="text-base font-bold text-gray-900">Pengaturan Pembayaran</h2>
-          <p class="text-xs text-gray-400 mt-0.5">Atur metode pembayaran yang tampil di halaman checkout.</p>
-        </div>
-
-        <!-- Toggle Payment Gateway -->
-        <div class="flex items-center justify-between gap-4 p-4 rounded-xl border" style="border-color:var(--border)">
-          <div>
-            <p class="text-sm font-medium text-gray-800">Payment Gateway (Duitku)</p>
-            <p class="text-xs text-gray-400 mt-0.5">Virtual Account, E-Wallet, dll. Butuh konfigurasi Duitku di environment.</p>
-          </div>
-          <button
-            class="relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors duration-200 focus:outline-none"
-            :style="paymentGatewayEnabled ? 'background:#090b0c' : 'background:#e5e7eb'"
-            @click="togglePaymentGateway"
-          >
-            <span
-              class="inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 mt-0.5"
-              :style="paymentGatewayEnabled ? 'translate:1.25rem' : 'translate:0.125rem'"
-            />
-          </button>
-        </div>
-
-        <!-- Rekening Bank Manual -->
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <p class="text-sm font-medium text-gray-800">Rekening Bank Manual</p>
-            <button
-              class="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-              style="background:rgba(9,11,12,0.06);color:#090b0c"
-              @click="addBankAccount"
-            >+ Tambah Rekening</button>
-          </div>
-
-          <div v-if="!bankAccounts.length" class="text-xs text-gray-400 py-3 text-center border border-dashed rounded-xl" style="border-color:var(--border)">
-            Belum ada rekening. Klik "+ Tambah Rekening" untuk menambahkan.
-          </div>
-
-          <div v-for="(acc, idx) in bankAccounts" :key="idx" class="flex gap-3 items-start p-4 rounded-xl border" style="border-color:var(--border)">
-            <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div>
-                <label class="label-text text-xs">Nama Bank</label>
-                <input v-model="acc.bank" type="text" placeholder="BCA, Mandiri, BRI…" class="input-field mt-1" />
-              </div>
-              <div>
-                <label class="label-text text-xs">Atas Nama</label>
-                <input v-model="acc.accountName" type="text" placeholder="Nama pemilik rekening" class="input-field mt-1" />
-              </div>
-              <div>
-                <label class="label-text text-xs">Nomor Rekening</label>
-                <input v-model="acc.accountNumber" type="text" placeholder="1234567890" class="input-field mt-1" />
-              </div>
-            </div>
-            <button
-              class="mt-6 p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
-              title="Hapus rekening"
-              @click="bankAccounts.splice(idx, 1)"
-            >
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <button
-            class="btn-primary"
-            :disabled="paymentSaving"
-            @click="savePaymentSettings"
-          >
-            <span v-if="paymentSaving" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
-            <span v-else>Simpan Pengaturan Pembayaran</span>
-          </button>
-          <span v-if="paymentSaved" class="text-sm text-green-600 font-medium">Tersimpan ✓</span>
-        </div>
-      </div>
-
-      <div class="card p-6 space-y-6 w-full max-w-2xl">
-        <h2 class="text-base font-bold text-gray-900">Template Pesan WA</h2>
-
-        <div class="space-y-2">
-          <label class="label-text block">Pesan Satu Produk</label>
-          <div class="flex flex-wrap gap-1.5">
-            <code
-              v-for="p in ['{{name}}','{{product}}','{{price}}','{{bank_info}}']"
-              :key="p"
-              class="bg-brand-50 text-brand-700 border border-brand-200 px-1.5 py-0.5 rounded text-xs cursor-pointer hover:bg-brand-100 select-none"
-              @click="insertPlaceholder('single', p)"
-            >{{ p }}</code>
-          </div>
-          <textarea
-            ref="singleTextarea"
-            v-model="waSingle"
-            rows="9"
-            class="input-field font-mono text-xs w-full"
-          />
-        </div>
-
-        <div class="space-y-2">
-          <label class="label-text block">Pesan Bulk (banyak produk, satu nomor)</label>
-          <div class="flex flex-wrap gap-1.5">
-            <code
-              v-for="p in ['{{name}}','{{items}}','{{total}}','{{bank_info}}']"
-              :key="p"
-              class="bg-brand-50 text-brand-700 border border-brand-200 px-1.5 py-0.5 rounded text-xs cursor-pointer hover:bg-brand-100 select-none"
-              @click="insertPlaceholder('bulk', p)"
-            >{{ p }}</code>
-          </div>
-          <textarea
-            ref="bulkTextarea"
-            v-model="waBulk"
-            rows="11"
-            class="input-field font-mono text-xs w-full"
-          />
-        </div>
-
-        <div class="flex items-center gap-3">
-          <button class="btn-primary" :disabled="waTemplateSaving" @click="saveWaTemplates">
-            <span v-if="waTemplateSaving" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
-            <span v-else>Simpan Template</span>
-          </button>
-          <span v-if="waTemplateSaved" class="text-sm text-green-600 font-medium">Tersimpan</span>
-        </div>
-      </div>
-
-      <!-- Kelola Admin -->
-      <div class="card p-6 space-y-5 w-full max-w-2xl">
-        <h2 class="text-base font-bold text-gray-900">Kelola Admin</h2>
-
-        <!-- Daftar admin -->
-        <div class="divide-y divide-gray-100">
-          <div v-for="a in adminList" :key="a.id" class="flex items-center justify-between py-3">
-            <div>
-              <p class="text-sm font-medium text-gray-800">{{ a.username }}</p>
-              <p class="text-xs text-gray-400">Dibuat {{ formatDateTime(a.createdAt) }}</p>
-            </div>
-            <button
-              class="text-xs text-red-500 hover:text-red-700 disabled:opacity-40"
-              :disabled="deletingAdminId === a.id"
-              @click="deleteAdmin(a.id)"
-            >
-              <span v-if="deletingAdminId === a.id" class="inline-block h-3 w-3 rounded-full border-2 border-red-300 border-t-red-500 animate-spin" />
-              <span v-else>Hapus</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Form tambah admin -->
-        <div class="border-t pt-4 space-y-3">
-          <p class="text-sm font-semibold text-gray-700">Tambah Admin Baru</p>
-          <div class="space-y-2">
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">Username</label>
-              <input v-model="adminForm.username" type="text" placeholder="Masukkan username" class="input-field w-full" />
-            </div>
-            <div>
-              <label class="block text-xs text-gray-500 mb-1">Password</label>
-              <input v-model="adminForm.password" type="password" placeholder="Min. 6 karakter" class="input-field w-full" />
-            </div>
-          </div>
-          <button class="btn-primary w-full" :disabled="addingAdmin || !adminForm.username || !adminForm.password" @click="addAdmin">
-            <span v-if="addingAdmin" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
-            <span v-else>Tambah Admin</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Modal: Pesanan Offline -->
     <div v-if="showOfflineOrderModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 py-6">
       <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px]" @click="showOfflineOrderModal = false" />
@@ -1121,6 +1224,11 @@ function showToast(type: 'success' | 'error', message: string) {
 const { data: orders, pending: ordersLoading, refresh: refreshOrders } = await useFetch('/api/admin/orders')
 const notifying = ref<string | null>(null)
 const cancelling = ref<string | null>(null)
+const selectedOrder = ref<any>(null)
+
+function openOrderDetail(order: any) {
+  selectedOrder.value = order
+}
 
 const shipmentModal = reactive({
   open: false,
@@ -1343,6 +1451,7 @@ async function cancelOrder(id: string) {
     await $fetch(`/api/admin/orders/${id}/cancel`, { method: 'PATCH' })
     showToast('success', 'Pesanan dibatalkan', 'Produk kembali tersedia')
     await refreshOrders()
+    selectedOrder.value = null
   } catch (err: any) {
     showToast('error', err.data?.statusMessage || 'Gagal membatalkan pesanan')
   } finally {
@@ -1853,14 +1962,19 @@ watch(waTemplates, (val) => {
 async function saveWaTemplates() {
   waTemplateSaving.value = true
   waTemplateSaved.value = false
-  await $fetch('/api/admin/wa-template', {
-    method: 'PUT',
-    body: { single: waSingle.value, bulk: waBulk.value }
-  })
-  waTemplateSaving.value = false
-  waTemplateSaved.value = true
-  await refreshTemplates()
-  setTimeout(() => { waTemplateSaved.value = false }, 3000)
+  try {
+    await $fetch('/api/admin/wa-template', {
+      method: 'PUT',
+      body: { single: waSingle.value, bulk: waBulk.value }
+    })
+    waTemplateSaved.value = true
+    await refreshTemplates()
+    setTimeout(() => { waTemplateSaved.value = false }, 3000)
+  } catch (err: any) {
+    showToast('error', err?.data?.statusMessage || 'Gagal menyimpan template')
+  } finally {
+    waTemplateSaving.value = false
+  }
 }
 
 // ── Kelola Admin ──

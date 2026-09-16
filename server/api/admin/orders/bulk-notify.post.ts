@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
 
   const orders = await prisma.order.findMany({
     where: { id: { in: orderIds }, status: 'PENDING_PAYMENT' },
-    include: { product: true }
+    include: { product: true, payment: { select: { paymentUrl: true } } }
   })
 
   if (!orders.length) {
@@ -34,11 +34,13 @@ export default defineEventHandler(async (event) => {
       .join('\n')
     const total = phoneOrders.reduce((sum, o) => sum + Number(o.product.price), 0)
 
+    const paymentUrl = phoneOrders[0].payment?.paymentUrl ?? null
+    const bankInfo = await resolveBankInfo(paymentUrl)
     const message = template
       .replace(/{{name}}/g, buyerName)
       .replace(/{{items}}/g, items)
       .replace(/{{total}}/g, total.toLocaleString('id-ID'))
-      .replace(/{{bank_info}}/g, config.bankInfo || 'Bank BCA: 1234567890 a.n. Toko Flash Sale')
+      .replace(/{{bank_info}}/g, bankInfo)
 
     await $fetch(config.fonnteUrl || 'https://api.fonnte.com/send', {
       method: 'POST',
