@@ -37,8 +37,6 @@
             />
           </div>
 
-          <!-- Turnstile widget -->
-          <div v-if="siteKey" id="cf-turnstile-admin" class="cf-turnstile" :data-sitekey="siteKey" data-theme="light" data-size="flexible"></div>
 
           <div
             v-if="errorMsg"
@@ -60,55 +58,19 @@
 <script setup lang="ts">
 definePageMeta({ middleware: [] })
 
-const config = useRuntimeConfig()
-const siteKey = config.public.turnstileSiteKey as string
-const turnstileToken = ref('')
-
 const form = reactive({ username: '', password: '' })
 const loading = ref(false)
 const errorMsg = ref('')
-
-function renderTurnstile() {
-  if (!siteKey || typeof window === 'undefined') return
-  nextTick(() => {
-    const el = document.getElementById('cf-turnstile-admin')
-    if (!el) return
-    if ((window as any).turnstile) {
-      ;(window as any).turnstile.render('#cf-turnstile-admin', {
-        sitekey: siteKey,
-        theme: 'light',
-        size: 'flexible',
-        callback: (token: string) => { turnstileToken.value = token },
-        'expired-callback': () => { turnstileToken.value = '' },
-        'error-callback': () => { turnstileToken.value = '' }
-      })
-    }
-  })
-}
-
-onMounted(() => {
-  if (!siteKey) return
-  if ((window as any).turnstile) { renderTurnstile(); return }
-  const s = document.createElement('script')
-  s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
-  s.async = true
-  s.defer = true
-  s.onload = renderTurnstile
-  document.head.appendChild(s)
-})
 
 async function login() {
   loading.value = true
   errorMsg.value = ''
   try {
-    await $fetch('/api/admin/login', { method: 'POST', body: { ...form, turnstileToken: turnstileToken.value } })
+    await $fetch('/api/admin/login', { method: 'POST', body: { ...form } })
     window.location.href = '/admin'
-    return
   } catch (err: any) {
     errorMsg.value = err.data?.statusMessage || 'Terjadi kesalahan, coba lagi'
     loading.value = false
-    turnstileToken.value = ''
-    ;(window as any).turnstile?.reset('#cf-turnstile-admin')
   }
 }
 </script>

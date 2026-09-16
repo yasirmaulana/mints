@@ -5,9 +5,8 @@ export default defineEventHandler(async (event) => {
   checkRateLimit(`admin-login:${ip}`, 10, 15 * 60 * 1000)
 
   const body = await readBody(event)
-  const { username, password, turnstileToken } = body ?? {}
+  const { username, password } = body ?? {}
 
-  await verifyTurnstile(turnstileToken ?? '', ip)
   const config = useRuntimeConfig()
 
   if (!username || !password) {
