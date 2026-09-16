@@ -89,7 +89,7 @@
 const props = defineProps<{ productId?: string; orderId?: string }>()
 
 const open = ref(false)
-const sessionId = ref(localStorage.getItem(`chat-session-${props.productId || 'global'}`) || '')
+const sessionId = ref(typeof localStorage !== 'undefined' ? localStorage.getItem(`chat-session-${props.productId || 'global'}`) || '' : '')
 const messages = ref<any[]>([])
 const newMessage = ref('')
 const nameInput = ref('')
@@ -101,7 +101,8 @@ const messagesEl = ref<HTMLElement>()
 
 const canStart = computed(() => nameInput.value.trim().length >= 2 && /^(08|628)/.test(phoneInput.value) && firstMessage.value.trim())
 
-let es: EventSource | null = null
+let pollTimer: ReturnType<typeof setTimeout> | null = null
+let lastCreatedAt = ''
 
 async function startChat() {
   if (!canStart.value || starting.value) return
@@ -119,7 +120,8 @@ async function startChat() {
     })
     sessionId.value = res.sessionId
     localStorage.setItem(`chat-session-${props.productId || 'global'}`, res.sessionId)
-    connectSSE()
+    await loadMessages()
+    startPolling()
   } finally {
     starting.value = false
   }
@@ -129,50 +131,75 @@ async function sendMessage() {
   if (!newMessage.value.trim() || !sessionId.value) return
   const body = newMessage.value.trim()
   newMessage.value = ''
-  // Optimistic update — show immediately, SSE will confirm within 2s
+  // Optimistic update
   messages.value.push({ id: `tmp-${Date.now()}`, sender: 'buyer', body, createdAt: new Date().toISOString() })
   nextTick(() => {
     if (messagesEl.value) messagesEl.value.scrollTop = messagesEl.value.scrollHeight
   })
-  await $fetch(`/api/chat/${sessionId.value}/messages`, {
-    method: 'POST',
-    body: { message: body }
+  await $fetch(`/api/chat/${sessionId.value}/messages`, { method: 'POST', body: { message: body } })
+}
+
+async function loadMessages() {
+  if (!sessionId.value) return
+  const res = await $fetch<{ messages: any[] }>(`/api/chat/${sessionId.value}/messages`)
+  messages.value = res.messages
+  if (res.messages.length) lastCreatedAt = res.messages[res.messages.length - 1].createdAt
+  nextTick(() => {
+    if (messagesEl.value) messagesEl.value.scrollTop = messagesEl.value.scrollHeight
   })
 }
 
-function connectSSE() {
-  if (!sessionId.value || !process.client) return
-  es?.close()
-  es = new EventSource(`/api/chat/${sessionId.value}/messages`)
-  es.onmessage = (e) => {
-    const data = JSON.parse(e.data)
-    if (data.type === 'init') {
-      messages.value = data.messages
-    } else if (data.type === 'messages') {
+async function pollMessages() {
+  if (!sessionId.value) return
+  try {
+    const url = lastCreatedAt
+      ? `/api/chat/${sessionId.value}/messages?after=${encodeURIComponent(lastCreatedAt)}`
+      : `/api/chat/${sessionId.value}/messages`
+    const res = await $fetch<{ messages: any[] }>(url)
+    if (res.messages.length) {
       const existingIds = new Set(messages.value.filter((m: any) => !m.id.startsWith('tmp-')).map((m: any) => m.id))
-      const incoming = data.messages.filter((m: any) => !existingIds.has(m.id))
+      const incoming = res.messages.filter((m: any) => !existingIds.has(m.id))
       if (incoming.length) {
         messages.value = messages.value.filter((m: any) => !m.id.startsWith('tmp-'))
         messages.value.push(...incoming)
+        lastCreatedAt = incoming[incoming.length - 1].createdAt
         if (!open.value) unread.value += incoming.filter((m: any) => m.sender === 'admin').length
+        nextTick(() => {
+          if (messagesEl.value) messagesEl.value.scrollTop = messagesEl.value.scrollHeight
+        })
       }
     }
-    nextTick(() => {
-      if (messagesEl.value) messagesEl.value.scrollTop = messagesEl.value.scrollHeight
-    })
-  }
+  } catch {}
+  pollTimer = setTimeout(pollMessages, 3000)
 }
 
-watch(open, (val) => {
-  if (val) { unread.value = 0 }
-  if (val && sessionId.value && !es) connectSSE()
+function startPolling() {
+  if (pollTimer) clearTimeout(pollTimer)
+  pollTimer = setTimeout(pollMessages, 3000)
+}
+
+function stopPolling() {
+  if (pollTimer) { clearTimeout(pollTimer); pollTimer = null }
+}
+
+watch(open, async (val) => {
+  if (val) {
+    unread.value = 0
+    if (sessionId.value && !messages.value.length) await loadMessages()
+    if (sessionId.value) startPolling()
+  } else {
+    stopPolling()
+  }
 })
 
-onMounted(() => {
-  if (sessionId.value) connectSSE()
+onMounted(async () => {
+  if (sessionId.value) {
+    await loadMessages()
+    startPolling()
+  }
 })
 
-onUnmounted(() => es?.close())
+onUnmounted(() => stopPolling())
 
 function formatTime(d: string) {
   return new Date(d).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })

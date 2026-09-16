@@ -28,6 +28,13 @@ export default defineEventHandler(async (event) => {
     }
   })
 
+  // Cache publik 60s, stale-while-revalidate 5 menit — hanya jika tidak ada filter dinamis
+  if (!search && !sessionId) {
+    setResponseHeader(event, 'Cache-Control', 's-maxage=60, stale-while-revalidate=300')
+  } else {
+    setResponseHeader(event, 'Cache-Control', 'no-store')
+  }
+
   return products.map(({ order, ...p }) => ({
     ...p,
     maskedPhone: p.status === 'SOLD_OUT' && order?.buyerPhone ? maskPhone(order.buyerPhone) : null

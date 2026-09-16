@@ -9,6 +9,8 @@ import viteNodeEntry_mjs from 'file:///home/yasir/Documents/Project/mints/node_m
 import { viteNodeFetch } from 'file:///home/yasir/Documents/Project/mints/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
 import bcrypt from 'file:///home/yasir/Documents/Project/mints/node_modules/bcryptjs/index.js';
 import { PutObjectCommand, S3Client, GetObjectCommand } from 'file:///home/yasir/Documents/Project/mints/node_modules/@aws-sdk/client-s3/dist-cjs/index.js';
+import { Ratelimit } from 'file:///home/yasir/Documents/Project/mints/node_modules/@upstash/ratelimit/dist/index.js';
+import { Redis } from 'file:///home/yasir/Documents/Project/mints/node_modules/@upstash/redis/nodejs.mjs';
 import { PrismaClient } from 'file:///home/yasir/Documents/Project/mints/node_modules/@prisma/client/default.js';
 import { withAccelerate } from 'file:///home/yasir/Documents/Project/mints/node_modules/@prisma/extension-accelerate/dist/index.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file:///home/yasir/Documents/Project/mints/node_modules/vue-bundle-renderer/dist/runtime.mjs';
@@ -2473,16 +2475,16 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"30bfd-wSjzR7nHGGUeeOXvbCWAt0WdgTY\"",
-    "mtime": "2026-09-16T03:11:13.096Z",
-    "size": 199677,
+    "etag": "\"30fa5-MQ4Rox6O7e8oAIRILFS8LYmQCX0\"",
+    "mtime": "2026-09-16T03:55:35.016Z",
+    "size": 200613,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"acccc-PTnwTezafrFKKZW2NXCXr7ZBCFc\"",
-    "mtime": "2026-09-16T03:11:13.096Z",
-    "size": 707788,
+    "etag": "\"ad442-oHO4rHLlYIF5bGy7Djpv68B08F0\"",
+    "mtime": "2026-09-16T03:55:35.016Z",
+    "size": 709698,
     "path": "index.mjs.map"
   }
 };
@@ -2730,10 +2732,14 @@ function publicAssetsURL(...path) {
 var _a;
 const globalForPrisma = globalThis;
 function buildPrisma() {
-  var _a2;
-  const url = (_a2 = process.env.DATABASE_URL) != null ? _a2 : "";
-  const client = new PrismaClient();
-  return url.startsWith("prisma") ? client.$extends(withAccelerate()) : client;
+  var _a2, _b;
+  const accelerateUrl = (_a2 = process.env.ACCELERATE_URL) != null ? _a2 : "";
+  const dbUrl = (_b = process.env.DATABASE_URL) != null ? _b : "";
+  const useAccelerate = accelerateUrl.startsWith("prisma+postgres");
+  const client = new PrismaClient({
+    datasources: { db: { url: useAccelerate ? accelerateUrl : dbUrl } }
+  });
+  return useAccelerate ? client.$extends(withAccelerate()) : client;
 }
 const prisma = (_a = globalForPrisma.prisma) != null ? _a : buildPrisma();
 {
@@ -2803,8 +2809,31 @@ Setelah transfer, kirimkan bukti pembayaran ke admin. Terima kasih!`;
   return getTemplate("bulk", DEFAULT_BULK);
 }
 
+const limiterCache = /* @__PURE__ */ new Map();
+let redis = null;
+function getRedis() {
+  if (redis) return redis;
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  redis = new Redis({ url, token });
+  return redis;
+}
+function getUpstashLimiter(max, windowMs) {
+  const r = getRedis();
+  if (!r) return null;
+  const cacheKey = `${max}:${windowMs}`;
+  if (!limiterCache.has(cacheKey)) {
+    limiterCache.set(cacheKey, new Ratelimit({
+      redis: r,
+      limiter: Ratelimit.slidingWindow(max, `${Math.round(windowMs / 1e3)} s`),
+      prefix: "rl"
+    }));
+  }
+  return limiterCache.get(cacheKey);
+}
 const store = /* @__PURE__ */ new Map();
-function checkRateLimit(key, max = 5, windowMs = 15 * 60 * 1e3) {
+function checkInMemory(key, max, windowMs) {
   const now = Date.now();
   let bucket = store.get(key);
   if (!bucket || now > bucket.resetAt) {
@@ -2823,6 +2852,18 @@ function checkRateLimit(key, max = 5, windowMs = 15 * 60 * 1e3) {
       if (now > v.resetAt) store.delete(k);
     }
   }
+}
+async function checkRateLimit(key, max = 5, windowMs = 15 * 60 * 1e3) {
+  const limiter = getUpstashLimiter(max, windowMs);
+  if (limiter) {
+    const { success, reset } = await limiter.limit(key);
+    if (!success) {
+      const retryIn = Math.ceil((reset - Date.now()) / 6e4);
+      throw createError({ statusCode: 429, statusMessage: `Terlalu banyak percobaan. Coba lagi dalam ${retryIn} menit` });
+    }
+    return;
+  }
+  checkInMemory(key, max, windowMs);
 }
 
 const MAX_SIZE = 2 * 1024 * 1024;
@@ -4803,7 +4844,8 @@ const profile_patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePro
   default: profile_patch
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$4 = defineEventHandler(async () => {
+const index_get$4 = defineEventHandler(async (event) => {
+  setResponseHeader(event, "Cache-Control", "s-maxage=300, stale-while-revalidate=600");
   return await prisma.category.findMany({
     orderBy: { name: "asc" },
     include: { _count: { select: { products: true } } }
@@ -4816,46 +4858,21 @@ const index_get$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const messages_get = defineEventHandler(async (event) => {
-  var _a;
   const sessionId = getRouterParam(event, "sessionId");
+  const { after } = getQuery$1(event);
   const session = await prisma.chatSession.findUnique({ where: { id: sessionId } });
   if (!session) throw createError({ statusCode: 404, statusMessage: "Session tidak ditemukan" });
-  const { res } = event.node;
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
-  (_a = res.flushHeaders) == null ? void 0 : _a.call(res);
-  const sendEvent = (data) => {
-    res.write(`data: ${JSON.stringify(data)}
-
-`);
-  };
-  const existing = await prisma.chatMessage.findMany({
-    where: { sessionId },
+  const where = { sessionId };
+  if (after) {
+    const afterDate = new Date(String(after));
+    if (!isNaN(afterDate.getTime())) where.createdAt = { gt: afterDate };
+  }
+  const messages = await prisma.chatMessage.findMany({
+    where,
     orderBy: { createdAt: "asc" }
   });
-  sendEvent({ type: "init", messages: existing });
-  let lastCreatedAt = existing.length ? existing[existing.length - 1].createdAt : /* @__PURE__ */ new Date(0);
-  const interval = setInterval(async () => {
-    const newMsgs = await prisma.chatMessage.findMany({
-      where: { sessionId, createdAt: { gt: lastCreatedAt } },
-      orderBy: { createdAt: "asc" }
-    });
-    if (newMsgs.length) {
-      lastCreatedAt = newMsgs[newMsgs.length - 1].createdAt;
-      sendEvent({ type: "messages", messages: newMsgs });
-    }
-  }, 2e3);
-  event.node.req.on("close", () => {
-    clearInterval(interval);
-    res.end();
-  });
-  const ping = setInterval(() => {
-    res.write(": ping\n\n");
-  }, 15e3);
-  event.node.req.on("close", () => clearInterval(ping));
-  return new Promise(() => {
-  });
+  setResponseHeader(event, "Cache-Control", "no-store");
+  return { messages };
 });
 
 const messages_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
@@ -5307,6 +5324,11 @@ const index_get = defineEventHandler(async (event) => {
       order: { select: { buyerPhone: true } }
     }
   });
+  if (!search && !sessionId) {
+    setResponseHeader(event, "Cache-Control", "s-maxage=60, stale-while-revalidate=300");
+  } else {
+    setResponseHeader(event, "Cache-Control", "no-store");
+  }
   return products.map(({ order, ...p }) => ({
     ...p,
     maskedPhone: p.status === "SOLD_OUT" && (order == null ? void 0 : order.buyerPhone) ? maskPhone(order.buyerPhone) : null

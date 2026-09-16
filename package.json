@@ -17,6 +17,8 @@
     "@nuxt/ui": "^2.18.4",
     "@prisma/client": "^5.22.0",
     "@prisma/extension-accelerate": "^3.0.1",
+    "@upstash/ratelimit": "^2.1.0",
+    "@upstash/redis": "^1.38.4",
     "bcryptjs": "^3.0.3",
     "chart.js": "^4.5.1",
     "nuxt": "^3.13.2",
