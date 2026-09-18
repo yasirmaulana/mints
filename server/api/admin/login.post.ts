@@ -1,11 +1,14 @@
 import bcrypt from 'bcryptjs'
+import { verifyRecaptcha } from '~/server/utils/recaptcha'
 
 export default defineEventHandler(async (event) => {
   const ip = getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
   checkRateLimit(`admin-login:${ip}`, 10, 15 * 60 * 1000)
 
   const body = await readBody(event)
-  const { username, password } = body ?? {}
+  const { username, password, recaptchaToken } = body ?? {}
+
+  await verifyRecaptcha(recaptchaToken)
 
   const config = useRuntimeConfig()
 
