@@ -1,6 +1,11 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-08-23',
-  modules: ['@nuxt/ui'],
+  modules: ['@nuxt/ui', '@nuxtjs/turnstile', 'nuxt-auth-utils'],
+
+  turnstile: {
+    siteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY,
+    addValidateEndpoint: false,
+  },
 
   tailwindcss: {
     cssPath: '~/assets/css/main.css',
@@ -42,6 +47,9 @@ export default defineNuxtConfig({
     duitkuCallbackUrl: process.env.DUITKU_CALLBACK_URL || '',
     duitkuReturnUrl: process.env.DUITKU_RETURN_URL || '',
     appUrl: process.env.APP_URL || 'https://mints.id',
+    // SMTP Gmail
+    smtpUser: process.env.SMTP_USER || '',
+    smtpPass: process.env.SMTP_PASS || '',
     // Cloudflare Turnstile
     turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY || '',
     public: {

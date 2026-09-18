@@ -1,56 +1,61 @@
 import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import { tmpdir } from 'node:os';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, getCookie, getResponseStatus, deleteCookie, getQuery as getQuery$1, getRequestWebStream, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getRouterParam, readBody, getHeader, getRequestIP, setCookie, readMultipartFormData, getResponseStatusText } from 'file:///home/yasir/Documents/Project/mints/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, getCookie, getResponseStatus, getQuery as getQuery$1, deleteCookie, setCookie, useSession, getHeaders, getRequestIP, sendStream, getRequestWebStream, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getRouterParam, readBody, getHeader, readMultipartFormData, getResponseStatusText } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/h3/dist/index.mjs';
 import { Server } from 'node:http';
 import { resolve, join, dirname } from 'node:path';
 import crypto$1, { createHash } from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
-import { escapeHtml } from 'file:///home/yasir/Documents/Project/mints/node_modules/@vue/shared/dist/shared.cjs.js';
-import viteNodeEntry_mjs from 'file:///home/yasir/Documents/Project/mints/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs';
-import { viteNodeFetch } from 'file:///home/yasir/Documents/Project/mints/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
-import bcrypt from 'file:///home/yasir/Documents/Project/mints/node_modules/bcryptjs/index.js';
-import { PutObjectCommand, S3Client, GetObjectCommand } from 'file:///home/yasir/Documents/Project/mints/node_modules/@aws-sdk/client-s3/dist-cjs/index.js';
-import { Ratelimit } from 'file:///home/yasir/Documents/Project/mints/node_modules/@upstash/ratelimit/dist/index.js';
-import { Redis } from 'file:///home/yasir/Documents/Project/mints/node_modules/@upstash/redis/nodejs.mjs';
-import { PrismaClient } from 'file:///home/yasir/Documents/Project/mints/node_modules/@prisma/client/default.js';
-import { withAccelerate } from 'file:///home/yasir/Documents/Project/mints/node_modules/@prisma/extension-accelerate/dist/index.js';
-import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file:///home/yasir/Documents/Project/mints/node_modules/vue-bundle-renderer/dist/runtime.mjs';
-import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL, encodePath } from 'file:///home/yasir/Documents/Project/mints/node_modules/ufo/dist/index.mjs';
-import { renderToString } from 'file:///home/yasir/Documents/Project/mints/node_modules/vue/server-renderer/index.mjs';
-import destr, { destr as destr$1 } from 'file:///home/yasir/Documents/Project/mints/node_modules/destr/dist/index.mjs';
-import { createHooks } from 'file:///home/yasir/Documents/Project/mints/node_modules/hookable/dist/index.mjs';
-import { createFetch, Headers as Headers$1 } from 'file:///home/yasir/Documents/Project/mints/node_modules/ofetch/dist/node.mjs';
-import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file:///home/yasir/Documents/Project/mints/node_modules/node-mock-http/dist/index.mjs';
-import { createStorage, prefixStorage } from 'file:///home/yasir/Documents/Project/mints/node_modules/unstorage/dist/index.mjs';
-import unstorage_47drivers_47fs from 'file:///home/yasir/Documents/Project/mints/node_modules/unstorage/drivers/fs.mjs';
+import { escapeHtml } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@vue/shared/dist/shared.cjs.js';
+import viteNodeEntry_mjs from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs';
+import { viteNodeFetch } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
+import bcrypt from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/bcryptjs/index.js';
+import { PutObjectCommand, S3Client, GetObjectCommand } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@aws-sdk/client-s3/dist-cjs/index.js';
+import nodemailer from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/nodemailer/dist/esm/nodemailer.js';
+import { Ratelimit } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@upstash/ratelimit/dist/index.js';
+import { Redis } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@upstash/redis/nodejs.mjs';
+import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL, encodePath } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/ufo/dist/index.mjs';
+import defu, { defuFn, defu as defu$1 } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/defu/dist/defu.mjs';
+import { FetchError, createFetch, Headers as Headers$1 } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/ofetch/dist/node.mjs';
+import { snakeCase, upperFirst } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/scule/dist/index.mjs';
+import { getRandomValues } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/uncrypto/dist/crypto.node.mjs';
+import { PrismaClient } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@prisma/client/default.js';
+import { withAccelerate } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@prisma/extension-accelerate/dist/index.js';
+import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/vue-bundle-renderer/dist/runtime.mjs';
+import { renderToString } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/vue/server-renderer/index.mjs';
+import destr, { destr as destr$1 } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/destr/dist/index.mjs';
+import { createHooks as createHooks$1 } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/hookable/dist/index.mjs';
+import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/node-mock-http/dist/index.mjs';
+import { createStorage, prefixStorage } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unstorage/dist/index.mjs';
+import unstorage_47drivers_47fs from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unstorage/drivers/fs.mjs';
+import lruCache from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unstorage/drivers/lru-cache.mjs';
 import { mkdir, writeFile, rename, unlink, readFile } from 'node:fs/promises';
-import fsDriver from 'file:///home/yasir/Documents/Project/mints/node_modules/unstorage/drivers/fs-lite.mjs';
-import lruCache from 'file:///home/yasir/Documents/Project/mints/node_modules/unstorage/drivers/lru-cache.mjs';
-import { digest, hash as hash$1 } from 'file:///home/yasir/Documents/Project/mints/node_modules/ohash/dist/index.mjs';
-import { klona } from 'file:///home/yasir/Documents/Project/mints/node_modules/klona/dist/index.mjs';
-import defu, { defuFn } from 'file:///home/yasir/Documents/Project/mints/node_modules/defu/dist/defu.mjs';
-import { snakeCase } from 'file:///home/yasir/Documents/Project/mints/node_modules/scule/dist/index.mjs';
-import { getContext } from 'file:///home/yasir/Documents/Project/mints/node_modules/nitropack/node_modules/unctx/dist/index.mjs';
-import { toRouteMatcher, createRouter } from 'file:///home/yasir/Documents/Project/mints/node_modules/radix3/dist/index.mjs';
-import consola, { consola as consola$1 } from 'file:///home/yasir/Documents/Project/mints/node_modules/consola/dist/index.mjs';
-import { ErrorParser } from 'file:///home/yasir/Documents/Project/mints/node_modules/youch-core/build/index.js';
-import { Youch } from 'file:///home/yasir/Documents/Project/mints/node_modules/youch/build/index.js';
-import { SourceMapConsumer } from 'file:///home/yasir/Documents/Project/mints/node_modules/source-map/source-map.js';
+import fsDriver from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unstorage/drivers/fs-lite.mjs';
+import { digest, hash as hash$1 } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/ohash/dist/index.mjs';
+import { klona } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/klona/dist/index.mjs';
+import { getContext } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/nitropack/node_modules/unctx/dist/index.mjs';
+import { toRouteMatcher, createRouter } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/radix3/dist/index.mjs';
+import consola, { consola as consola$1 } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/consola/dist/index.mjs';
+import { ErrorParser } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/youch-core/build/index.js';
+import { Youch } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/youch/build/index.js';
+import { SourceMapConsumer } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/source-map/source-map.js';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { stringify, uneval } from 'file:///home/yasir/Documents/Project/mints/node_modules/devalue/index.js';
-import { getContext as getContext$1 } from 'file:///home/yasir/Documents/Project/mints/node_modules/@nuxt/nitro-server/node_modules/unctx/dist/index.mjs';
-import { captureRawStackTrace, parseRawStackTrace } from 'file:///home/yasir/Documents/Project/mints/node_modules/errx/dist/index.mjs';
-import { isVNode, isRef, toValue } from 'file:///home/yasir/Documents/Project/mints/node_modules/vue/index.mjs';
-import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file:///home/yasir/Documents/Project/mints/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
+import { stringify, uneval } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/devalue/index.js';
+import { getContext as getContext$1 } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@nuxt/nitro-server/node_modules/unctx/dist/index.mjs';
+import { captureRawStackTrace, parseRawStackTrace } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/errx/dist/index.mjs';
+import { isVNode, isRef, toValue } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/vue/index.mjs';
+import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
 import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname as dirname$1, resolve as resolve$1, basename } from 'file:///home/yasir/Documents/Project/mints/node_modules/pathe/dist/index.mjs';
-import { getIcons } from 'file:///home/yasir/Documents/Project/mints/node_modules/@iconify/utils/lib/index.mjs';
-import { collections } from 'file:///home/yasir/Documents/Project/mints/.nuxt/nuxt-icon-server-bundle.mjs';
-import { createHead as createHead$1, propsToString, renderSSRHead } from 'file:///home/yasir/Documents/Project/mints/node_modules/unhead/dist/server.mjs';
-import { DeprecationsPlugin, PromisesPlugin, TemplateParamsPlugin, AliasSortingPlugin } from 'file:///home/yasir/Documents/Project/mints/node_modules/unhead/dist/plugins.mjs';
-import { walkResolver } from 'file:///home/yasir/Documents/Project/mints/node_modules/unhead/dist/utils.mjs';
+import { dirname as dirname$1, resolve as resolve$1, basename } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/pathe/dist/index.mjs';
+import { getIcons } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@iconify/utils/lib/index.mjs';
+import { collections } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/.nuxt/nuxt-icon-server-bundle.mjs';
+import { lookup } from 'node:dns';
+import { Agent, fetch } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/undici/index.js';
+import { createHooks } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/nuxt-auth-utils/node_modules/hookable/dist/index.mjs';
+import { createHead as createHead$1, propsToString, renderSSRHead } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unhead/dist/server.mjs';
+import { DeprecationsPlugin, PromisesPlugin, TemplateParamsPlugin, AliasSortingPlugin } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unhead/dist/plugins.mjs';
+import { walkResolver } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unhead/dist/utils.mjs';
 
-const serverAssets = [{"baseName":"server","dir":"/home/yasir/Documents/Project/mints/server/assets"}];
+const serverAssets = [{"baseName":"server","dir":"/home/yasir/Documents/Project/p_otomatisin/mints/server/assets"}];
 
 const assets$1 = createStorage();
 
@@ -118,12 +123,13 @@ const storage = createStorage({});
 
 storage.mount('/assets', assets$1);
 
-storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/home/yasir/Documents/Project/mints","watchOptions":{"ignored":[null]}}));
-storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/home/yasir/Documents/Project/mints/server","watchOptions":{"ignored":[null]}}));
-storage.mount('cache:nuxt:payload', cacheDriver({"base":"/home/yasir/Documents/Project/mints/.nuxt/cache/nuxt/payload"}));
-storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/home/yasir/Documents/Project/mints/.nuxt"}));
-storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/home/yasir/Documents/Project/mints/.nuxt/cache"}));
-storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"/home/yasir/Documents/Project/mints/.data/kv"}));
+storage.mount('nuxt-scripts-cache', lruCache({"driver":"lru-cache","max":500,"maxSize":33554432,"maxEntrySize":8388608}));
+storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/home/yasir/Documents/Project/p_otomatisin/mints","watchOptions":{"ignored":[null]}}));
+storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/home/yasir/Documents/Project/p_otomatisin/mints/server","watchOptions":{"ignored":[null]}}));
+storage.mount('cache:nuxt:payload', cacheDriver({"base":"/home/yasir/Documents/Project/p_otomatisin/mints/.nuxt/cache/nuxt/payload"}));
+storage.mount('build', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/home/yasir/Documents/Project/p_otomatisin/mints/.nuxt"}));
+storage.mount('cache', unstorage_47drivers_47fs({"driver":"fs","readOnly":false,"base":"/home/yasir/Documents/Project/p_otomatisin/mints/.nuxt/cache"}));
+storage.mount('data', unstorage_47drivers_47fs({"driver":"fs","base":"/home/yasir/Documents/Project/p_otomatisin/mints/.data/kv"}));
 
 function useStorage(base = "") {
   return base ? prefixStorage(storage, base) : storage;
@@ -925,6 +931,14 @@ const _inlineRuntimeConfig = {
       "/__nuxt_error": {
         "cache": false
       },
+      "/_scripts/assets/**": {
+        "headers": {
+          "cache-control": "public, max-age=31536000, immutable"
+        },
+        "cache": {
+          "maxAge": 31536000
+        }
+      },
       "/_nuxt/builds/meta/**": {
         "headers": {
           "cache-control": "public, max-age=31536000, immutable"
@@ -937,9 +951,27 @@ const _inlineRuntimeConfig = {
       }
     }
   },
+  "turnstile": {
+    "secretKey": "1x0000000000000000000000000000000AA"
+  },
   "public": {
-    "turnstileSiteKey": "1x00000000000000000000AA",
-    "freeShippingMin": "500000"
+    "turnstile": {
+      "siteKey": "0x4AAAAAAE1kinJSGI7SMaBk"
+    },
+    "turnstileSiteKey": "0x4AAAAAAE1kinJSGI7SMaBk",
+    "freeShippingMin": "500000",
+    "nuxt-scripts": {
+      "version": "1.3.9",
+      "prefix": "/_scripts",
+      "defaultScriptOptions": {
+        "trigger": "onNuxtReady"
+      },
+      "googleStaticMapsProxy": "",
+      "endpoints": {}
+    },
+    "auth": {
+      "loadStrategy": "server-first"
+    }
   },
   "fonnteToken": "UnrEBcungbTmdX9H918A",
   "fonnteUrl": "https://api.fonnte.com/send",
@@ -960,9 +992,335 @@ const _inlineRuntimeConfig = {
   "duitkuCallbackUrl": "https://mints.id/api/payment/callback",
   "duitkuReturnUrl": "https://mints.id/orders",
   "appUrl": "https://mints.id",
-  "turnstileSecretKey": "1x0000000000000000000000000000000AA",
+  "smtpUser": "otomatisinwebid@gmail.com",
+  "smtpPass": "zlqw qtmf mmwu mfni",
+  "turnstileSecretKey": "0x4AAAAAAE1kikLcUmfFvICQYFgYHeeo7v4",
   "icon": {
     "serverKnownCssClasses": []
+  },
+  "nuxt-scripts": {
+    "version": "1.3.9",
+    "googleStaticMapsProxy": ""
+  },
+  "session": {
+    "name": "nuxt-session",
+    "password": "",
+    "cookie": {
+      "sameSite": "lax"
+    }
+  },
+  "hash": {
+    "scrypt": {}
+  },
+  "webauthn": {
+    "register": {},
+    "authenticate": {}
+  },
+  "oauth": {
+    "gitea": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": "",
+      "baseURL": ""
+    },
+    "box": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": "",
+      "scope": []
+    },
+    "github": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "gitlab": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": "",
+      "baseURL": "https://gitlab.com"
+    },
+    "spotify": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "google": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "twitch": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "auth0": {
+      "clientId": "",
+      "clientSecret": "",
+      "domain": "",
+      "audience": "",
+      "redirectURL": ""
+    },
+    "workos": {
+      "clientId": "",
+      "clientSecret": "",
+      "connectionId": "",
+      "screenHint": "",
+      "redirectURL": ""
+    },
+    "microsoft": {
+      "clientId": "",
+      "clientSecret": "",
+      "tenant": "",
+      "scope": [],
+      "authorizationURL": "",
+      "tokenURL": "",
+      "userURL": "",
+      "redirectURL": ""
+    },
+    "azureb2c": {
+      "clientId": "",
+      "policy": "",
+      "tenant": "",
+      "scope": [],
+      "authorizationURL": "",
+      "tokenURL": "",
+      "userURL": "",
+      "redirectURL": ""
+    },
+    "discord": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "battledotnet": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "bluesky": {
+      "clientMetadataFilename": "",
+      "clientName": "",
+      "clientUri": "",
+      "logoUri": "",
+      "policyUri": "",
+      "tosUri": "",
+      "scope": [
+        "atproto"
+      ],
+      "grantTypes": [
+        "authorization_code"
+      ],
+      "responseTypes": [
+        "code"
+      ],
+      "applicationType": "web",
+      "redirectUris": "",
+      "dpopBoundAccessTokens": true,
+      "tokenEndpointAuthMethod": "none"
+    },
+    "keycloak": {
+      "clientId": "",
+      "clientSecret": "",
+      "serverUrl": "",
+      "serverUrlInternal": "",
+      "realm": "",
+      "redirectURL": ""
+    },
+    "linear": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "linkedin": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "cognito": {
+      "clientId": "",
+      "clientSecret": "",
+      "region": "",
+      "userPoolId": "",
+      "redirectURL": ""
+    },
+    "facebook": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "instagram": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "paypal": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "steam": {
+      "apiKey": "",
+      "redirectURL": ""
+    },
+    "x": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "xsuaa": {
+      "clientId": "",
+      "clientSecret": "",
+      "domain": "",
+      "redirectURL": ""
+    },
+    "vk": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "yandex": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "tiktok": {
+      "clientKey": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "dropbox": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "polar": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "zitadel": {
+      "clientId": "",
+      "clientSecret": "",
+      "domain": "",
+      "redirectURL": ""
+    },
+    "authentik": {
+      "clientId": "",
+      "clientSecret": "",
+      "domain": "",
+      "redirectURL": ""
+    },
+    "seznam": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "strava": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "hubspot": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "line": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "atlassian": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "apple": {
+      "teamId": "",
+      "keyId": "",
+      "privateKey": "",
+      "redirectURL": "",
+      "clientId": ""
+    },
+    "kick": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": ""
+    },
+    "livechat": {
+      "clientId": "",
+      "clientSecret": ""
+    },
+    "salesforce": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": "",
+      "baseURL": "",
+      "scope": ""
+    },
+    "slack": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": "",
+      "scope": ""
+    },
+    "heroku": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": "",
+      "scope": ""
+    },
+    "roblox": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": "",
+      "scope": ""
+    },
+    "okta": {
+      "clientId": "",
+      "clientSecret": "",
+      "domain": "",
+      "audience": "",
+      "scope": [],
+      "redirectURL": ""
+    },
+    "ory": {
+      "clientId": "",
+      "clientSecret": "",
+      "sdkURL": "",
+      "redirectURL": "",
+      "scope": [],
+      "authorizationURL": "",
+      "tokenURL": "",
+      "userURL": ""
+    },
+    "shopifyCustomer": {
+      "shopDomain": "",
+      "clientId": "",
+      "redirectURL": "",
+      "scope": []
+    },
+    "oidc": {
+      "clientId": "",
+      "clientSecret": "",
+      "openidConfig": "",
+      "redirectURL": "",
+      "scope": []
+    },
+    "osu": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": "",
+      "scope": []
+    },
+    "riotgames": {
+      "clientId": "",
+      "clientSecret": "",
+      "redirectURL": "",
+      "scope": []
+    }
   }
 };
 const envOptions = {
@@ -2357,7 +2715,23 @@ async function errorHandler(error, event) {
   // H3 will handle fallback
 }
 
-const rootDir = "/home/yasir/Documents/Project/mints";
+const _9Ee2O3VyIv6j_Zaf_QQnGvGWE96IKsvPoij0H6jkKlI = defineNitroPlugin((nitroApp) => {
+  if (process.env.NUXT_OAUTH_FACEBOOK_CLIENT_ID && process.env.NUXT_OAUTH_FACEBOOK_CLIENT_SECRET || process.env.NUXT_OAUTH_INSTAGRAM_CLIENT_ID && process.env.NUXT_OAUTH_INSTAGRAM_CLIENT_SECRET) {
+    nitroApp.hooks.hook("render:html", (html) => {
+      html.head.unshift(`
+      <script>
+        if (window.location.hash === "#_=_"){
+          history.replaceState
+              ? history.replaceState(null, null, window.location.href.split("#")[0])
+              : window.location.hash = "";
+        }
+      <\/script>
+    `);
+    });
+  }
+});
+
+const rootDir = "/home/yasir/Documents/Project/p_otomatisin/mints";
 
 const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"preconnect","href":"https://fonts.gstatic.com","crossorigin":""},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"}],"style":[],"script":[],"noscript":[]};
 
@@ -2383,7 +2757,7 @@ const asyncContext = getContext$1("nuxt-dev", {
 	asyncContext: true,
 	AsyncLocalStorage
 });
-const _ooUPD5aOiZyrFEfAT0xWSFG2DGzOq7RrOOFQnloaLY = (nitroApp) => {
+const _ESwPJML0JJK01vboSP1n0FbXVKjsULX9eMtBp2ep7YE = (nitroApp) => {
 	const handler = nitroApp.h3App.handler;
 	nitroApp.h3App.handler = (event) => {
 		return asyncContext.callAsync({
@@ -2460,41 +2834,27 @@ function onConsoleLog(callback) {
 
 const script = "\"use strict\";(()=>{const t=window,e=document.documentElement,c=[\"dark\",\"light\"],n=getStorageValue(\"localStorage\",\"nuxt-color-mode\")||\"system\";let i=n===\"system\"?u():n;const r=e.getAttribute(\"data-color-mode-forced\");r&&(i=r),l(i),t[\"__NUXT_COLOR_MODE__\"]={preference:n,value:i,getColorScheme:u,addColorScheme:l,removeColorScheme:d};function l(o){const s=\"\"+o+\"\",a=\"\";e.classList?e.classList.add(s):e.className+=\" \"+s,a&&e.setAttribute(\"data-\"+a,o)}function d(o){const s=\"\"+o+\"\",a=\"\";e.classList?e.classList.remove(s):e.className=e.className.replace(new RegExp(s,\"g\"),\"\"),a&&e.removeAttribute(\"data-\"+a)}function f(o){return t.matchMedia(\"(prefers-color-scheme\"+o+\")\")}function u(){if(t.matchMedia&&f(\"\").media!==\"not all\"){for(const o of c)if(f(\":\"+o).matches)return o}return\"light\"}})();function getStorageValue(t,e){switch(t){case\"localStorage\":return window.localStorage.getItem(e);case\"sessionStorage\":return window.sessionStorage.getItem(e);case\"cookie\":return getCookie(e);default:return null}}function getCookie(t){const c=(\"; \"+window.document.cookie).split(\"; \"+t+\"=\");if(c.length===2)return c.pop()?.split(\";\").shift()}";
 
-const _vjSbgTEPcvP0HEi0K1qft2ncAMxEKqgheZndV1buhI = (function(nitro) {
+const _5jxvmWaDQawAxCYeFtukVo2_l4z46c5n9k8XiaC5ua4 = (function(nitro) {
   nitro.hooks.hook("render:html", (htmlContext) => {
     htmlContext.head.push(`<script>${script}<\/script>`);
   });
 });
 
 const plugins = [
-  _ooUPD5aOiZyrFEfAT0xWSFG2DGzOq7RrOOFQnloaLY,
-_vjSbgTEPcvP0HEi0K1qft2ncAMxEKqgheZndV1buhI,
+  _9Ee2O3VyIv6j_Zaf_QQnGvGWE96IKsvPoij0H6jkKlI,
+_ESwPJML0JJK01vboSP1n0FbXVKjsULX9eMtBp2ep7YE,
+_5jxvmWaDQawAxCYeFtukVo2_l4z46c5n9k8XiaC5ua4,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"32557-JN3iLVBzBvKDWyV0f7c+ajJhgC0\"",
-    "mtime": "2026-09-16T13:07:35.438Z",
-    "size": 206167,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"b1689-rCzawlsIICbyQt+20jFviZtS+7s\"",
-    "mtime": "2026-09-16T13:07:35.439Z",
-    "size": 726665,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
   return promises.readFile(resolve$1(serverDir, assets[id].path))
 }
 
-const publicAssetBases = {"/_nuxt/builds/meta/":{"maxAge":31536000},"/_nuxt/builds/":{"maxAge":1}};
+const publicAssetBases = {"/_nuxt/builds/meta/":{"maxAge":31536000},"/_nuxt/builds/":{"maxAge":1},"/_scripts/assets/":{"maxAge":31536000}};
 
 function isPublicAssetURL(id = '') {
   if (assets[id]) {
@@ -2512,7 +2872,7 @@ function getAsset (id) {
 
 const METHODS = /* @__PURE__ */ new Set(["HEAD", "GET"]);
 const EncodingMap = { gzip: ".gz", br: ".br" };
-const _r3Dd_Z = eventHandler((event) => {
+const _v5G0eK = eventHandler((event) => {
   if (event.method && !METHODS.has(event.method)) {
     return;
   }
@@ -2624,13 +2984,13 @@ async function requireAdminSession(event) {
   }
 }
 
-const _O2xcaq = defineEventHandler(async (event) => {
+const _6meFrg = defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname;
   if (!path.startsWith("/api/admin/") || path === "/api/admin/login") return;
   await requireAdminSession(event);
 });
 
-const _PenuE5 = defineEventHandler((event) => {
+const _EKMQMn = defineEventHandler((event) => {
   if (event.path.startsWith("/api/buyer/")) {
     const buyerId = getCookie(event, "buyer_session");
     if (!buyerId) {
@@ -2638,6 +2998,10 @@ const _PenuE5 = defineEventHandler((event) => {
     }
   }
 });
+
+function defineNitroPlugin(def) {
+  return def;
+}
 
 function defineRenderHandler(render) {
   const runtimeConfig = useRuntimeConfig();
@@ -2727,6 +3091,175 @@ function publicAssetsURL(...path) {
 	const app = useRuntimeConfig().app;
 	const publicBase = app.cdnURL || app.baseURL;
 	return path.length ? joinRelativeURL(publicBase, ...path) : publicBase;
+}
+
+const OAUTH_COOKIE_MAX_AGE = 60 * 10;
+function getOAuthRedirectURL(event) {
+  const requestURL = getRequestURL(event);
+  return `${requestURL.protocol}//${requestURL.host}${requestURL.pathname}`;
+}
+async function requestAccessToken(url, options) {
+  const headers = {
+    "Content-Type": "application/x-www-form-urlencoded",
+    ...options.headers
+  };
+  const body = headers["Content-Type"] === "application/x-www-form-urlencoded" ? new URLSearchParams(
+    options.body || options.params || {}
+  ).toString() : options.body;
+  return $fetch(url, {
+    method: "POST",
+    headers,
+    body
+  }).catch((error) => {
+    if (error instanceof FetchError && error.status === 401) {
+      return error.data;
+    }
+    throw error;
+  });
+}
+function handleAccessTokenErrorResponse(event, oauthProvider, oauthError, onError) {
+  const message = `${upperFirst(oauthProvider)} login failed: ${oauthError.error_description || oauthError.error || "Unknown error"}`;
+  const error = createError({
+    statusCode: 401,
+    message,
+    data: oauthError
+  });
+  if (!onError) throw error;
+  return onError(event, error);
+}
+function handleMissingConfiguration(event, provider, missingKeys, onError) {
+  const environmentVariables = missingKeys.map((key) => `NUXT_OAUTH_${provider.toUpperCase()}_${snakeCase(key).toUpperCase()}`);
+  const error = createError({
+    statusCode: 500,
+    message: `Missing ${environmentVariables.join(" or ")} env ${missingKeys.length > 1 ? "variables" : "variable"}.`
+  });
+  if (!onError) throw error;
+  return onError(event, error);
+}
+function handleInvalidState(event, provider, onError) {
+  const message = `${upperFirst(provider)} login failed: state mismatch`;
+  const error = createError({
+    statusCode: 500,
+    message
+  });
+  if (!onError) throw error;
+  return onError(event, error);
+}
+function encodeBase64Url(input) {
+  return btoa(String.fromCharCode.apply(null, input)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+function getRandomBytes(size = 32) {
+  return getRandomValues(new Uint8Array(size));
+}
+async function handleState(event, options = {}) {
+  const query = getQuery$1(event);
+  const isCallback = options.isCallback ?? Boolean(query.code);
+  if (isCallback) {
+    const state2 = getCookie(event, "nuxt-auth-state");
+    deleteCookie(event, "nuxt-auth-state", { path: "/" });
+    return state2;
+  }
+  const state = encodeBase64Url(getRandomBytes());
+  const sameSite = options.sameSite || "lax";
+  setCookie(event, "nuxt-auth-state", state, {
+    httpOnly: true,
+    secure: sameSite === "none" || false,
+    sameSite,
+    maxAge: OAUTH_COOKIE_MAX_AGE,
+    path: "/"
+  });
+  return state;
+}
+
+function defineOAuthGoogleEventHandler({
+  config,
+  onSuccess,
+  onError
+}) {
+  return eventHandler(async (event) => {
+    config = defu$1(config, useRuntimeConfig(event).oauth?.google, {
+      authorizationURL: "https://accounts.google.com/o/oauth2/v2/auth",
+      tokenURL: "https://oauth2.googleapis.com/token",
+      userURL: "https://www.googleapis.com/oauth2/v3/userinfo",
+      authorizationParams: {}
+    });
+    const query = getQuery$1(event);
+    if (!config.clientId || !config.clientSecret) {
+      return handleMissingConfiguration(event, "google", ["clientId", "clientSecret"], onError);
+    }
+    const redirectURL = config.redirectURL || getOAuthRedirectURL(event);
+    const state = await handleState(event);
+    if (!query.code) {
+      config.scope = config.scope || ["email", "profile"];
+      return sendRedirect(
+        event,
+        withQuery(config.authorizationURL, {
+          response_type: "code",
+          client_id: config.clientId,
+          redirect_uri: redirectURL,
+          scope: config.scope.join(" "),
+          ...config.authorizationParams,
+          state
+        })
+      );
+    }
+    if (query.state !== state) {
+      return handleInvalidState(event, "google", onError);
+    }
+    const tokens = await requestAccessToken(config.tokenURL, {
+      body: {
+        grant_type: "authorization_code",
+        code: query.code,
+        client_id: config.clientId,
+        client_secret: config.clientSecret,
+        redirect_uri: redirectURL
+      }
+    });
+    if (tokens.error) {
+      return handleAccessTokenErrorResponse(event, "google", tokens, onError);
+    }
+    const accessToken = tokens.access_token;
+    const user = await $fetch(
+      config.userURL,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      }
+    );
+    return onSuccess(event, {
+      tokens,
+      user
+    });
+  });
+}
+
+const sessionHooks = createHooks();
+async function getUserSession(event) {
+  const session = await _useSession(event);
+  return {
+    ...session.data,
+    id: session.id
+  };
+}
+async function clearUserSession(event, config) {
+  const session = await _useSession(event, config);
+  await sessionHooks.callHookParallel("clear", session.data, event);
+  await session.clear();
+  return true;
+}
+let sessionConfig;
+function _useSession(event, config = {}) {
+  if (!sessionConfig) {
+    const runtimeConfig = useRuntimeConfig(isEvent(event) ? event : void 0);
+    const envSessionPassword = `${runtimeConfig.nitro?.envPrefix || "NUXT_"}SESSION_PASSWORD`;
+    sessionConfig = defu$1({ password: process.env[envSessionPassword] }, runtimeConfig.session);
+    if (!sessionConfig.password) {
+      console.error(`[nuxt-auth-utils] ${envSessionPassword} environment variable or runtimeConfig.session.password was not set.`);
+    }
+  }
+  const finalConfig = defu$1(config, sessionConfig);
+  return useSession(event, finalConfig);
 }
 
 var _a;
@@ -2828,6 +3361,40 @@ Setelah transfer, kirimkan bukti pembayaran ke admin. Terima kasih!`;
   return getTemplate("bulk", DEFAULT_BULK);
 }
 
+let _transporter = null;
+function getTransporter() {
+  if (_transporter) return _transporter;
+  const config = useRuntimeConfig();
+  _transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: config.smtpUser,
+      pass: config.smtpPass
+    }
+  });
+  return _transporter;
+}
+async function sendOtpEmail(to, code, appName = "MINTS") {
+  const transporter = getTransporter();
+  await transporter.sendMail({
+    from: `"${appName}" <${useRuntimeConfig().smtpUser}>`,
+    to,
+    subject: `Kode verifikasi ${appName}: ${code}`,
+    html: `
+      <div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px">
+        <h2 style="font-size:20px;font-weight:700;margin:0 0 8px">Kode Verifikasi</h2>
+        <p style="color:#555;margin:0 0 24px">Masukkan kode berikut untuk masuk ke akun ${appName} kamu.</p>
+        <div style="font-size:36px;font-weight:800;letter-spacing:0.2em;text-align:center;padding:24px;background:#f5f5f2;border-radius:12px;margin-bottom:24px">
+          ${code}
+        </div>
+        <p style="color:#999;font-size:13px;margin:0">Kode berlaku 10 menit. Jangan bagikan kode ini ke siapapun.</p>
+      </div>
+    `
+  });
+}
+
 const limiterCache = /* @__PURE__ */ new Map();
 let redis = null;
 function getRedis() {
@@ -2920,9 +3487,27 @@ async function uploadToS3(data, filename, contentType, prefix = "products") {
   return `/api/s3-image/${key}`;
 }
 
+async function verifyTurnstile(token, ip) {
+  const config = useRuntimeConfig();
+  const secret = config.turnstileSecretKey;
+  if (!secret) {
+    console.warn("[turnstile] TURNSTILE_SECRET_KEY tidak dikonfigurasi \u2014 verifikasi dilewati");
+    return;
+  }
+  const body = new URLSearchParams({ secret, response: token });
+  if (ip) body.set("remoteip", ip);
+  const res = await $fetch(
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    { method: "POST", body: body.toString(), headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+  );
+  if (!res.success) {
+    throw createError({ statusCode: 400, statusMessage: "Verifikasi keamanan gagal, coba lagi" });
+  }
+}
+
 const warnOnceSet = /* @__PURE__ */ new Set();
 const DEFAULT_ENDPOINT = "https://api.iconify.design";
-const _7MfM_W = defineCachedEventHandler(async (event) => {
+const _lcD18D = defineCachedEventHandler(async (event) => {
   const url = getRequestURL(event);
   if (!url)
     return createError({ status: 400, message: "Invalid icon request" });
@@ -2978,6 +3563,998 @@ const _7MfM_W = defineCachedEventHandler(async (event) => {
   swr: true,
   maxAge: 60 * 60 * 24 * 7
   // 1 week
+});
+
+const TLD_WILDCARD_RE = /^(?:com|[a-z]{2}|(?:com|co)\.[a-z]{2})$/i;
+const SUBDOMAIN_LABEL_RE = /^[^.]+$/;
+function matchDomain(domain, pattern) {
+  if (!pattern.includes("*"))
+    return domain === pattern || domain.endsWith(`.${pattern}`);
+  if (pattern.startsWith("*.") && pattern.startsWith("*")) {
+    const suffix = pattern.slice(2);
+    if (!domain.endsWith(`.${suffix}`))
+      return false;
+    const label = domain.slice(0, -(suffix.length + 1));
+    return SUBDOMAIN_LABEL_RE.test(label);
+  }
+  if (!pattern.endsWith("*") || pattern.indexOf("*") !== pattern.length - 1)
+    return false;
+  const prefix = pattern.slice(0, -1);
+  if (!domain.startsWith(prefix))
+    return false;
+  const tld = domain.slice(prefix.length);
+  return TLD_WILDCARD_RE.test(tld);
+}
+
+const createNetworkDispatcher = async (createLookup, resolveHostnameOverride) => {
+  const resolveHostname = ((hostname, callback) => {
+    lookup(hostname, { all: true, verbatim: true }, (error, addresses) => {
+      callback(error, addresses);
+    });
+  });
+  const dispatcher = new Agent({
+    connect: {
+      lookup: createLookup(resolveHostname)
+    }
+  });
+  return {
+    fetch: ((input, init) => fetch(input, {
+      ...init,
+      dispatcher
+    })),
+    close: () => dispatcher.close()
+  };
+};
+
+const LOCAL_HOST_SUFFIXES = [
+  "home",
+  "internal",
+  "lan",
+  "local",
+  "localdomain",
+  "localhost"
+];
+function parseIPv4(hostname) {
+  const parts = hostname.split(".");
+  if (parts.length !== 4 || parts.some((part) => !/^\d{1,3}$/.test(part)))
+    return;
+  const octets = parts.map(Number);
+  return octets.every((octet) => octet >= 0 && octet <= 255) ? octets : void 0;
+}
+function isPublicIPv4([a, b, c]) {
+  return a !== 0 && a !== 10 && a !== 127 && !(a === 100 && b >= 64 && b <= 127) && !(a === 169 && b === 254) && !(a === 172 && b >= 16 && b <= 31) && !(a === 192 && b === 0 && c === 0) && !(a === 192 && b === 0 && c === 2) && !(a === 192 && b === 88 && c === 99) && !(a === 192 && b === 168) && !(a === 198 && (b === 18 || b === 19)) && !(a === 198 && b === 51 && c === 100) && !(a === 203 && b === 0 && c === 113) && a < 224;
+}
+function isPublicIPv6(hostname) {
+  const groups = hostname.split(":");
+  const firstGroup = Number.parseInt(groups[0] || "0", 16);
+  if (!Number.isInteger(firstGroup) || firstGroup < 8192 || firstGroup > 16383)
+    return false;
+  const secondGroup = Number.parseInt(groups[1] || "0", 16);
+  return !(firstGroup === 8193 && (secondGroup === 0 || secondGroup === 3512)) && firstGroup !== 8194;
+}
+function isPublicNetworkHostname(input) {
+  const hostname = input.trim().toLowerCase().replace(/^\[|\]$/g, "").split("%", 1)[0].replace(/\.$/, "");
+  if (!hostname)
+    return false;
+  const ipv4 = parseIPv4(hostname);
+  if (ipv4)
+    return isPublicIPv4(ipv4);
+  if (hostname.includes(":"))
+    return isPublicIPv6(hostname);
+  const labels = hostname.split(".");
+  if (labels.length < 2)
+    return false;
+  const suffix = labels.at(-1);
+  return !LOCAL_HOST_SUFFIXES.includes(suffix);
+}
+
+async function closePublicNetworkDispatcher(dispatcher, primaryError) {
+  if (!dispatcher)
+    return;
+  await dispatcher.close().catch((cleanupError) => {
+    if (primaryError !== void 0) {
+      if (primaryError && typeof primaryError === "object")
+        Object.assign(primaryError, { cleanupError });
+      return;
+    }
+    throw cleanupError;
+  });
+}
+function createPublicNetworkLookup(resolveHostname) {
+  const networkLookup = (hostname, options, callback) => {
+    resolveHostname(hostname, (error, addresses) => {
+      if (error) {
+        callback(error, "");
+        return;
+      }
+      if (!addresses.length || addresses.some(({ address }) => !isPublicNetworkHostname(address))) {
+        callback(Object.assign(new Error("Upstream hostname resolved to a non-public address"), {
+          code: "ERR_NUXT_SCRIPTS_PRIVATE_ADDRESS"
+        }), "");
+        return;
+      }
+      if (options.all) {
+        callback(null, addresses);
+        return;
+      }
+      const requestedFamily = options.family === "IPv4" ? 4 : options.family === "IPv6" ? 6 : options.family === 4 || options.family === 6 ? options.family : void 0;
+      const selected = addresses.find(({ family }) => family === requestedFamily) ?? addresses[0];
+      callback(null, selected.address, selected.family);
+    });
+  };
+  return networkLookup;
+}
+async function createPublicNetworkDispatcher(resolveHostnameOverride) {
+  return createNetworkDispatcher(createPublicNetworkLookup);
+}
+function isPrivateNetworkResolutionError(error) {
+  let current = error;
+  for (let depth = 0; depth < 5 && current && typeof current === "object"; depth++) {
+    if (current.code === "ERR_NUXT_SCRIPTS_PRIVATE_ADDRESS")
+      return true;
+    current = current.cause;
+  }
+  return false;
+}
+
+const FULL_PRIVACY = { ip: true, userAgent: true, language: true, screen: true, timezone: true, hardware: true };
+const NO_PRIVACY = { ip: false, userAgent: false, language: false, screen: false, timezone: false, hardware: false };
+const MAJOR_VERSION_RE = /^(\d+)/;
+const VERSION_RE = /^(\d+)(([.\-_])\d+)*/;
+const VERSION_SPLIT_RE = /[.\-_]/;
+const SNAPCHAT_VERSION_RE = /("version"\s*:\s*")(\d+(?:\.\d+)*)/g;
+const GA_VERSION_RE = /;(\d+(?:\.\d+)*)/g;
+const UPPERCASE_RE = /^[A-Z]/;
+const LANG_CODE_RE = /^[a-z]{2}(?:-[a-z]{2,})?$/i;
+function resolvePrivacy(input) {
+  if (input === true)
+    return { ...FULL_PRIVACY };
+  if (input === false || input === void 0)
+    return { ...NO_PRIVACY };
+  return {
+    ip: input.ip ?? false,
+    userAgent: input.userAgent ?? false,
+    language: input.language ?? false,
+    screen: input.screen ?? false,
+    timezone: input.timezone ?? false,
+    hardware: input.hardware ?? false
+  };
+}
+function mergePrivacy(base, override) {
+  if (override === void 0)
+    return base;
+  if (typeof override === "boolean")
+    return resolvePrivacy(override);
+  return {
+    ip: override.ip !== void 0 ? override.ip : base.ip,
+    userAgent: override.userAgent !== void 0 ? override.userAgent : base.userAgent,
+    language: override.language !== void 0 ? override.language : base.language,
+    screen: override.screen !== void 0 ? override.screen : base.screen,
+    timezone: override.timezone !== void 0 ? override.timezone : base.timezone,
+    hardware: override.hardware !== void 0 ? override.hardware : base.hardware
+  };
+}
+const SENSITIVE_HEADERS = [
+  "cookie",
+  "authorization",
+  "proxy-authorization",
+  "x-csrf-token",
+  "www-authenticate"
+];
+const STRIP_PARAMS = {
+  // IP addresses — anonymized to subnet
+  ip: ["uip", "ip", "client_ip_address", "ip_address", "user_ip", "ipaddress", "context.ip"],
+  // Screen/Hardware — generalized to common buckets
+  screen: ["sr", "vp", "sd", "screen", "viewport", "colordepth", "pixelratio", "sh", "sw"],
+  // Hardware capabilities — generalized to common buckets
+  hardware: ["hardwareconcurrency", "devicememory", "cpu", "mem"],
+  // Platform identifiers — low entropy, kept as-is (e.g. "Linux", "x86")
+  platform: ["plat", "platform", "d_a", "d_ot"],
+  // Version strings — generalized to major version only (d_os = Snapchat OS version, uapv = GA platform version)
+  version: ["d_os", "uapv"],
+  // Browser version lists — generalized to major versions (d_bvs = Snapchat, uafvl = GA Client Hints)
+  browserVersion: ["d_bvs", "uafvl"],
+  // Browser data lists — replaced with empty value
+  browserData: ["plugins", "fonts", "audiofingerprint"],
+  // Location/Timezone — generalized
+  location: ["tz", "timezone", "timezoneoffset"],
+  // Canvas/WebGL fingerprints — neutralized at build time via AST rewriting (rewrite-ast.ts).
+  // These params are no longer stripped at runtime; the source APIs (toDataURL, WEBGL_debug_renderer_info)
+  // are neutralized before the script ever runs.
+  // canvas: ['canvas', 'webgl'],
+  // Combined device fingerprinting (X/Twitter dv param contains: timezone, locale, vendor, platform, screen, etc.)
+  deviceInfo: ["dv", "device_info", "deviceinfo"]
+};
+const NORMALIZE_PARAMS = {
+  language: ["ul", "lang", "language", "languages"],
+  userAgent: ["ua", "useragent", "user_agent", "client_user_agent", "context.useragent"]
+};
+function expandIPv6(address) {
+  const halves = address.split("::");
+  if (halves.length > 2)
+    return;
+  const left = halves[0] ? halves[0].split(":") : [];
+  const right = halves[1] ? halves[1].split(":") : [];
+  const valid = (part) => /^[\da-f]{1,4}$/i.test(part);
+  if (!left.every(valid) || !right.every(valid))
+    return;
+  if (halves.length === 1)
+    return left.length === 8 ? left : void 0;
+  const missing = 8 - left.length - right.length;
+  if (missing < 1)
+    return;
+  return [...left, ...Array.from({ length: missing }).fill("0"), ...right];
+}
+function anonymizeIP(ip) {
+  if (ip.includes(":")) {
+    const normalized = ip.split("%", 1)[0] || "";
+    const mappedIPv4 = normalized.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/i)?.[1];
+    if (mappedIPv4)
+      return `::ffff:${anonymizeIP(mappedIPv4)}`;
+    const expanded = expandIPv6(normalized);
+    return expanded ? `${expanded.slice(0, 3).join(":")}::` : normalized;
+  }
+  const parts = ip.split(".");
+  if (parts.length === 4) {
+    parts[3] = "0";
+    return parts.join(".");
+  }
+  return ip;
+}
+function normalizeUserAgent(ua) {
+  const tokens = [
+    ["Edg/", "Edge"],
+    ["OPR/", "Opera"],
+    ["Opera/", "Opera"],
+    ["Firefox/", "Firefox"],
+    ["Chrome/", "Chrome"],
+    ["Safari/", "Safari"]
+  ];
+  for (const [pattern, family] of tokens) {
+    const idx = ua.indexOf(pattern);
+    if (idx !== -1) {
+      const versionStart = idx + pattern.length;
+      const majorVersion = ua.slice(versionStart).match(MAJOR_VERSION_RE)?.[1];
+      if (majorVersion)
+        return `Mozilla/5.0 (compatible; ${family}/${majorVersion}.0)`;
+    }
+  }
+  return "Mozilla/5.0 (compatible)";
+}
+function normalizeLanguage(lang) {
+  return lang.split(",")[0]?.split(";")[0]?.trim() || "en";
+}
+const SCREEN_BUCKETS = {
+  desktop: { w: 1920, h: 1080 },
+  tablet: { w: 768, h: 1024 },
+  mobile: { w: 360, h: 640 }
+};
+function getDeviceClass(width) {
+  if (width >= 1200)
+    return "desktop";
+  if (width >= 700)
+    return "tablet";
+  return "mobile";
+}
+function generalizeScreen(value, dimension) {
+  if (typeof value === "string" && value.includes("x")) {
+    const width = Number.parseInt(value.split("x")[0] || "0");
+    const cls = getDeviceClass(width);
+    return `${SCREEN_BUCKETS[cls].w}x${SCREEN_BUCKETS[cls].h}`;
+  }
+  const num = typeof value === "number" ? value : Number(value);
+  if (!Number.isNaN(num)) {
+    const cls = getDeviceClass(num);
+    const bucketed = dimension === "height" ? SCREEN_BUCKETS[cls].h : SCREEN_BUCKETS[cls].w;
+    return typeof value === "number" ? bucketed : String(bucketed);
+  }
+  return "1920x1080";
+}
+function generalizeHardware(value) {
+  const num = typeof value === "number" ? value : Number(value);
+  if (Number.isNaN(num))
+    return 4;
+  if (num >= 16)
+    return 16;
+  if (num >= 8)
+    return 8;
+  if (num >= 4)
+    return 4;
+  return 2;
+}
+function generalizeVersion(value) {
+  if (typeof value !== "string")
+    return String(value);
+  const match = value.match(VERSION_RE);
+  if (!match)
+    return String(value);
+  const major = match[1];
+  const sep = match[3] || ".";
+  const segmentCount = value.split(VERSION_SPLIT_RE).length;
+  return major + `${sep}0`.repeat(segmentCount - 1);
+}
+function generalizeBrowserVersions(value) {
+  if (typeof value !== "string")
+    return String(value);
+  const zeroSegments = (ver) => {
+    const parts = ver.split(".");
+    return parts[0] + parts.slice(1).map(() => ".0").join("");
+  };
+  if (value.includes('"version"'))
+    return value.replace(SNAPCHAT_VERSION_RE, (_, prefix, ver) => prefix + zeroSegments(ver));
+  if (value.includes(";"))
+    return value.replace(GA_VERSION_RE, (_, ver) => `;${zeroSegments(ver)}`);
+  return value;
+}
+function generalizeTimezone(value) {
+  if (typeof value === "number") {
+    return Math.round(value / 180) * 180;
+  }
+  if (typeof value === "string") {
+    return "UTC";
+  }
+  return 0;
+}
+function anonymizeDeviceInfo(value) {
+  const sep = value.includes("|") ? "|" : "&";
+  const parts = value.split(sep);
+  if (parts.length < 4)
+    return value;
+  const result = [...parts];
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (part.includes("/") && UPPERCASE_RE.test(part)) {
+      result[i] = String(generalizeTimezone(part));
+      continue;
+    }
+    if (LANG_CODE_RE.test(part)) {
+      result[i] = normalizeLanguage(part);
+      continue;
+    }
+    const num = Number(part);
+    if (!Number.isNaN(num) && num >= 300 && num <= 1e4) {
+      const nextNum = Number(parts[i + 1]);
+      if (!Number.isNaN(nextNum) && nextNum >= 300 && nextNum <= 1e4) {
+        const cls = getDeviceClass(num);
+        result[i] = String(SCREEN_BUCKETS[cls].w);
+        result[i + 1] = String(SCREEN_BUCKETS[cls].h);
+        i++;
+        continue;
+      }
+      result[i] = String(generalizeScreen(num));
+      continue;
+    }
+    if (!Number.isNaN(num) && num < -60) {
+      result[i] = String(generalizeTimezone(num));
+    }
+  }
+  return result.join(sep);
+}
+function matchesParam(key, params) {
+  const lk = key.toLowerCase();
+  return params.some((pm) => {
+    const lp = pm.toLowerCase();
+    return lk === lp || lk.startsWith(`${lp}[`);
+  });
+}
+function mapValue(value, transform) {
+  return Array.isArray(value) ? value.map(transform) : transform(value);
+}
+function mapString(value, transform) {
+  return mapValue(value, (item) => typeof item === "string" ? transform(item) : item);
+}
+function stripPayloadFingerprinting(payload, privacy) {
+  const p = privacy || FULL_PRIVACY;
+  const result = /* @__PURE__ */ Object.create(null);
+  let deviceClasses = [];
+  for (const [key, value] of Object.entries(payload)) {
+    if (key.toLowerCase() === "sw") {
+      const widths = Array.isArray(value) ? value : [value];
+      deviceClasses = widths.map((width) => {
+        const num = typeof width === "number" ? width : Number(width);
+        return Number.isNaN(num) ? void 0 : getDeviceClass(num);
+      });
+    }
+  }
+  for (const [key, value] of Object.entries(payload)) {
+    const lowerKey = key.toLowerCase();
+    const isLanguageParam = NORMALIZE_PARAMS.language.some((pm) => lowerKey === pm.toLowerCase());
+    if (isLanguageParam) {
+      if (Array.isArray(value)) {
+        result[key] = p.language ? value.map((v) => typeof v === "string" ? normalizeLanguage(v) : v) : value;
+      } else if (typeof value === "string") {
+        result[key] = p.language ? normalizeLanguage(value) : value;
+      } else {
+        result[key] = value;
+      }
+      continue;
+    }
+    const isUserAgentParam = NORMALIZE_PARAMS.userAgent.some((pm) => lowerKey === pm.toLowerCase());
+    if (isUserAgentParam) {
+      result[key] = p.userAgent ? mapString(value, normalizeUserAgent) : value;
+      continue;
+    }
+    if (matchesParam(key, STRIP_PARAMS.ip)) {
+      result[key] = p.ip ? mapString(value, anonymizeIP) : value;
+      continue;
+    }
+    if (matchesParam(key, STRIP_PARAMS.screen)) {
+      if (!p.screen) {
+        result[key] = value;
+        continue;
+      }
+      if (["sd", "colordepth", "pixelratio"].includes(lowerKey)) {
+        result[key] = value;
+      } else if (lowerKey === "sh" && deviceClasses.length > 0) {
+        const generalizePairedHeight = (item, index) => {
+          const deviceClass = deviceClasses[index] ?? deviceClasses[0];
+          if (!deviceClass)
+            return generalizeScreen(item, "height");
+          const paired = SCREEN_BUCKETS[deviceClass].h;
+          return typeof item === "number" ? paired : String(paired);
+        };
+        result[key] = Array.isArray(value) ? value.map(generalizePairedHeight) : generalizePairedHeight(value, 0);
+      } else {
+        const dimension = lowerKey === "sw" ? "width" : lowerKey === "sh" ? "height" : void 0;
+        result[key] = mapValue(value, (item) => generalizeScreen(item, dimension));
+      }
+      continue;
+    }
+    if (matchesParam(key, STRIP_PARAMS.hardware)) {
+      result[key] = p.hardware ? mapValue(value, generalizeHardware) : value;
+      continue;
+    }
+    if (matchesParam(key, STRIP_PARAMS.version)) {
+      result[key] = p.hardware ? mapValue(value, generalizeVersion) : value;
+      continue;
+    }
+    if (matchesParam(key, STRIP_PARAMS.browserVersion)) {
+      result[key] = p.hardware ? mapValue(value, generalizeBrowserVersions) : value;
+      continue;
+    }
+    if (matchesParam(key, STRIP_PARAMS.location)) {
+      result[key] = p.timezone ? mapValue(value, generalizeTimezone) : value;
+      continue;
+    }
+    if (matchesParam(key, STRIP_PARAMS.browserData)) {
+      result[key] = p.hardware ? Array.isArray(value) ? [] : typeof value === "number" ? 0 : "" : value;
+      continue;
+    }
+    if (matchesParam(key, STRIP_PARAMS.deviceInfo)) {
+      result[key] = p.hardware ? mapValue(value, (item) => typeof item === "string" ? anonymizeDeviceInfo(item) : "") : value;
+      continue;
+    }
+    if (matchesParam(key, STRIP_PARAMS.platform)) {
+      result[key] = value;
+      continue;
+    }
+    if (Array.isArray(value)) {
+      result[key] = value.map(
+        (item) => typeof item === "object" && item !== null ? stripPayloadFingerprinting(item, privacy) : item
+      );
+    } else if (typeof value === "object" && value !== null) {
+      result[key] = stripPayloadFingerprinting(value, privacy);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+const COMPRESSION_RE = /gzip|deflate|br|compress|base64/i;
+const CLIENT_HINT_VERSION_RE = /;v="(\d+)\.[^"]*"/g;
+const MAX_TRANSFORM_BODY_SIZE = 2 * 1024 * 1024;
+const UPSTREAM_TIMEOUT_MS = 15e3;
+const MAX_UPSTREAM_REDIRECTS = 5;
+const REDIRECT_STATUSES = /* @__PURE__ */ new Set([301, 302, 303, 307, 308]);
+const REQUEST_BODY_HEADERS = ["content-encoding", "content-language", "content-length", "content-location", "content-type"];
+const SKIP_RESPONSE_HEADERS = /* @__PURE__ */ new Set([
+  "alt-svc",
+  "clear-site-data",
+  "connection",
+  "content-encoding",
+  "content-length",
+  "keep-alive",
+  "nel",
+  "proxy-authenticate",
+  "proxy-authorization",
+  "report-to",
+  "reporting-endpoints",
+  "set-cookie",
+  "set-cookie2",
+  "strict-transport-security",
+  "te",
+  "trailer",
+  "transfer-encoding",
+  "upgrade",
+  "www-authenticate"
+]);
+const SKIP_REQUEST_HEADERS = /* @__PURE__ */ new Set([
+  "connection",
+  "keep-alive",
+  "proxy-authenticate",
+  "proxy-authorization",
+  "te",
+  "trailer",
+  "transfer-encoding",
+  "upgrade"
+]);
+async function readBodyBytes(event) {
+  const contentLength = Number(getHeaders(event)["content-length"] || 0);
+  if (Number.isFinite(contentLength) && contentLength > MAX_TRANSFORM_BODY_SIZE) {
+    throw createError({ statusCode: 413, statusMessage: "Proxy request body too large" });
+  }
+  const stream = getRequestWebStream(event);
+  if (!stream)
+    return void 0;
+  const reader = stream.getReader();
+  const chunks = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done)
+        break;
+      if (!value)
+        continue;
+      total += value.byteLength;
+      if (total > MAX_TRANSFORM_BODY_SIZE) {
+        try {
+          await reader.cancel("Proxy request body too large");
+        } catch {
+        }
+        throw createError({ statusCode: 413, statusMessage: "Proxy request body too large" });
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const body = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return body;
+}
+function withResponseBodyIdleTimeout(body, timeoutMs, onTimeout) {
+  const reader = body.getReader();
+  let stopped = false;
+  let timeoutId;
+  const clearIdleTimeout = () => {
+    if (timeoutId !== void 0) {
+      clearTimeout(timeoutId);
+      timeoutId = void 0;
+    }
+  };
+  return new ReadableStream({
+    async pull(controller) {
+      timeoutId = setTimeout(() => {
+        stopped = true;
+        const error = createError({
+          statusCode: 504,
+          statusMessage: "Gateway Timeout",
+          message: "Upstream response body timed out"
+        });
+        onTimeout();
+        controller.error(error);
+        void reader.cancel(error).catch((cancelError) => {
+          Object.assign(error, { cause: cancelError });
+        });
+      }, timeoutMs);
+      const result = await reader.read().catch((error) => {
+        clearIdleTimeout();
+        if (!stopped)
+          controller.error(error);
+        return void 0;
+      });
+      clearIdleTimeout();
+      if (!result || stopped)
+        return;
+      if (result.done) {
+        stopped = true;
+        controller.close();
+        return;
+      }
+      controller.enqueue(result.value);
+    },
+    async cancel(reason) {
+      stopped = true;
+      clearIdleTimeout();
+      await reader.cancel(reason);
+    }
+  });
+}
+function stripQueryFingerprinting(query, privacy) {
+  const stripped = stripPayloadFingerprinting(query, privacy);
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(stripped)) {
+    const values = Array.isArray(value) ? value : [value];
+    for (const item of values) {
+      if (item !== void 0 && item !== null)
+        params.append(key, typeof item === "object" ? JSON.stringify(item) : String(item));
+    }
+  }
+  return { queryString: params.toString(), stripped };
+}
+function isUpstreamRedirect(status) {
+  return REDIRECT_STATUSES.has(status);
+}
+function upstreamFetchError(err, timedOut) {
+  const blockedPrivateNetwork = isPrivateNetworkResolutionError(err);
+  return createError({
+    statusCode: blockedPrivateNetwork ? 403 : timedOut ? 504 : 502,
+    statusMessage: blockedPrivateNetwork ? "Local network targets are not allowed" : timedOut ? "Gateway Timeout" : "Bad Gateway",
+    message: "Proxy upstream request failed",
+    cause: err,
+    data: {
+      errorName: err?.name,
+      errorCode: timedOut ? "TIMEOUT" : err?.code
+    }
+  });
+}
+function resolveProxyRedirect(response, state, redirectCount, urlAllowed) {
+  const location = response.headers.get("location");
+  if (!location) {
+    throw createError({
+      statusCode: 502,
+      statusMessage: "Invalid upstream redirect",
+      message: "Upstream redirect has no Location header"
+    });
+  }
+  if (redirectCount >= MAX_UPSTREAM_REDIRECTS) {
+    throw createError({
+      statusCode: 502,
+      statusMessage: "Too many upstream redirects",
+      message: "Upstream redirect limit exceeded"
+    });
+  }
+  let nextUrl;
+  try {
+    nextUrl = new URL(location, state.url);
+  } catch (cause) {
+    throw createError({
+      statusCode: 502,
+      statusMessage: "Invalid upstream redirect",
+      message: "Upstream redirect URL is invalid",
+      cause
+    });
+  }
+  if (!urlAllowed(nextUrl)) {
+    throw createError({
+      statusCode: 502,
+      statusMessage: "Unsafe upstream redirect",
+      message: `Upstream redirect target is not allowed: ${nextUrl.origin}`
+    });
+  }
+  const switchToGet = response.status === 303 && state.method !== "GET" && state.method !== "HEAD" || (response.status === 301 || response.status === 302) && state.method === "POST";
+  if (!switchToGet)
+    return { ...state, url: nextUrl };
+  const headers = { ...state.headers };
+  for (const header of REQUEST_BODY_HEADERS)
+    delete headers[header];
+  return { url: nextUrl, method: "GET", body: void 0, headers };
+}
+const _upcABj = defineEventHandler(async (event) => {
+  const config = useRuntimeConfig();
+  const proxyConfig = config["nuxt-scripts-proxy"];
+  if (!proxyConfig) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: "First-party proxy not configured"
+    });
+  }
+  const { proxyPrefix, domainPrivacy, aliasToDomain, privacy: globalPrivacy, debug = true } = proxyConfig;
+  const path = event.path;
+  const log = debug ? (message, ...args) => {
+    console.debug(message, ...args);
+  } : () => {
+  };
+  const afterPrefix = path.slice(proxyPrefix.length + 1);
+  const slashIdx = afterPrefix.indexOf("/");
+  const segment = slashIdx > 0 ? afterPrefix.slice(0, slashIdx) : afterPrefix;
+  const remainingPath = slashIdx > 0 ? afterPrefix.slice(slashIdx) : "/";
+  const domain = aliasToDomain && Object.hasOwn(aliasToDomain, segment) ? aliasToDomain[segment] : segment;
+  if (!domain) {
+    log("[proxy] No domain in path:", path);
+    throw createError({
+      statusCode: 404,
+      statusMessage: "No proxy domain found",
+      message: `No domain in proxy path: ${path}`
+    });
+  }
+  if (!isPublicNetworkHostname(domain)) {
+    log("[proxy] Rejected local or non-public target:", domain);
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Local network targets are not allowed"
+    });
+  }
+  let perScriptInput;
+  for (const [configDomain, privacyInput] of Object.entries(domainPrivacy)) {
+    if (matchDomain(domain, configDomain)) {
+      perScriptInput = privacyInput;
+      break;
+    }
+  }
+  if (perScriptInput === void 0) {
+    log("[proxy] Rejected: domain not in allowlist:", domain);
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Domain not allowed",
+      message: `Proxy domain not in allowlist: ${domain}`
+    });
+  }
+  const targetBase = `https://${domain}`;
+  log("[proxy] Matched:", domain, "->", targetBase);
+  const perScriptResolved = resolvePrivacy(perScriptInput ?? true);
+  const privacy = globalPrivacy !== void 0 ? mergePrivacy(perScriptResolved, globalPrivacy) : perScriptResolved;
+  const anyPrivacy = privacy.ip || privacy.userAgent || privacy.language || privacy.screen || privacy.timezone || privacy.hardware;
+  const originalHeaders = getHeaders(event);
+  const originalQuery = getQuery$1(event);
+  const contentType = originalHeaders["content-type"]?.toLowerCase() || "";
+  const compressionParam = originalQuery.compression || "";
+  const method = event.method?.toUpperCase();
+  const isWriteMethod = method === "POST" || method === "PUT" || method === "PATCH";
+  const transformableBodyType = contentType.includes("application/x-www-form-urlencoded") ? "form" : contentType.includes("json") ? "json" : void 0;
+  const hasOpaqueBodyEncoding = Boolean(
+    originalHeaders["content-encoding"] || contentType.includes("octet-stream") || compressionParam && COMPRESSION_RE.test(compressionParam)
+  );
+  const shouldTransformBody = isWriteMethod && anyPrivacy && !hasOpaqueBodyEncoding && transformableBodyType !== void 0;
+  let targetUrl = targetBase + remainingPath;
+  let strippedQueryRecord;
+  if (anyPrivacy) {
+    if (Object.keys(originalQuery).length > 0) {
+      const { queryString, stripped } = stripQueryFingerprinting(originalQuery, privacy);
+      strippedQueryRecord = stripped;
+      const basePath = targetUrl.split("?")[0] || targetUrl;
+      targetUrl = queryString ? `${basePath}?${queryString}` : basePath;
+    }
+  }
+  const headers = {};
+  const connectionHeaderValue = originalHeaders.connection;
+  const connectionNamedHeaders = connectionHeaderValue ? new Set(connectionHeaderValue.split(",").map((h) => h.trim().toLowerCase()).filter(Boolean)) : null;
+  for (const [key, value] of Object.entries(originalHeaders)) {
+    if (!value)
+      continue;
+    const lowerKey = key.toLowerCase();
+    if (lowerKey === "host")
+      continue;
+    if (SKIP_REQUEST_HEADERS.has(lowerKey))
+      continue;
+    if (connectionNamedHeaders?.has(lowerKey))
+      continue;
+    if (SENSITIVE_HEADERS.includes(lowerKey))
+      continue;
+    if (lowerKey === "content-length") {
+      if (shouldTransformBody)
+        continue;
+      headers[lowerKey] = value;
+      continue;
+    }
+    if (lowerKey === "x-forwarded-for" || lowerKey === "x-real-ip" || lowerKey === "forwarded" || lowerKey === "cf-connecting-ip" || lowerKey === "true-client-ip" || lowerKey === "x-client-ip" || lowerKey === "x-cluster-client-ip") {
+      if (privacy.ip)
+        continue;
+      headers[lowerKey] = value;
+      continue;
+    }
+    if (lowerKey === "user-agent") {
+      headers[key] = privacy.userAgent ? normalizeUserAgent(value) : value;
+      continue;
+    }
+    if (lowerKey === "accept-language") {
+      headers[key] = privacy.language ? normalizeLanguage(value) : value;
+      continue;
+    }
+    if (lowerKey === "sec-ch-ua" || lowerKey === "sec-ch-ua-full-version-list") {
+      headers[lowerKey] = privacy.hardware ? value.replace(CLIENT_HINT_VERSION_RE, ';v="$1"') : value;
+      continue;
+    }
+    if (lowerKey === "sec-ch-ua-platform-version" || lowerKey === "sec-ch-ua-arch" || lowerKey === "sec-ch-ua-model" || lowerKey === "sec-ch-ua-bitness") {
+      if (privacy.hardware)
+        continue;
+      headers[lowerKey] = value;
+      continue;
+    }
+    headers[key] = value;
+  }
+  if (!headers["x-forwarded-for"]) {
+    const clientIP = getRequestIP(event, { xForwardedFor: true });
+    if (clientIP) {
+      if (privacy.ip) {
+        headers["x-forwarded-for"] = anonymizeIP(clientIP);
+      } else {
+        headers["x-forwarded-for"] = clientIP;
+      }
+    }
+  } else if (privacy.ip) {
+    headers["x-forwarded-for"] = headers["x-forwarded-for"].split(",").map((ip) => anonymizeIP(ip.trim())).join(", ");
+  }
+  let body;
+  let rawBody;
+  let rawBodyBytes;
+  let passthroughBody = false;
+  if (isWriteMethod) {
+    rawBodyBytes = await readBodyBytes(event);
+    if (!shouldTransformBody) {
+      passthroughBody = true;
+    } else if (transformableBodyType === "form") {
+      const formBody = rawBodyBytes === void 0 ? void 0 : new TextDecoder().decode(rawBodyBytes);
+      rawBody = formBody;
+      if (formBody != null) {
+        const params = new URLSearchParams(formBody);
+        const formRecord = /* @__PURE__ */ Object.create(null);
+        for (const [key, value] of params.entries()) {
+          if (Object.hasOwn(formRecord, key)) {
+            const existing = formRecord[key];
+            formRecord[key] = Array.isArray(existing) ? [...existing, value] : [existing, value];
+          } else {
+            formRecord[key] = value;
+          }
+        }
+        const stripped = stripPayloadFingerprinting(formRecord, privacy);
+        const transformedValues = /* @__PURE__ */ new Map();
+        for (const [key, value] of Object.entries(stripped)) {
+          transformedValues.set(key, Array.isArray(value) ? [...value] : [value]);
+        }
+        const transformed = new URLSearchParams();
+        for (const [key] of params.entries()) {
+          const value = transformedValues.get(key)?.shift();
+          if (value === void 0 || value === null)
+            continue;
+          transformed.append(key, typeof value === "string" ? value : JSON.stringify(value));
+        }
+        body = transformed.toString();
+      }
+    } else {
+      const jsonBody = rawBodyBytes === void 0 ? void 0 : new TextDecoder().decode(rawBodyBytes);
+      if (jsonBody !== void 0) {
+        try {
+          rawBody = JSON.parse(jsonBody);
+        } catch (error) {
+          throw createError({
+            statusCode: 400,
+            statusMessage: "Invalid JSON proxy request body",
+            cause: error
+          });
+        }
+      }
+      if (Array.isArray(rawBody)) {
+        body = rawBody.map(
+          (item) => item && typeof item === "object" && !Array.isArray(item) ? stripPayloadFingerprinting(item, privacy) : item
+        );
+      } else if (rawBody !== null && typeof rawBody === "object") {
+        body = stripPayloadFingerprinting(rawBody, privacy);
+      } else {
+        body = rawBody;
+      }
+    }
+  }
+  const nitro = useNitroApp();
+  await nitro.hooks?.callHook?.("nuxt-scripts:proxy", {
+    timestamp: Date.now(),
+    path: event.path,
+    targetUrl,
+    method: method || "GET",
+    privacy,
+    passthroughBody,
+    original: {
+      headers: { ...originalHeaders },
+      query: originalQuery,
+      body: passthroughBody ? "<passthrough>" : rawBody ?? null
+    },
+    stripped: {
+      headers,
+      query: strippedQueryRecord ?? originalQuery,
+      body: passthroughBody ? "<passthrough>" : body ?? null
+    }
+  });
+  log("[proxy] Fetching:", targetUrl);
+  const controller = new AbortController();
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, UPSTREAM_TIMEOUT_MS);
+  let fetchBody;
+  if (passthroughBody) {
+    if (rawBodyBytes && rawBodyBytes.byteLength > 0)
+      fetchBody = rawBodyBytes;
+  } else if (body !== void 0) {
+    fetchBody = transformableBodyType === "json" ? JSON.stringify(body) : String(body);
+  }
+  const hopAllowed = (url) => url.protocol === "https:" && !url.username && !url.password && (!url.port || url.port === "443") && isPublicNetworkHostname(url.hostname) && Object.keys(domainPrivacy).some((configDomain) => matchDomain(url.hostname, configDomain));
+  let response;
+  let network;
+  try {
+    network = await createPublicNetworkDispatcher();
+    let state = {
+      url: new URL(targetUrl),
+      method: method || "GET",
+      body: fetchBody,
+      headers
+    };
+    for (let redirectCount = 0; ; redirectCount++) {
+      let hop;
+      try {
+        hop = await network.fetch(state.url.toString(), {
+          method: state.method,
+          headers: state.headers,
+          body: state.body,
+          credentials: "omit",
+          // Don't send cookies to third parties
+          signal: controller.signal,
+          redirect: "manual"
+        });
+      } catch (err) {
+        log("[proxy] Upstream error:", err);
+        throw upstreamFetchError(err, timedOut);
+      }
+      log("[proxy] Response:", hop.status, hop.statusText);
+      if (!isUpstreamRedirect(hop.status)) {
+        response = hop;
+        break;
+      }
+      let next;
+      try {
+        next = resolveProxyRedirect(hop, state, redirectCount, hopAllowed);
+      } catch (err) {
+        await hop.body?.cancel(err).catch((cancelError) => Object.assign(err, { cleanupError: cancelError }));
+        throw err;
+      }
+      const redirectDiscarded = new Error("Upstream redirect response body discarded");
+      await hop.body?.cancel(redirectDiscarded).catch((cancelError) => Object.assign(redirectDiscarded, { cause: cancelError }));
+      log("[proxy] Following redirect:", next.url.toString());
+      state = next;
+    }
+    clearTimeout(timeoutId);
+  } catch (err) {
+    clearTimeout(timeoutId);
+    await closePublicNetworkDispatcher(network, err);
+    throw err;
+  }
+  log("[proxy] Upstream settled:", response.status);
+  const responseConnectionHeaders = new Set(
+    (response.headers.get("connection") || "").split(",").map((header) => header.trim().toLowerCase()).filter(Boolean)
+  );
+  response.headers.forEach((value, key) => {
+    const lowerKey = key.toLowerCase();
+    if (!SKIP_RESPONSE_HEADERS.has(lowerKey) && !responseConnectionHeaders.has(lowerKey)) {
+      setResponseHeader(event, key, value);
+    }
+  });
+  setResponseHeader(event, "Content-Security-Policy", "sandbox; default-src 'none'; base-uri 'none'; form-action 'none'");
+  setResponseHeader(event, "X-Content-Type-Options", "nosniff");
+  setResponseStatus(event, response.status, response.statusText);
+  if (!response.body) {
+    await closePublicNetworkDispatcher(network);
+    return null;
+  }
+  const guardedBody = withResponseBodyIdleTimeout(response.body, UPSTREAM_TIMEOUT_MS, () => controller.abort());
+  let streamError;
+  try {
+    return await sendStream(event, guardedBody);
+  } catch (error) {
+    streamError = error;
+    throw error;
+  } finally {
+    await closePublicNetworkDispatcher(network, streamError);
+  }
+});
+
+const _qMmhPB = eventHandler(async (event) => {
+  await clearUserSession(event);
+  return { loggedOut: true };
+});
+
+const _GRxcGX = eventHandler(async (event) => {
+  const session = await getUserSession(event);
+  if (Object.keys(session).length > 0) {
+    await sessionHooks.callHookParallel("fetch", session, event);
+  }
+  const { secure, ...data } = session;
+  return data;
 });
 
 const VueResolver = (_, value) => {
@@ -3050,8 +4627,6 @@ function exceedsMaxDepth(raw, maxDepth = MAX_ISLAND_PROP_DEPTH) {
 function exceedsMaxBytes(raw, maxBytes = MAX_ISLAND_BODY_BYTES) {
 	return Buffer.byteLength(raw, "utf8") > maxBytes;
 }
-
-const NUXT_RUNTIME_PAYLOAD_EXTRACTION = false;
 
 // @__NO_SIDE_EFFECTS__
 function createHead(options = {}) {
@@ -3537,133 +5112,139 @@ async function getIslandContext(event) {
 	};
 }
 
-const _lazy_6QBRuj = () => Promise.resolve().then(function () { return admins_get$1; });
-const _lazy_f5pdik = () => Promise.resolve().then(function () { return admins_post$1; });
-const _lazy_tuccwz = () => Promise.resolve().then(function () { return _id__delete$7; });
-const _lazy_eLbzjn = () => Promise.resolve().then(function () { return _id__delete$5; });
-const _lazy_ORcWye = () => Promise.resolve().then(function () { return index_get$f; });
-const _lazy_wqum7U = () => Promise.resolve().then(function () { return index_post$3; });
-const _lazy_Iz56ev = () => Promise.resolve().then(function () { return reply_post$1; });
-const _lazy_5YvuXn = () => Promise.resolve().then(function () { return index_get$d; });
-const _lazy_H2aQmh = () => Promise.resolve().then(function () { return config_post$1; });
-const _lazy_drSWYU = () => Promise.resolve().then(function () { return _id__delete$3; });
-const _lazy_a_oKaC = () => Promise.resolve().then(function () { return _id__patch$1; });
-const _lazy_sdn5sA = () => Promise.resolve().then(function () { return index_get$b; });
-const _lazy_YvIMUF = () => Promise.resolve().then(function () { return login_post$3; });
-const _lazy_Gmr9wb = () => Promise.resolve().then(function () { return logout_post$3; });
-const _lazy_dYVR1N = () => Promise.resolve().then(function () { return cancel_patch$1; });
-const _lazy_E0Gjcu = () => Promise.resolve().then(function () { return notify_post$1; });
-const _lazy_uhpb2t = () => Promise.resolve().then(function () { return shipment_post$1; });
-const _lazy_EmhuoZ = () => Promise.resolve().then(function () { return status_patch$1; });
-const _lazy_wB7Hld = () => Promise.resolve().then(function () { return uploadProof_post$1; });
-const _lazy_UnsqB4 = () => Promise.resolve().then(function () { return bulkNotify_post$1; });
-const _lazy_5199bw = () => Promise.resolve().then(function () { return index_get$9; });
-const _lazy_BAJ9dj = () => Promise.resolve().then(function () { return offline_post$1; });
-const _lazy_IO3x1Y = () => Promise.resolve().then(function () { return _id__delete$1; });
-const _lazy_L75D0g = () => Promise.resolve().then(function () { return stock_patch$1; });
-const _lazy_l7midL = () => Promise.resolve().then(function () { return index_get$7; });
-const _lazy_j5wTIn = () => Promise.resolve().then(function () { return index_post$1; });
-const _lazy_0U0hsm = () => Promise.resolve().then(function () { return settings_get$3; });
-const _lazy_Q2RZmu = () => Promise.resolve().then(function () { return settings_put$1; });
-const _lazy_VfYszK = () => Promise.resolve().then(function () { return waTemplate_get$1; });
-const _lazy_YyNmCg = () => Promise.resolve().then(function () { return waTemplate_put$1; });
-const _lazy_lOShbY = () => Promise.resolve().then(function () { return login_post$1; });
-const _lazy_hlgeJA = () => Promise.resolve().then(function () { return logout_post$1; });
-const _lazy_0l11ws = () => Promise.resolve().then(function () { return me_get$1; });
-const _lazy_SKAwPR = () => Promise.resolve().then(function () { return register_post$1; });
-const _lazy_xs3oZ1 = () => Promise.resolve().then(function () { return orders_get$1; });
-const _lazy_QOOvhs = () => Promise.resolve().then(function () { return password_patch$1; });
-const _lazy_FmgFTw = () => Promise.resolve().then(function () { return profile_patch$1; });
-const _lazy_M136m0 = () => Promise.resolve().then(function () { return index_get$5; });
-const _lazy_3eA6zu = () => Promise.resolve().then(function () { return messages_get$1; });
-const _lazy_JLeXPB = () => Promise.resolve().then(function () { return messages_post$1; });
-const _lazy_uYpnFX = () => Promise.resolve().then(function () { return start_post$1; });
-const _lazy_ot1jd9 = () => Promise.resolve().then(function () { return regular_post$1; });
-const _lazy__xPjau = () => Promise.resolve().then(function () { return config_get$1; });
-const _lazy_x5EPkY = () => Promise.resolve().then(function () { return track_get$3; });
-const _lazy_XvAQch = () => Promise.resolve().then(function () { return index_get$3; });
-const _lazy_ZeJRPr = () => Promise.resolve().then(function () { return callback_post$1; });
-const _lazy_ER02zJ = () => Promise.resolve().then(function () { return createTransaction_post$1; });
-const _lazy_DNFySx = () => Promise.resolve().then(function () { return settings_get$1; });
-const _lazy_aUWAGC = () => Promise.resolve().then(function () { return _id__get$1; });
-const _lazy_8SDBc4 = () => Promise.resolve().then(function () { return index_get$1; });
-const _lazy_LHWe79 = () => Promise.resolve().then(function () { return status_get$1; });
-const _lazy_FjXQ0x = () => Promise.resolve().then(function () { return stock_get$1; });
-const _lazy_sgku4X = () => Promise.resolve().then(function () { return ____path__get$1; });
-const _lazy_48FSFH = () => Promise.resolve().then(function () { return cities_get$1; });
-const _lazy_ZwHANp = () => Promise.resolve().then(function () { return cost_get$1; });
-const _lazy_pZWUTm = () => Promise.resolve().then(function () { return track_get$1; });
-const _lazy_6yuls8 = () => Promise.resolve().then(function () { return renderer; });
+const _lazy_BQIed_ = () => Promise.resolve().then(function () { return admins_get$1; });
+const _lazy_RfaPM3 = () => Promise.resolve().then(function () { return admins_post$1; });
+const _lazy_3jgDDX = () => Promise.resolve().then(function () { return _id__delete$7; });
+const _lazy__yqt0J = () => Promise.resolve().then(function () { return _id__delete$5; });
+const _lazy_l5fHzD = () => Promise.resolve().then(function () { return index_get$f; });
+const _lazy_XBZAfQ = () => Promise.resolve().then(function () { return index_post$3; });
+const _lazy_aoy1P6 = () => Promise.resolve().then(function () { return reply_post$1; });
+const _lazy_LS5sYQ = () => Promise.resolve().then(function () { return index_get$d; });
+const _lazy_YXUhDR = () => Promise.resolve().then(function () { return config_post$1; });
+const _lazy_zgHEQk = () => Promise.resolve().then(function () { return _id__delete$3; });
+const _lazy_D71gOl = () => Promise.resolve().then(function () { return _id__patch$1; });
+const _lazy_Fci4SR = () => Promise.resolve().then(function () { return index_get$b; });
+const _lazy_XCmZOw = () => Promise.resolve().then(function () { return login_post$1; });
+const _lazy_DsPwBN = () => Promise.resolve().then(function () { return logout_post$3; });
+const _lazy_oPWSth = () => Promise.resolve().then(function () { return cancel_patch$1; });
+const _lazy_DR1Ytj = () => Promise.resolve().then(function () { return notify_post$1; });
+const _lazy_2itD4b = () => Promise.resolve().then(function () { return shipment_post$1; });
+const _lazy_g7cb36 = () => Promise.resolve().then(function () { return status_patch$1; });
+const _lazy_9y_LEw = () => Promise.resolve().then(function () { return uploadProof_post$1; });
+const _lazy_NDO_ct = () => Promise.resolve().then(function () { return bulkNotify_post$1; });
+const _lazy_C9JkIR = () => Promise.resolve().then(function () { return index_get$9; });
+const _lazy_xJIDzk = () => Promise.resolve().then(function () { return offline_post$1; });
+const _lazy_KqdiYd = () => Promise.resolve().then(function () { return _id__delete$1; });
+const _lazy_qI6aAn = () => Promise.resolve().then(function () { return stock_patch$1; });
+const _lazy_XbxiBR = () => Promise.resolve().then(function () { return index_get$7; });
+const _lazy_P75Guf = () => Promise.resolve().then(function () { return index_post$1; });
+const _lazy_sXCsut = () => Promise.resolve().then(function () { return settings_get$3; });
+const _lazy_CwyZ4k = () => Promise.resolve().then(function () { return settings_put$1; });
+const _lazy_Jb2wQx = () => Promise.resolve().then(function () { return waTemplate_get$1; });
+const _lazy_SSy4Pw = () => Promise.resolve().then(function () { return waTemplate_put$1; });
+const _lazy_m1eK1F = () => Promise.resolve().then(function () { return logout_post$1; });
+const _lazy_wek7if = () => Promise.resolve().then(function () { return me_get$1; });
+const _lazy_ZujuIf = () => Promise.resolve().then(function () { return sendOtp_post$1; });
+const _lazy_Db6jMY = () => Promise.resolve().then(function () { return verifyOtp_post$1; });
+const _lazy_hi3qtl = () => Promise.resolve().then(function () { return orders_get$1; });
+const _lazy_q7T3uz = () => Promise.resolve().then(function () { return password_patch$1; });
+const _lazy__URDNX = () => Promise.resolve().then(function () { return profile_patch$1; });
+const _lazy_PwUBuS = () => Promise.resolve().then(function () { return index_get$5; });
+const _lazy_IqasZS = () => Promise.resolve().then(function () { return messages_get$1; });
+const _lazy_VkZORE = () => Promise.resolve().then(function () { return messages_post$1; });
+const _lazy_bwpPh8 = () => Promise.resolve().then(function () { return start_post$1; });
+const _lazy_Pj7fWU = () => Promise.resolve().then(function () { return regular_post$1; });
+const _lazy_QIpR3S = () => Promise.resolve().then(function () { return config_get$1; });
+const _lazy_ll6SVl = () => Promise.resolve().then(function () { return track_get$3; });
+const _lazy_6vuowY = () => Promise.resolve().then(function () { return index_get$3; });
+const _lazy_nsd8A_ = () => Promise.resolve().then(function () { return callback_post$1; });
+const _lazy_IVHrPt = () => Promise.resolve().then(function () { return createTransaction_post$1; });
+const _lazy_GNRQjq = () => Promise.resolve().then(function () { return settings_get$1; });
+const _lazy_hz5WvZ = () => Promise.resolve().then(function () { return _id__get$1; });
+const _lazy_zWM6F4 = () => Promise.resolve().then(function () { return index_get$1; });
+const _lazy_N0zask = () => Promise.resolve().then(function () { return status_get$1; });
+const _lazy_xHEEaV = () => Promise.resolve().then(function () { return stock_get$1; });
+const _lazy_7aiXuF = () => Promise.resolve().then(function () { return ____path__get$1; });
+const _lazy_vGN5Zf = () => Promise.resolve().then(function () { return cities_get$1; });
+const _lazy_Ntvqfy = () => Promise.resolve().then(function () { return cost_get$1; });
+const _lazy_KvZJ3d = () => Promise.resolve().then(function () { return track_get$1; });
+const _lazy_ZjTvV3 = () => Promise.resolve().then(function () { return google_get$1; });
+const _lazy_CW5HzW = () => Promise.resolve().then(function () { return renderer; });
 
 const handlers = [
-  { route: '', handler: _r3Dd_Z, lazy: false, middleware: true, method: undefined },
-  { route: '', handler: _O2xcaq, lazy: false, middleware: true, method: undefined },
-  { route: '', handler: _PenuE5, lazy: false, middleware: true, method: undefined },
-  { route: '/api/admin/admins', handler: _lazy_6QBRuj, lazy: true, middleware: false, method: "get" },
-  { route: '/api/admin/admins', handler: _lazy_f5pdik, lazy: true, middleware: false, method: "post" },
-  { route: '/api/admin/admins/:id', handler: _lazy_tuccwz, lazy: true, middleware: false, method: "delete" },
-  { route: '/api/admin/categories/:id', handler: _lazy_eLbzjn, lazy: true, middleware: false, method: "delete" },
-  { route: '/api/admin/categories', handler: _lazy_ORcWye, lazy: true, middleware: false, method: "get" },
-  { route: '/api/admin/categories', handler: _lazy_wqum7U, lazy: true, middleware: false, method: "post" },
-  { route: '/api/admin/chat/:sessionId/reply', handler: _lazy_Iz56ev, lazy: true, middleware: false, method: "post" },
-  { route: '/api/admin/chat', handler: _lazy_5YvuXn, lazy: true, middleware: false, method: "get" },
-  { route: '/api/admin/flash-sale/config', handler: _lazy_H2aQmh, lazy: true, middleware: false, method: "post" },
-  { route: '/api/admin/flash-sale/sessions/:id', handler: _lazy_drSWYU, lazy: true, middleware: false, method: "delete" },
-  { route: '/api/admin/flash-sale/sessions/:id', handler: _lazy_a_oKaC, lazy: true, middleware: false, method: "patch" },
-  { route: '/api/admin/flash-sale/sessions', handler: _lazy_sdn5sA, lazy: true, middleware: false, method: "get" },
-  { route: '/api/admin/login', handler: _lazy_YvIMUF, lazy: true, middleware: false, method: "post" },
-  { route: '/api/admin/logout', handler: _lazy_Gmr9wb, lazy: true, middleware: false, method: "post" },
-  { route: '/api/admin/orders/:id/cancel', handler: _lazy_dYVR1N, lazy: true, middleware: false, method: "patch" },
-  { route: '/api/admin/orders/:id/notify', handler: _lazy_E0Gjcu, lazy: true, middleware: false, method: "post" },
-  { route: '/api/admin/orders/:id/shipment', handler: _lazy_uhpb2t, lazy: true, middleware: false, method: "post" },
-  { route: '/api/admin/orders/:id/status', handler: _lazy_EmhuoZ, lazy: true, middleware: false, method: "patch" },
-  { route: '/api/admin/orders/:id/upload-proof', handler: _lazy_wB7Hld, lazy: true, middleware: false, method: "post" },
-  { route: '/api/admin/orders/bulk-notify', handler: _lazy_UnsqB4, lazy: true, middleware: false, method: "post" },
-  { route: '/api/admin/orders', handler: _lazy_5199bw, lazy: true, middleware: false, method: "get" },
-  { route: '/api/admin/orders/offline', handler: _lazy_BAJ9dj, lazy: true, middleware: false, method: "post" },
-  { route: '/api/admin/products/:id', handler: _lazy_IO3x1Y, lazy: true, middleware: false, method: "delete" },
-  { route: '/api/admin/products/:id/stock', handler: _lazy_L75D0g, lazy: true, middleware: false, method: "patch" },
-  { route: '/api/admin/products', handler: _lazy_l7midL, lazy: true, middleware: false, method: "get" },
-  { route: '/api/admin/products', handler: _lazy_j5wTIn, lazy: true, middleware: false, method: "post" },
-  { route: '/api/admin/settings', handler: _lazy_0U0hsm, lazy: true, middleware: false, method: "get" },
-  { route: '/api/admin/settings', handler: _lazy_Q2RZmu, lazy: true, middleware: false, method: "put" },
-  { route: '/api/admin/wa-template', handler: _lazy_VfYszK, lazy: true, middleware: false, method: "get" },
-  { route: '/api/admin/wa-template', handler: _lazy_YyNmCg, lazy: true, middleware: false, method: "put" },
-  { route: '/api/auth/login', handler: _lazy_lOShbY, lazy: true, middleware: false, method: "post" },
-  { route: '/api/auth/logout', handler: _lazy_hlgeJA, lazy: true, middleware: false, method: "post" },
-  { route: '/api/auth/me', handler: _lazy_0l11ws, lazy: true, middleware: false, method: "get" },
-  { route: '/api/auth/register', handler: _lazy_SKAwPR, lazy: true, middleware: false, method: "post" },
-  { route: '/api/buyer/orders', handler: _lazy_xs3oZ1, lazy: true, middleware: false, method: "get" },
-  { route: '/api/buyer/password', handler: _lazy_QOOvhs, lazy: true, middleware: false, method: "patch" },
-  { route: '/api/buyer/profile', handler: _lazy_FmgFTw, lazy: true, middleware: false, method: "patch" },
-  { route: '/api/categories', handler: _lazy_M136m0, lazy: true, middleware: false, method: "get" },
-  { route: '/api/chat/:sessionId/messages', handler: _lazy_3eA6zu, lazy: true, middleware: false, method: "get" },
-  { route: '/api/chat/:sessionId/messages', handler: _lazy_JLeXPB, lazy: true, middleware: false, method: "post" },
-  { route: '/api/chat/start', handler: _lazy_uYpnFX, lazy: true, middleware: false, method: "post" },
-  { route: '/api/checkout/regular', handler: _lazy_ot1jd9, lazy: true, middleware: false, method: "post" },
-  { route: '/api/flash-sale/config', handler: _lazy__xPjau, lazy: true, middleware: false, method: "get" },
-  { route: '/api/orders/:id/track', handler: _lazy_x5EPkY, lazy: true, middleware: false, method: "get" },
-  { route: '/api/orders', handler: _lazy_XvAQch, lazy: true, middleware: false, method: "get" },
-  { route: '/api/payment/callback', handler: _lazy_ZeJRPr, lazy: true, middleware: false, method: "post" },
-  { route: '/api/payment/create-transaction', handler: _lazy_ER02zJ, lazy: true, middleware: false, method: "post" },
-  { route: '/api/payment/settings', handler: _lazy_DNFySx, lazy: true, middleware: false, method: "get" },
-  { route: '/api/products/:id', handler: _lazy_aUWAGC, lazy: true, middleware: false, method: "get" },
-  { route: '/api/products', handler: _lazy_8SDBc4, lazy: true, middleware: false, method: "get" },
-  { route: '/api/products/status', handler: _lazy_LHWe79, lazy: true, middleware: false, method: "get" },
-  { route: '/api/products/stock', handler: _lazy_FjXQ0x, lazy: true, middleware: false, method: "get" },
-  { route: '/api/s3-image/**:path', handler: _lazy_sgku4X, lazy: true, middleware: false, method: "get" },
-  { route: '/api/shipping/cities', handler: _lazy_48FSFH, lazy: true, middleware: false, method: "get" },
-  { route: '/api/shipping/cost', handler: _lazy_ZwHANp, lazy: true, middleware: false, method: "get" },
-  { route: '/api/track', handler: _lazy_pZWUTm, lazy: true, middleware: false, method: "get" },
-  { route: '/__nuxt_error', handler: _lazy_6yuls8, lazy: true, middleware: false, method: undefined },
-  { route: '/api/_nuxt_icon/:collection', handler: _7MfM_W, lazy: false, middleware: false, method: undefined },
+  { route: '', handler: _v5G0eK, lazy: false, middleware: true, method: undefined },
+  { route: '', handler: _6meFrg, lazy: false, middleware: true, method: undefined },
+  { route: '', handler: _EKMQMn, lazy: false, middleware: true, method: undefined },
+  { route: '/api/admin/admins', handler: _lazy_BQIed_, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/admins', handler: _lazy_RfaPM3, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/admins/:id', handler: _lazy_3jgDDX, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/admin/categories/:id', handler: _lazy__yqt0J, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/admin/categories', handler: _lazy_l5fHzD, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/categories', handler: _lazy_XBZAfQ, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/chat/:sessionId/reply', handler: _lazy_aoy1P6, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/chat', handler: _lazy_LS5sYQ, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/flash-sale/config', handler: _lazy_YXUhDR, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/flash-sale/sessions/:id', handler: _lazy_zgHEQk, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/admin/flash-sale/sessions/:id', handler: _lazy_D71gOl, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/admin/flash-sale/sessions', handler: _lazy_Fci4SR, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/login', handler: _lazy_XCmZOw, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/logout', handler: _lazy_DsPwBN, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/orders/:id/cancel', handler: _lazy_oPWSth, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/admin/orders/:id/notify', handler: _lazy_DR1Ytj, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/orders/:id/shipment', handler: _lazy_2itD4b, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/orders/:id/status', handler: _lazy_g7cb36, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/admin/orders/:id/upload-proof', handler: _lazy_9y_LEw, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/orders/bulk-notify', handler: _lazy_NDO_ct, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/orders', handler: _lazy_C9JkIR, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/orders/offline', handler: _lazy_xJIDzk, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/products/:id', handler: _lazy_KqdiYd, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/admin/products/:id/stock', handler: _lazy_qI6aAn, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/admin/products', handler: _lazy_XbxiBR, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/products', handler: _lazy_P75Guf, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/settings', handler: _lazy_sXCsut, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/settings', handler: _lazy_CwyZ4k, lazy: true, middleware: false, method: "put" },
+  { route: '/api/admin/wa-template', handler: _lazy_Jb2wQx, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/wa-template', handler: _lazy_SSy4Pw, lazy: true, middleware: false, method: "put" },
+  { route: '/api/auth/logout', handler: _lazy_m1eK1F, lazy: true, middleware: false, method: "post" },
+  { route: '/api/auth/me', handler: _lazy_wek7if, lazy: true, middleware: false, method: "get" },
+  { route: '/api/auth/send-otp', handler: _lazy_ZujuIf, lazy: true, middleware: false, method: "post" },
+  { route: '/api/auth/verify-otp', handler: _lazy_Db6jMY, lazy: true, middleware: false, method: "post" },
+  { route: '/api/buyer/orders', handler: _lazy_hi3qtl, lazy: true, middleware: false, method: "get" },
+  { route: '/api/buyer/password', handler: _lazy_q7T3uz, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/buyer/profile', handler: _lazy__URDNX, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/categories', handler: _lazy_PwUBuS, lazy: true, middleware: false, method: "get" },
+  { route: '/api/chat/:sessionId/messages', handler: _lazy_IqasZS, lazy: true, middleware: false, method: "get" },
+  { route: '/api/chat/:sessionId/messages', handler: _lazy_VkZORE, lazy: true, middleware: false, method: "post" },
+  { route: '/api/chat/start', handler: _lazy_bwpPh8, lazy: true, middleware: false, method: "post" },
+  { route: '/api/checkout/regular', handler: _lazy_Pj7fWU, lazy: true, middleware: false, method: "post" },
+  { route: '/api/flash-sale/config', handler: _lazy_QIpR3S, lazy: true, middleware: false, method: "get" },
+  { route: '/api/orders/:id/track', handler: _lazy_ll6SVl, lazy: true, middleware: false, method: "get" },
+  { route: '/api/orders', handler: _lazy_6vuowY, lazy: true, middleware: false, method: "get" },
+  { route: '/api/payment/callback', handler: _lazy_nsd8A_, lazy: true, middleware: false, method: "post" },
+  { route: '/api/payment/create-transaction', handler: _lazy_IVHrPt, lazy: true, middleware: false, method: "post" },
+  { route: '/api/payment/settings', handler: _lazy_GNRQjq, lazy: true, middleware: false, method: "get" },
+  { route: '/api/products/:id', handler: _lazy_hz5WvZ, lazy: true, middleware: false, method: "get" },
+  { route: '/api/products', handler: _lazy_zWM6F4, lazy: true, middleware: false, method: "get" },
+  { route: '/api/products/status', handler: _lazy_N0zask, lazy: true, middleware: false, method: "get" },
+  { route: '/api/products/stock', handler: _lazy_xHEEaV, lazy: true, middleware: false, method: "get" },
+  { route: '/api/s3-image/**:path', handler: _lazy_7aiXuF, lazy: true, middleware: false, method: "get" },
+  { route: '/api/shipping/cities', handler: _lazy_vGN5Zf, lazy: true, middleware: false, method: "get" },
+  { route: '/api/shipping/cost', handler: _lazy_Ntvqfy, lazy: true, middleware: false, method: "get" },
+  { route: '/api/track', handler: _lazy_KvZJ3d, lazy: true, middleware: false, method: "get" },
+  { route: '/auth/google', handler: _lazy_ZjTvV3, lazy: true, middleware: false, method: "get" },
+  { route: '/__nuxt_error', handler: _lazy_CW5HzW, lazy: true, middleware: false, method: undefined },
+  { route: '/api/_nuxt_icon/:collection', handler: _lcD18D, lazy: false, middleware: false, method: undefined },
+  { route: '/_scripts/p/**', handler: _upcABj, lazy: false, middleware: false, method: undefined },
+  { route: '/api/_auth/session', handler: _qMmhPB, lazy: false, middleware: false, method: "delete" },
+  { route: '/api/_auth/session', handler: _GRxcGX, lazy: false, middleware: false, method: "get" },
   { route: '/__nuxt_island/**', handler: handler$1, lazy: false, middleware: false, method: undefined },
-  { route: '/**', handler: _lazy_6yuls8, lazy: true, middleware: false, method: undefined }
+  { route: '/_scripts/assets/**', handler: _lazy_CW5HzW, lazy: true, middleware: false, method: undefined },
+  { route: '/**', handler: _lazy_CW5HzW, lazy: true, middleware: false, method: undefined }
 ];
 
 function createNitroApp() {
   const config = useRuntimeConfig();
-  const hooks = createHooks();
+  const hooks = createHooks$1();
   const captureError = (error, context = {}) => {
     const promise = hooks.callHookParallel("error", error, context).catch((error_) => {
       console.error("Error while capturing another error", error_);
@@ -4145,7 +5726,7 @@ const index_get$b = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
   default: index_get$a
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const login_post$2 = defineEventHandler(async (event) => {
+const login_post = defineEventHandler(async (event) => {
   var _a, _b, _c;
   const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
   checkRateLimit(`admin-login:${ip}`, 10, 15 * 60 * 1e3);
@@ -4195,9 +5776,9 @@ const login_post$2 = defineEventHandler(async (event) => {
   return { success: true };
 });
 
-const login_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const login_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: login_post$2
+  default: login_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const logout_post$2 = defineEventHandler((event) => {
@@ -4742,43 +6323,6 @@ const waTemplate_put$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePr
   default: waTemplate_put
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const login_post = defineEventHandler(async (event) => {
-  var _a, _b, _c;
-  const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
-  checkRateLimit(`buyer-login:${ip}`, 10, 15 * 60 * 1e3);
-  const body = await readBody(event);
-  const { phone, password } = body != null ? body : {};
-  if (!(phone == null ? void 0 : phone.trim()) || !(password == null ? void 0 : password.trim())) {
-    throw createError({ statusCode: 400, statusMessage: "Nomor HP dan password wajib diisi" });
-  }
-  const normalizedPhone = phone.replace(/\D/g, "").replace(/^0/, "62");
-  const buyer = await prisma.buyer.findUnique({ where: { phone: normalizedPhone } });
-  if (!buyer || !await bcrypt.compare(password, buyer.password)) {
-    throw createError({ statusCode: 401, statusMessage: "Nomor HP atau password salah" });
-  }
-  const maxAge = 60 * 60 * 24 * 30;
-  setCookie(event, "buyer_session", buyer.id, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "strict",
-    maxAge,
-    path: "/"
-  });
-  setCookie(event, "buyer_auth", "1", {
-    httpOnly: false,
-    secure: true,
-    sameSite: "strict",
-    maxAge,
-    path: "/"
-  });
-  return { success: true, buyer: { id: buyer.id, name: buyer.name, phone: buyer.phone, email: buyer.email } };
-});
-
-const login_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
-  __proto__: null,
-  default: login_post
-}, Symbol.toStringTag, { value: 'Module' }));
-
 const logout_post = defineEventHandler((event) => {
   deleteCookie(event, "buyer_session", { path: "/" });
   deleteCookie(event, "buyer_auth", { path: "/" });
@@ -4808,32 +6352,66 @@ const me_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: me_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const register_post = defineEventHandler(async (event) => {
-  var _a, _b, _c;
+const sendOtp_post = defineEventHandler(async (event) => {
+  var _a, _b, _c, _d;
   const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
-  checkRateLimit(`buyer-register:${ip}`, 5, 60 * 60 * 1e3);
-  const body = await readBody(event);
-  const { name, phone, password, email } = body != null ? body : {};
-  if (!(name == null ? void 0 : name.trim()) || !(phone == null ? void 0 : phone.trim()) || !(password == null ? void 0 : password.trim())) {
-    throw createError({ statusCode: 400, statusMessage: "Nama, nomor HP, dan password wajib diisi" });
+  checkRateLimit(`send-otp:${ip}`, 5, 10 * 60 * 1e3);
+  const { email, turnstileToken } = (_d = await readBody(event)) != null ? _d : {};
+  await verifyTurnstile(turnstileToken, ip);
+  if (!(email == null ? void 0 : email.trim()) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw createError({ statusCode: 400, statusMessage: "Email tidak valid" });
   }
-  const normalizedPhone = phone.replace(/\D/g, "").replace(/^0/, "62");
-  if (!/^(62|08)\d{8,12}$/.test("0" + normalizedPhone.replace(/^62/, ""))) {
-    throw createError({ statusCode: 400, statusMessage: "Nomor HP tidak valid" });
-  }
-  const exists = await prisma.buyer.findUnique({ where: { phone: normalizedPhone } });
-  if (exists) {
-    throw createError({ statusCode: 409, statusMessage: "Nomor HP sudah terdaftar" });
-  }
-  const hashed = await bcrypt.hash(password, 10);
-  const buyer = await prisma.buyer.create({
+  const normalizedEmail = email.trim().toLowerCase();
+  await prisma.emailOtp.updateMany({
+    where: { email: normalizedEmail, used: false },
+    data: { used: true }
+  });
+  const code = String(Math.floor(1e5 + Math.random() * 9e5));
+  await prisma.emailOtp.create({
     data: {
-      name: name.trim(),
-      phone: normalizedPhone,
-      email: (email == null ? void 0 : email.trim()) || null,
-      password: hashed
+      email: normalizedEmail,
+      code,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1e3)
     }
   });
+  await sendOtpEmail(normalizedEmail, code);
+  return { success: true };
+});
+
+const sendOtp_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: sendOtp_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const verifyOtp_post = defineEventHandler(async (event) => {
+  var _a, _b, _c, _d;
+  const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
+  checkRateLimit(`verify-otp:${ip}`, 10, 15 * 60 * 1e3);
+  const { email, code } = (_d = await readBody(event)) != null ? _d : {};
+  if (!(email == null ? void 0 : email.trim()) || !(code == null ? void 0 : code.trim())) {
+    throw createError({ statusCode: 400, statusMessage: "Email dan kode wajib diisi" });
+  }
+  const normalizedEmail = email.trim().toLowerCase();
+  const otp = await prisma.emailOtp.findFirst({
+    where: {
+      email: normalizedEmail,
+      code: String(code).trim(),
+      used: false,
+      expiresAt: { gt: /* @__PURE__ */ new Date() }
+    },
+    orderBy: { createdAt: "desc" }
+  });
+  if (!otp) {
+    throw createError({ statusCode: 401, statusMessage: "Kode tidak valid atau sudah kadaluarsa" });
+  }
+  await prisma.emailOtp.update({ where: { id: otp.id }, data: { used: true } });
+  let buyer = await prisma.buyer.findUnique({ where: { email: normalizedEmail } });
+  if (!buyer) {
+    const nameFallback = normalizedEmail.split("@")[0];
+    buyer = await prisma.buyer.create({
+      data: { email: normalizedEmail, name: nameFallback }
+    });
+  }
   const maxAge = 60 * 60 * 24 * 30;
   setCookie(event, "buyer_session", buyer.id, {
     httpOnly: true,
@@ -4849,12 +6427,12 @@ const register_post = defineEventHandler(async (event) => {
     maxAge,
     path: "/"
   });
-  return { success: true, buyer: { id: buyer.id, name: buyer.name, phone: buyer.phone, email: buyer.email } };
+  return { success: true, buyer: { id: buyer.id, name: buyer.name, email: buyer.email } };
 });
 
-const register_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const verifyOtp_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: register_post
+  default: verifyOtp_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const orders_get = defineEventHandler(async (event) => {
@@ -5436,7 +7014,7 @@ const index_get = defineEventHandler(async (event) => {
     include: {
       category: { select: { id: true, name: true, slug: true } },
       variants: { orderBy: { size: "asc" } },
-      order: { select: { buyerPhone: true } }
+      orders: { select: { buyerPhone: true }, take: 1 }
     }
   });
   if (!search && !sessionId) {
@@ -5444,10 +7022,13 @@ const index_get = defineEventHandler(async (event) => {
   } else {
     setResponseHeader(event, "Cache-Control", "no-store");
   }
-  return products.map(({ order, ...p }) => ({
-    ...p,
-    maskedPhone: p.status === "SOLD_OUT" && (order == null ? void 0 : order.buyerPhone) ? maskPhone(order.buyerPhone) : null
-  }));
+  return products.map(({ orders, ...p }) => {
+    var _a;
+    return {
+      ...p,
+      maskedPhone: p.status === "SOLD_OUT" && ((_a = orders[0]) == null ? void 0 : _a.buyerPhone) ? maskPhone(orders[0].buyerPhone) : null
+    };
+  });
 });
 
 const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
@@ -5616,6 +7197,45 @@ const track_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
   default: track_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const google_get = defineOAuthGoogleEventHandler({
+  config: {
+    scope: ["email", "profile"]
+  },
+  async onSuccess(event, { user }) {
+    const email = user.email;
+    const name = user.name || email.split("@")[0];
+    let buyer = await prisma.buyer.findUnique({ where: { email } });
+    if (!buyer) {
+      buyer = await prisma.buyer.create({ data: { email, name } });
+    }
+    const maxAge = 60 * 60 * 24 * 30;
+    setCookie(event, "buyer_session", buyer.id, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge,
+      path: "/"
+    });
+    setCookie(event, "buyer_auth", "1", {
+      httpOnly: false,
+      secure: true,
+      sameSite: "lax",
+      maxAge,
+      path: "/"
+    });
+    return sendRedirect(event, "/account");
+  },
+  onError(event, error) {
+    console.error("[google-oauth]", error);
+    return sendRedirect(event, "/login?error=google");
+  }
+});
+
+const google_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: google_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
 function renderPayloadResponse(ssrContext) {
 	return {
 		body: encodeForwardSlashes(stringify(splitPayload(ssrContext).payload, ssrContext["~payloadReducers"])) ,
@@ -5708,8 +7328,8 @@ async function renderRoute(event, ssrError) {
 		ssrContext.noSSR = true;
 	}
 	
-	!ssrContext.noSSR && (NUXT_RUNTIME_PAYLOAD_EXTRACTION);
-	const isRenderingPayload = (routeOptions.prerender) && PAYLOAD_URL_RE.test(ssrContext.url);
+	const _PAYLOAD_EXTRACTION = !ssrContext.noSSR && ((routeOptions.isr || routeOptions.cache));
+	const isRenderingPayload = (_PAYLOAD_EXTRACTION || routeOptions.prerender) && PAYLOAD_URL_RE.test(ssrContext.url);
 	if (isRenderingPayload) {
 		const payloadURL = new URL(ssrContext.url, "http://localhost");
 		const url = payloadURL.pathname.slice(0, -`/${PAYLOAD_FILENAME}`.length) || "/";
@@ -5717,6 +7337,7 @@ async function renderRoute(event, ssrError) {
 		ssrContext.url = url + payloadURL.search;
 		event._path = event.node.req.url = ssrContext.url;
 	}
+	const payloadURL = _PAYLOAD_EXTRACTION ? buildPayloadURL(ssrContext) : undefined;
 	
 	const renderer = await getRenderer(ssrContext);
 	const _rendered = await renderer.renderToString(ssrContext).catch(async (error) => {
@@ -5753,6 +7374,15 @@ async function renderRoute(event, ssrError) {
 	const NO_SCRIPTS = routeOptions.noScripts;
 	
 	const { styles, scripts } = getRequestDependencies(ssrContext, renderer.rendererContext);
+	
+	if (_PAYLOAD_EXTRACTION && !NO_SCRIPTS) {
+		ssrContext.head.push({ link: [{
+			rel: "preload",
+			as: "fetch",
+			crossorigin: "anonymous",
+			href: payloadURL
+		} ] }, headEntryOptions);
+	}
 	if (ssrContext["~preloadManifest"] && !NO_SCRIPTS) {
 		ssrContext.head.push({ link: [{
 			rel: "preload",
@@ -5795,7 +7425,11 @@ async function renderRoute(event, ssrError) {
 		const stylesheetHrefs = new Set(link.map((l) => l.href));
 		ssrContext.head.push({ link: [...getPreloadLinks(ssrContext, renderer.rendererContext, dependencyOptions), ...getPrefetchLinks(ssrContext, renderer.rendererContext, dependencyOptions)].filter((l) => !stylesheetHrefs.has(l.href)) }, headEntryOptions);
 		
-		ssrContext.head.push({ script: renderPayloadJsonScript({
+		ssrContext.head.push({ script: _PAYLOAD_EXTRACTION ? renderPayloadJsonScript({
+			ssrContext,
+			data: splitPayload(ssrContext).initial,
+			src: payloadURL
+		})  : renderPayloadJsonScript({
 			ssrContext,
 			data: ssrContext.payload
 		})  }, {
@@ -5840,6 +7474,13 @@ async function renderRoute(event, ssrError) {
 			"x-powered-by": "Nuxt"
 		}
 	};
+}
+function buildPayloadURL(ssrContext) {
+	const url = new URL(ssrContext.url, "http://localhost");
+	const baseURL = ssrContext.runtimeConfig.app.cdnURL || ssrContext.runtimeConfig.app.baseURL;
+	const payloadURL = joinURL(baseURL, url.pathname, PAYLOAD_FILENAME);
+	url.searchParams.set(PAYLOAD_BUILD_ID_PARAM, ssrContext.runtimeConfig.app.buildId);
+	return payloadURL + url.search;
 }
 function normalizeChunks(chunks) {
 	const result = [];

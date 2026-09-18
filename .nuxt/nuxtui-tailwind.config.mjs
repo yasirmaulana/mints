@@ -1,6 +1,6 @@
 
       import { defaultExtractor as createDefaultExtractor } from "tailwindcss/lib/lib/defaultExtractor.js";
-      import { customSafelistExtractor, generateSafelist } from "/home/yasir/Documents/Project/mints/node_modules/@nuxt/ui/dist/runtime/utils/colors";
+      import { customSafelistExtractor, generateSafelist } from "/home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@nuxt/ui/dist/runtime/utils/colors";
       import formsPlugin from "@tailwindcss/forms";
       import aspectRatio from "@tailwindcss/aspect-ratio";
       import typography from "@tailwindcss/typography";
@@ -19,8 +19,8 @@
         ],
         content: {
           files: [
-            "/home/yasir/Documents/Project/mints/node_modules/@nuxt/ui/dist/runtime/components/**/*.{vue,mjs,ts}",
-            "/home/yasir/Documents/Project/mints/node_modules/@nuxt/ui/dist/runtime/ui.config/**/*.{mjs,js,ts}"
+            "/home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@nuxt/ui/dist/runtime/components/**/*.{vue,mjs,ts}",
+            "/home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@nuxt/ui/dist/runtime/ui.config/**/*.{mjs,js,ts}"
           ],
           transform: {
             vue: (content) => {

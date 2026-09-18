@@ -1,5 +1,0 @@
-const flash_sale_vue_vue_type_style_index_0_scoped_9cbf197b_inline_used_lang = ".modal-enter-active[data-v-9cbf197b],.modal-leave-active[data-v-9cbf197b]{transition:opacity .2s ease}.modal-enter-from[data-v-9cbf197b],.modal-leave-to[data-v-9cbf197b]{opacity:0}.lightbox-enter-active[data-v-9cbf197b],.lightbox-leave-active[data-v-9cbf197b]{transition:opacity .2s ease}.lightbox-enter-from[data-v-9cbf197b],.lightbox-leave-to[data-v-9cbf197b]{opacity:0}.toast-enter-active[data-v-9cbf197b],.toast-leave-active[data-v-9cbf197b]{transition:opacity .2s ease,transform .2s ease}.toast-enter-from[data-v-9cbf197b],.toast-leave-to[data-v-9cbf197b]{opacity:0;transform:translate(-50%) translateY(8px)}.sold-toast-enter-active[data-v-9cbf197b],.sold-toast-leave-active[data-v-9cbf197b]{transition:opacity .3s ease,transform .3s ease}.sold-toast-enter-from[data-v-9cbf197b],.sold-toast-leave-to[data-v-9cbf197b]{opacity:0;transform:translate(-50%) translateY(16px)}";
-export {
-  flash_sale_vue_vue_type_style_index_0_scoped_9cbf197b_inline_used_lang as default
-};
-//# sourceMappingURL=flash_sale-styles-1.mjs-BiNmNSQh.js.map

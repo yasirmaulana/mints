@@ -81,17 +81,17 @@ declare module "nitropack/types" {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/wa-template.get').default>>>>
       'put': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/wa-template.put').default>>>>
     }
-    '/api/auth/login': {
-      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/auth/login.post').default>>>>
-    }
     '/api/auth/logout': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/auth/logout.post').default>>>>
     }
     '/api/auth/me': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/auth/me.get').default>>>>
     }
-    '/api/auth/register': {
-      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/auth/register.post').default>>>>
+    '/api/auth/send-otp': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/auth/send-otp.post').default>>>>
+    }
+    '/api/auth/verify-otp': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/auth/verify-otp.post').default>>>>
     }
     '/api/buyer/orders': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/buyer/orders.get').default>>>>
@@ -157,11 +157,21 @@ declare module "nitropack/types" {
     '/api/track': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/track.get').default>>>>
     }
+    '/auth/google': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/routes/auth/google.get').default>>>>
+    }
     '/__nuxt_error': {
       'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/@nuxt/nitro-server/dist/runtime/handlers/renderer').default>>>>
     }
     '/api/_nuxt_icon/:collection': {
       'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/@nuxt/icon/dist/runtime/server/api').default>>>>
+    }
+    '/_scripts/p/**': {
+      'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/@nuxt/scripts/dist/runtime/server/proxy-handler').default>>>>
+    }
+    '/api/_auth/session': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/nuxt-auth-utils/dist/runtime/server/api/session.delete').default>>>>
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/nuxt-auth-utils/dist/runtime/server/api/session.get').default>>>>
     }
     '/__nuxt_island/**': {
       'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/#internal/nuxt/island-renderer').default>>>>

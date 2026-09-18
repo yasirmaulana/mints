@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     include: {
       category: { select: { id: true, name: true, slug: true } },
       variants: { orderBy: { size: 'asc' } },
-      order: { select: { buyerPhone: true } }
+      orders: { select: { buyerPhone: true }, take: 1 }
     }
   })
 
@@ -30,8 +30,8 @@ export default defineEventHandler(async (event) => {
     setResponseHeader(event, 'Cache-Control', 'no-store')
   }
 
-  return products.map(({ order, ...p }) => ({
+  return products.map(({ orders, ...p }) => ({
     ...p,
-    maskedPhone: p.status === 'SOLD_OUT' && order?.buyerPhone ? maskPhone(order.buyerPhone) : null
+    maskedPhone: p.status === 'SOLD_OUT' && orders[0]?.buyerPhone ? maskPhone(orders[0].buyerPhone) : null
   }))
 })
