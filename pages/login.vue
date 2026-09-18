@@ -57,8 +57,6 @@
               </div>
             </div>
 
-            <NuxtTurnstile v-model="turnstileToken" class="mb-1" />
-
             <button
               type="submit"
               class="w-full rounded-full py-3.5 text-sm font-semibold transition-opacity"
@@ -144,19 +142,40 @@ const code = ref('')
 const loading = ref(false)
 const error = ref('')
 const resendCooldown = ref(0)
-const turnstileToken = ref('')
 
 let cooldownTimer: ReturnType<typeof setInterval> | null = null
 
-const canSend = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()) && !!turnstileToken.value)
+const canSend = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()))
+
+const { public: { recaptchaSiteKey } } = useRuntimeConfig()
+
+function loadRecaptcha(): Promise<void> {
+  return new Promise((resolve) => {
+    if ((window as any).grecaptcha) return resolve()
+    const script = document.createElement('script')
+    script.src = `https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`
+    script.onload = () => resolve()
+    document.head.appendChild(script)
+  })
+}
+
+async function getRecaptchaToken(): Promise<string> {
+  await loadRecaptcha()
+  return new Promise((resolve) => {
+    (window as any).grecaptcha.ready(async () => {
+      const token = await (window as any).grecaptcha.execute(recaptchaSiteKey, { action: 'send_otp' })
+      resolve(token)
+    })
+  })
+}
 const canVerify = computed(() => code.value.trim().length === 6)
 
 async function sendOtp() {
   loading.value = true
   error.value = ''
   try {
-    await $fetch('/api/auth/send-otp', { method: 'POST', body: { email: email.value, turnstileToken: turnstileToken.value } })
-  turnstileToken.value = ''
+    const recaptchaToken = await getRecaptchaToken()
+    await $fetch('/api/auth/send-otp', { method: 'POST', body: { email: email.value, recaptchaToken } })
     step.value = 'otp'
     startCooldown(60)
   } catch (err: any) {
