@@ -588,6 +588,8 @@ import { NuxtModule, ModuleDependencyMeta } from '@nuxt/schema'
 
    freeShippingMin: string,
 
+   duitkuIsProduction: string,
+
    auth: {
       loadStrategy: string,
    },

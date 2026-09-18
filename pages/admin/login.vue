@@ -62,11 +62,34 @@ const form = reactive({ username: '', password: '' })
 const loading = ref(false)
 const errorMsg = ref('')
 
+const { public: { recaptchaSiteKey } } = useRuntimeConfig()
+
+function loadRecaptcha(): Promise<void> {
+  return new Promise((resolve) => {
+    if ((window as any).grecaptcha) return resolve()
+    const script = document.createElement('script')
+    script.src = `https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`
+    script.onload = () => resolve()
+    document.head.appendChild(script)
+  })
+}
+
+async function getRecaptchaToken(): Promise<string> {
+  await loadRecaptcha()
+  return new Promise((resolve) => {
+    (window as any).grecaptcha.ready(async () => {
+      const token = await (window as any).grecaptcha.execute(recaptchaSiteKey, { action: 'admin_login' })
+      resolve(token)
+    })
+  })
+}
+
 async function login() {
   loading.value = true
   errorMsg.value = ''
   try {
-    await $fetch('/api/admin/login', { method: 'POST', body: { ...form } })
+    const recaptchaToken = await getRecaptchaToken()
+    await $fetch('/api/admin/login', { method: 'POST', body: { ...form, recaptchaToken } })
     window.location.href = '/admin'
   } catch (err: any) {
     errorMsg.value = err.data?.statusMessage || 'Terjadi kesalahan, coba lagi'

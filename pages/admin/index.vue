@@ -1,5 +1,10 @@
 <template>
   <div class="min-h-screen bg-gray-50 font-body">
+    <!-- Banner Sandbox Mode -->
+    <div v-if="isSandbox" class="w-full text-center text-xs font-semibold py-1.5 tracking-wide" style="background:#f59e0b;color:#fff">
+      ⚠ DUITKU SANDBOX MODE — Transaksi tidak nyata. Ganti <code class="bg-black/20 px-1 rounded">DUITKU_IS_PRODUCTION=true</code> untuk production.
+    </div>
+
     <!-- Topbar -->
     <div class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 px-4 sm:px-6 py-3.5 flex items-center justify-between shadow-xs">
       <div class="flex items-center gap-3">
@@ -884,6 +889,117 @@
         </div>
       </div>
 
+      <!-- ── Analitik ── -->
+      <div class="card p-6 space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold text-gray-900">Analitik</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Tambahkan Meta Pixel, Google Tag Manager, atau TikTok Pixel untuk melacak aktivitas pengunjung.</p>
+          </div>
+          <button
+            class="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+            style="background:rgba(9,11,12,0.06);color:#090b0c"
+            @click="openAddPixel"
+          >+ Tambah</button>
+        </div>
+
+        <div v-if="!analyticsPixels.length" class="text-xs text-gray-400 py-3 text-center border border-dashed rounded-xl" style="border-color:var(--border)">
+          Belum ada integrasi analitik. Klik "+ Tambah" untuk menambahkan.
+        </div>
+
+        <div v-for="(px, idx) in analyticsPixels" :key="px.id" class="flex items-center justify-between gap-3 p-4 rounded-xl border" style="border-color:var(--border)">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-sm font-bold"
+              :style="px.type === 'meta' ? 'background:#e7f0fd;color:#1877f2' : px.type === 'gtm' ? 'background:#e8f5e9;color:#34a853' : 'background:#fce4ec;color:#e91e63'"
+            >
+              {{ px.type === 'meta' ? 'f' : px.type === 'gtm' ? 'G' : 'T' }}
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate">{{ px.name }}</p>
+              <p class="text-xs text-gray-400 truncate">{{ px.pixelId || px.containerId }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button
+              class="relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors duration-200 focus:outline-none"
+              :style="px.enabled ? 'background:#090b0c' : 'background:#e5e7eb'"
+              @click="togglePixel(idx)"
+            >
+              <span
+                class="inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200 mt-0.5"
+                :style="px.enabled ? 'translate:1.125rem' : 'translate:0.125rem'"
+              />
+            </button>
+            <button class="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors" @click="editPixel(idx)">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors" @click="removePixel(idx)">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button class="btn-primary" :disabled="analyticsSaving" @click="saveAnalytics">
+            <span v-if="analyticsSaving" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
+            <span v-else>Simpan Analitik</span>
+          </button>
+          <span v-if="analyticsSaved" class="text-sm text-green-600 font-medium">Tersimpan ✓</span>
+        </div>
+      </div>
+
+      <!-- Modal Tambah/Edit Pixel -->
+      <div v-if="showPixelModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" @click.self="showPixelModal = false">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-gray-900 text-base">{{ editingPixelIdx !== null ? 'Edit Integrasi' : 'Tambah Integrasi' }}</h3>
+            <button class="p-1 rounded-lg hover:bg-gray-100 transition-colors" @click="showPixelModal = false">
+              <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="label-text block mb-1">Jenis</label>
+              <select v-model="pixelForm.type" class="input-field w-full">
+                <option value="meta">Meta Pixel (Facebook)</option>
+                <option value="gtm">Google Tag Manager</option>
+                <option value="tiktok">TikTok Pixel</option>
+              </select>
+            </div>
+            <div>
+              <label class="label-text block mb-1">Nama <span class="text-red-500">*</span></label>
+              <input v-model="pixelForm.name" type="text" placeholder="Contoh: Meta Pixel Utama" class="input-field w-full" />
+            </div>
+            <div v-if="pixelForm.type === 'gtm'">
+              <label class="label-text block mb-1">Container ID <span class="text-red-500">*</span></label>
+              <input v-model="pixelForm.containerId" type="text" placeholder="GTM-XXXXXXX" class="input-field w-full" />
+            </div>
+            <template v-else>
+              <div>
+                <label class="label-text block mb-1">Pixel ID <span class="text-red-500">*</span></label>
+                <input v-model="pixelForm.pixelId" type="text" :placeholder="pixelForm.type === 'meta' ? '123456789012345' : '1234567890123456789'" class="input-field w-full" />
+              </div>
+              <div>
+                <label class="label-text block mb-1">{{ pixelForm.type === 'meta' ? 'Conversion API Token' : 'Events API Token' }} <span class="text-gray-400 text-xs">(opsional)</span></label>
+                <input v-model="pixelForm.apiToken" type="text" placeholder="Token untuk server-side events" class="input-field w-full" />
+              </div>
+              <div>
+                <label class="label-text block mb-1">Kode Testing <span class="text-gray-400 text-xs">(opsional, hapus di production)</span></label>
+                <input v-model="pixelForm.testCode" type="text" :placeholder="pixelForm.type === 'meta' ? 'TEST12345' : 'TEST_XXXXXXXXXX'" class="input-field w-full" />
+              </div>
+            </template>
+          </div>
+
+          <div class="flex gap-3 pt-1">
+            <button class="btn-primary flex-1" :disabled="!pixelForm.name || (!pixelForm.pixelId && !pixelForm.containerId)" @click="savePixelForm">
+              {{ editingPixelIdx !== null ? 'Simpan Perubahan' : 'Tambah' }}
+            </button>
+            <button class="btn-secondary" @click="showPixelModal = false">Batal</button>
+          </div>
+        </div>
+      </div>
+
       <div class="card p-6 space-y-6">
         <h2 class="text-base font-bold text-gray-900">Template Pesan WA</h2>
 
@@ -1199,6 +1315,9 @@
 
 <script setup lang="ts">
 definePageMeta({ middleware: 'admin' })
+
+const { public: { duitkuIsProduction } } = useRuntimeConfig()
+const isSandbox = duitkuIsProduction !== 'true'
 
 const activeTab = ref('dashboard')
 const tabs = [
@@ -1925,6 +2044,75 @@ async function savePaymentSettings() {
     setTimeout(() => { paymentSaved.value = false }, 3000)
   } finally {
     paymentSaving.value = false
+  }
+}
+
+// ── Analitik ──
+type PixelType = 'meta' | 'gtm' | 'tiktok'
+type Pixel = { id: string; type: PixelType; name: string; pixelId?: string; containerId?: string; apiToken?: string; testCode?: string; enabled: boolean }
+
+const { data: analyticsSettingsData } = await useFetch<Record<string, string>>('/api/admin/settings')
+const analyticsPixels = ref<Pixel[]>([])
+if (analyticsSettingsData.value?.analytics_pixels) {
+  try { analyticsPixels.value = JSON.parse(analyticsSettingsData.value.analytics_pixels) } catch {}
+}
+
+const analyticsSaving = ref(false)
+const analyticsSaved = ref(false)
+const showPixelModal = ref(false)
+const editingPixelIdx = ref<number | null>(null)
+const pixelForm = reactive<Omit<Pixel, 'id' | 'enabled'>>({ type: 'meta', name: '', pixelId: '', containerId: '', apiToken: '', testCode: '' })
+
+function openAddPixel() {
+  editingPixelIdx.value = null
+  Object.assign(pixelForm, { type: 'meta', name: '', pixelId: '', containerId: '', apiToken: '', testCode: '' })
+  showPixelModal.value = true
+}
+
+function editPixel(idx: number) {
+  editingPixelIdx.value = idx
+  const px = analyticsPixels.value[idx]
+  Object.assign(pixelForm, { type: px.type, name: px.name, pixelId: px.pixelId ?? '', containerId: px.containerId ?? '', apiToken: px.apiToken ?? '', testCode: px.testCode ?? '' })
+  showPixelModal.value = true
+}
+
+function savePixelForm() {
+  if (!pixelForm.name || (!pixelForm.pixelId && !pixelForm.containerId)) return
+  const entry: Pixel = {
+    id: editingPixelIdx.value !== null ? analyticsPixels.value[editingPixelIdx.value].id : crypto.randomUUID(),
+    type: pixelForm.type,
+    name: pixelForm.name,
+    pixelId: pixelForm.pixelId || undefined,
+    containerId: pixelForm.containerId || undefined,
+    apiToken: pixelForm.apiToken || undefined,
+    testCode: pixelForm.testCode || undefined,
+    enabled: editingPixelIdx.value !== null ? analyticsPixels.value[editingPixelIdx.value].enabled : true,
+  }
+  if (editingPixelIdx.value !== null) {
+    analyticsPixels.value[editingPixelIdx.value] = entry
+  } else {
+    analyticsPixels.value.push(entry)
+  }
+  showPixelModal.value = false
+}
+
+function removePixel(idx: number) {
+  analyticsPixels.value.splice(idx, 1)
+}
+
+function togglePixel(idx: number) {
+  analyticsPixels.value[idx].enabled = !analyticsPixels.value[idx].enabled
+}
+
+async function saveAnalytics() {
+  analyticsSaving.value = true
+  analyticsSaved.value = false
+  try {
+    await $fetch('/api/admin/settings', { method: 'PUT', body: { analytics_pixels: JSON.stringify(analyticsPixels.value) } })
+    analyticsSaved.value = true
+    setTimeout(() => { analyticsSaved.value = false }, 3000)
+  } finally {
+    analyticsSaving.value = false
   }
 }
 

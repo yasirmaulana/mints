@@ -81,6 +81,9 @@ declare module "nitropack/types" {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/wa-template.get').default>>>>
       'put': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/wa-template.put').default>>>>
     }
+    '/api/analytics-config': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/analytics-config.get').default>>>>
+    }
     '/api/auth/logout': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/auth/logout.post').default>>>>
     }

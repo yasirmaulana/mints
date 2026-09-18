@@ -943,6 +943,7 @@ const _inlineRuntimeConfig = {
   "public": {
     "recaptchaSiteKey": "6Ld99cEtAAAAALE-xeCRGVdQyTE7xjzqEcTbXnik",
     "freeShippingMin": "500000",
+    "duitkuIsProduction": "false",
     "auth": {
       "loadStrategy": "server-first"
     }
@@ -2817,7 +2818,22 @@ _5jxvmWaDQawAxCYeFtukVo2_l4z46c5n9k8XiaC5ua4,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"36aad-aKtOr72vq27UOY1ti8TGwAwfm1Y\"",
+    "mtime": "2026-09-18T08:00:26.077Z",
+    "size": 223917,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"c19b8-nRaMyf2LjDM3BomsZ5zuV04Il6U\"",
+    "mtime": "2026-09-18T08:00:26.078Z",
+    "size": 793016,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -4138,6 +4154,7 @@ const _lazy_sXCsut = () => Promise.resolve().then(function () { return settings_
 const _lazy_CwyZ4k = () => Promise.resolve().then(function () { return settings_put$1; });
 const _lazy_Jb2wQx = () => Promise.resolve().then(function () { return waTemplate_get$1; });
 const _lazy_SSy4Pw = () => Promise.resolve().then(function () { return waTemplate_put$1; });
+const _lazy_cctNiS = () => Promise.resolve().then(function () { return analyticsConfig_get$1; });
 const _lazy_m1eK1F = () => Promise.resolve().then(function () { return logout_post$1; });
 const _lazy_wek7if = () => Promise.resolve().then(function () { return me_get$1; });
 const _lazy_ZujuIf = () => Promise.resolve().then(function () { return sendOtp_post$1; });
@@ -4201,6 +4218,7 @@ const handlers = [
   { route: '/api/admin/settings', handler: _lazy_CwyZ4k, lazy: true, middleware: false, method: "put" },
   { route: '/api/admin/wa-template', handler: _lazy_Jb2wQx, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/wa-template', handler: _lazy_SSy4Pw, lazy: true, middleware: false, method: "put" },
+  { route: '/api/analytics-config', handler: _lazy_cctNiS, lazy: true, middleware: false, method: "get" },
   { route: '/api/auth/logout', handler: _lazy_m1eK1F, lazy: true, middleware: false, method: "post" },
   { route: '/api/auth/me', handler: _lazy_wek7if, lazy: true, middleware: false, method: "get" },
   { route: '/api/auth/send-otp', handler: _lazy_ZujuIf, lazy: true, middleware: false, method: "post" },
@@ -4725,7 +4743,8 @@ const login_post = defineEventHandler(async (event) => {
   const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
   checkRateLimit(`admin-login:${ip}`, 10, 15 * 60 * 1e3);
   const body = await readBody(event);
-  const { username, password } = body != null ? body : {};
+  const { username, password, recaptchaToken } = body != null ? body : {};
+  await verifyRecaptcha(recaptchaToken);
   const config = useRuntimeConfig();
   if (!username || !password) {
     throw createError({ statusCode: 400, statusMessage: "Username dan password wajib diisi" });
@@ -5209,7 +5228,8 @@ const ALLOWED_KEYS$2 = /* @__PURE__ */ new Set([
   "shipping_origin_city_id",
   "shipping_origin_city_label",
   "payment_gateway_enabled",
-  "bank_accounts"
+  "bank_accounts",
+  "analytics_pixels"
 ]);
 const settings_get$2 = defineEventHandler(async (event) => {
   await requireAdminSession(event);
@@ -5232,7 +5252,8 @@ const ALLOWED_KEYS$1 = /* @__PURE__ */ new Set([
   "shipping_origin_city_id",
   "shipping_origin_city_label",
   "payment_gateway_enabled",
-  "bank_accounts"
+  "bank_accounts",
+  "analytics_pixels"
 ]);
 const settings_put = defineEventHandler(async (event) => {
   await requireAdminSession(event);
@@ -5315,6 +5336,21 @@ const waTemplate_put = defineEventHandler(async (event) => {
 const waTemplate_put$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: waTemplate_put
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const analyticsConfig_get = defineEventHandler(async () => {
+  const row = await prisma.storeSettings.findUnique({ where: { key: "analytics_pixels" } });
+  if (!row) return [];
+  try {
+    return JSON.parse(row.value);
+  } catch {
+    return [];
+  }
+});
+
+const analyticsConfig_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: analyticsConfig_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const logout_post = defineEventHandler((event) => {

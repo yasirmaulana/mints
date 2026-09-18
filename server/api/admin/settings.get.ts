@@ -2,7 +2,8 @@ const ALLOWED_KEYS = new Set([
   'shipping_origin_city_id',
   'shipping_origin_city_label',
   'payment_gateway_enabled',
-  'bank_accounts'
+  'bank_accounts',
+  'analytics_pixels'
 ])
 
 export default defineEventHandler(async (event) => {
