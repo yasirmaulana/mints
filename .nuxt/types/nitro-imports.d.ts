@@ -198,8 +198,8 @@ declare global {
   const useStorage: typeof import('../../node_modules/nitropack/dist/runtime/internal/storage').useStorage
   const verifyAdminToken: typeof import('../../server/utils/auth').verifyAdminToken
   const verifyPassword: typeof import('../../node_modules/nuxt-auth-utils/dist/runtime/server/utils/password').verifyPassword
+  const verifyRecaptcha: typeof import('../../server/utils/recaptcha').verifyRecaptcha
   const verifyTurnstile: typeof import('../../server/utils/turnstile').verifyTurnstile
-  const verifyTurnstileToken: typeof import('../../node_modules/@nuxtjs/turnstile/dist/runtime/server/utils/verify').verifyTurnstileToken
   const writeEarlyHints: typeof import('../../node_modules/h3').writeEarlyHints
 }
 // for type re-export
@@ -356,7 +356,6 @@ declare global {
   import('../../node_modules/nuxt-auth-utils/dist/runtime/server/utils/session.d')
 }
 export { H3Event, H3Error, appendCorsHeaders, appendCorsPreflightHeaders, appendHeader, appendHeaders, appendResponseHeader, appendResponseHeaders, assertMethod, callNodeListener, clearResponseHeaders, clearSession, createApp, createAppEventHandler, createError, createEvent, createEventStream, createRouter, defaultContentType, defineEventHandler, defineLazyEventHandler, defineNodeListener, defineNodeMiddleware, defineRequestMiddleware, defineResponseMiddleware, defineWebSocket, defineWebSocketHandler, deleteCookie, dynamicEventHandler, eventHandler, fetchWithEvent, fromNodeMiddleware, fromPlainHandler, fromWebHandler, getCookie, getHeader, getHeaders, getMethod, getProxyRequestHeaders, getQuery, getRequestFingerprint, getRequestHeader, getRequestHeaders, getRequestHost, getRequestIP, getRequestPath, getRequestProtocol, getRequestURL, getRequestWebStream, getResponseHeader, getResponseHeaders, getResponseStatus, getResponseStatusText, getRouterParam, getRouterParams, getSession, getValidatedQuery, getValidatedRouterParams, handleCacheHeaders, handleCors, isCorsOriginAllowed, isError, isEvent, isEventHandler, isMethod, isPreflightRequest, isStream, isWebResponse, lazyEventHandler, parseCookies, promisifyNodeListener, proxyRequest, readBody, readFormData, readMultipartFormData, readRawBody, readValidatedBody, removeResponseHeader, sanitizeStatusCode, sanitizeStatusMessage, sealSession, send, sendError, sendIterable, sendNoContent, sendProxy, sendRedirect, sendStream, sendWebResponse, serveStatic, setCookie, setHeader, setHeaders, setResponseHeader, setResponseHeaders, setResponseStatus, splitCookiesString, toEventHandler, toNodeListener, toPlainHandler, toWebHandler, toWebRequest, unsealSession, updateSession, useBase, useSession, writeEarlyHints } from 'h3';
-export { verifyTurnstileToken } from '/home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@nuxtjs/turnstile/dist/runtime/server/utils/verify';
 export { useNitroApp } from 'nitropack/runtime/internal/app';
 export { useRuntimeConfig, useAppConfig } from 'nitropack/runtime/internal/config';
 export { defineNitroPlugin, nitroPlugin } from 'nitropack/runtime/internal/plugin';
@@ -428,5 +427,6 @@ export { resolveBankInfo, sendPaymentNotice, getBulkTemplate } from '/home/yasir
 export { sendOtpEmail } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/mailer';
 export { prisma } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/prisma';
 export { checkRateLimit } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/rate-limit';
+export { verifyRecaptcha } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/recaptcha';
 export { getS3Client, uploadToS3 } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/s3';
 export { verifyTurnstile } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/turnstile';

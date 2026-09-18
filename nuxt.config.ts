@@ -1,11 +1,6 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-08-23',
-  modules: ['@nuxt/ui', '@nuxtjs/turnstile', 'nuxt-auth-utils'],
-
-  turnstile: {
-    siteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY,
-    addValidateEndpoint: false,
-  },
+  modules: ['@nuxt/ui', 'nuxt-auth-utils'],
 
   tailwindcss: {
     cssPath: '~/assets/css/main.css',
@@ -50,10 +45,10 @@ export default defineNuxtConfig({
     // SMTP Gmail
     smtpUser: process.env.SMTP_USER || '',
     smtpPass: process.env.SMTP_PASS || '',
-    // Cloudflare Turnstile
-    turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY || '',
+    // Google reCAPTCHA v3
+    recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY || '',
     public: {
-      turnstileSiteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY || '',
+      recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY || '',
       freeShippingMin: process.env.FREE_SHIPPING_MIN || '500000'
     }
   },

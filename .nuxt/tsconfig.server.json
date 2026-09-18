@@ -35,9 +35,6 @@
       "vue-router/auto-routes": [
         "../node_modules/vue-router/vue-router-auto-routes"
       ],
-      "@types/cloudflare-turnstile": [
-        "../node_modules/@types/cloudflare-turnstile"
-      ],
       "nuxt": [
         "../node_modules/nuxt"
       ],
@@ -89,9 +86,6 @@
       "nitropack/runtime": [
         "../node_modules/nitropack/runtime"
       ],
-      "#nuxt-scripts/h3": [
-        "./h3"
-      ],
       "#shared": [
         "../shared"
       ],
@@ -137,15 +131,6 @@
       "#color-mode-options": [
         "./color-mode-options.mjs"
       ],
-      "#nuxt-scripts": [
-        "../node_modules/@nuxt/scripts/dist/runtime"
-      ],
-      "#nuxt-scripts/*": [
-        "../node_modules/@nuxt/scripts/dist/runtime/*"
-      ],
-      "#nuxt-scripts/network-dispatcher": [
-        "../node_modules/@nuxt/scripts/dist/runtime/server/utils/network-dispatcher.node"
-      ],
       "#auth-utils": [
         "../node_modules/nuxt-auth-utils/dist/runtime/types/index"
       ],
@@ -186,8 +171,6 @@
     "../node_modules/@nuxtjs/color-mode/node_modules",
     "../node_modules/@nuxtjs/tailwindcss/node_modules",
     "../node_modules/@nuxt/ui/node_modules",
-    "../node_modules/@nuxt/scripts/node_modules",
-    "../node_modules/@nuxtjs/turnstile/node_modules",
     "../node_modules/nuxt-auth-utils/node_modules",
     "../node_modules/@nuxt/telemetry/node_modules",
     "../dist"

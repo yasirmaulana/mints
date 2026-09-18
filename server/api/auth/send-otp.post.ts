@@ -1,13 +1,13 @@
 import { sendOtpEmail } from '~/server/utils/mailer'
-import { verifyTurnstile } from '~/server/utils/turnstile'
+import { verifyRecaptcha } from '~/server/utils/recaptcha'
 
 export default defineEventHandler(async (event) => {
   const ip = getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
   checkRateLimit(`send-otp:${ip}`, 5, 10 * 60 * 1000)
 
-  const { email, turnstileToken } = await readBody(event) ?? {}
+  const { email, recaptchaToken } = await readBody(event) ?? {}
 
-  await verifyTurnstile(turnstileToken, ip)
+  await verifyRecaptcha(recaptchaToken)
   if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw createError({ statusCode: 400, statusMessage: 'Email tidak valid' })
   }

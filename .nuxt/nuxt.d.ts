@@ -1,5 +1,4 @@
 /// <reference types="@nuxt/ui" />
-/// <reference types="@nuxtjs/turnstile" />
 /// <reference types="nuxt-auth-utils" />
 /// <reference types="@nuxt/telemetry" />
 /// <reference path="types/nitro-layouts.d.ts" />
@@ -13,8 +12,6 @@
 /// <reference path="../node_modules/@nuxt/vite-builder/dist/index.d.mts" />
 /// <reference path="../node_modules/@nuxt/nitro-server/dist/index.d.mts" />
 /// <reference path="ui.colors.d.ts" />
-/// <reference path="types/nuxt-scripts-nitro.d.ts" />
-/// <reference types="@types/cloudflare-turnstile" />
 /// <reference path="types/layouts.d.ts" />
 /// <reference types="vue-router" />
 /// <reference path="types/middleware.d.ts" />
@@ -24,7 +21,6 @@
 /// <reference path="types/imports.d.ts" />
 /// <reference path="schema/nuxt.schema.d.ts" />
 /// <reference path="types/tailwind.config.d.ts" />
-/// <reference path="types/nuxt-scripts-augments.d.ts" />
 /// <reference path="types/nitro.d.ts" />
 
 export {}

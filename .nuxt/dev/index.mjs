@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import { tmpdir } from 'node:os';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, getCookie, getResponseStatus, getQuery as getQuery$1, deleteCookie, setCookie, useSession, getHeaders, getRequestIP, sendStream, getRequestWebStream, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getRouterParam, readBody, getHeader, readMultipartFormData, getResponseStatusText } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, getCookie, getResponseStatus, getQuery as getQuery$1, deleteCookie, setCookie, useSession, getRequestWebStream, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getRouterParam, readBody, getHeader, getRequestIP, readMultipartFormData, getResponseStatusText } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/h3/dist/index.mjs';
 import { Server } from 'node:http';
 import { resolve, join, dirname } from 'node:path';
 import crypto$1, { createHash } from 'node:crypto';
@@ -26,9 +26,9 @@ import { createHooks as createHooks$1 } from 'file:///home/yasir/Documents/Proje
 import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/node-mock-http/dist/index.mjs';
 import { createStorage, prefixStorage } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unstorage/dist/index.mjs';
 import unstorage_47drivers_47fs from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unstorage/drivers/fs.mjs';
-import lruCache from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unstorage/drivers/lru-cache.mjs';
 import { mkdir, writeFile, rename, unlink, readFile } from 'node:fs/promises';
 import fsDriver from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unstorage/drivers/fs-lite.mjs';
+import lruCache from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unstorage/drivers/lru-cache.mjs';
 import { digest, hash as hash$1 } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/ohash/dist/index.mjs';
 import { klona } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/klona/dist/index.mjs';
 import { getContext } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/nitropack/node_modules/unctx/dist/index.mjs';
@@ -48,8 +48,6 @@ import { fileURLToPath } from 'node:url';
 import { dirname as dirname$1, resolve as resolve$1, basename } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/pathe/dist/index.mjs';
 import { getIcons } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@iconify/utils/lib/index.mjs';
 import { collections } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/.nuxt/nuxt-icon-server-bundle.mjs';
-import { lookup } from 'node:dns';
-import { Agent, fetch } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/undici/index.js';
 import { createHooks } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/nuxt-auth-utils/node_modules/hookable/dist/index.mjs';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unhead/dist/server.mjs';
 import { DeprecationsPlugin, PromisesPlugin, TemplateParamsPlugin, AliasSortingPlugin } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/unhead/dist/plugins.mjs';
@@ -123,7 +121,6 @@ const storage = createStorage({});
 
 storage.mount('/assets', assets$1);
 
-storage.mount('nuxt-scripts-cache', lruCache({"driver":"lru-cache","max":500,"maxSize":33554432,"maxEntrySize":8388608}));
 storage.mount('root', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/home/yasir/Documents/Project/p_otomatisin/mints","watchOptions":{"ignored":[null]}}));
 storage.mount('src', unstorage_47drivers_47fs({"driver":"fs","readOnly":true,"base":"/home/yasir/Documents/Project/p_otomatisin/mints/server","watchOptions":{"ignored":[null]}}));
 storage.mount('cache:nuxt:payload', cacheDriver({"base":"/home/yasir/Documents/Project/p_otomatisin/mints/.nuxt/cache/nuxt/payload"}));
@@ -931,14 +928,6 @@ const _inlineRuntimeConfig = {
       "/__nuxt_error": {
         "cache": false
       },
-      "/_scripts/assets/**": {
-        "headers": {
-          "cache-control": "public, max-age=31536000, immutable"
-        },
-        "cache": {
-          "maxAge": 31536000
-        }
-      },
       "/_nuxt/builds/meta/**": {
         "headers": {
           "cache-control": "public, max-age=31536000, immutable"
@@ -951,24 +940,9 @@ const _inlineRuntimeConfig = {
       }
     }
   },
-  "turnstile": {
-    "secretKey": "1x0000000000000000000000000000000AA"
-  },
   "public": {
-    "turnstile": {
-      "siteKey": "0x4AAAAAAE1kinJSGI7SMaBk"
-    },
-    "turnstileSiteKey": "0x4AAAAAAE1kinJSGI7SMaBk",
+    "recaptchaSiteKey": "6Ld99cEtAAAAALE-xeCRGVdQyTE7xjzqEcTbXnik",
     "freeShippingMin": "500000",
-    "nuxt-scripts": {
-      "version": "1.3.9",
-      "prefix": "/_scripts",
-      "defaultScriptOptions": {
-        "trigger": "onNuxtReady"
-      },
-      "googleStaticMapsProxy": "",
-      "endpoints": {}
-    },
     "auth": {
       "loadStrategy": "server-first"
     }
@@ -994,13 +968,9 @@ const _inlineRuntimeConfig = {
   "appUrl": "https://mints.id",
   "smtpUser": "otomatisinwebid@gmail.com",
   "smtpPass": "zlqw qtmf mmwu mfni",
-  "turnstileSecretKey": "0x4AAAAAAE1kikLcUmfFvICQYFgYHeeo7v4",
+  "recaptchaSecretKey": "6Ld99cEtAAAAABNLxll8_QQMfU2czYDbZ0xJo7sk",
   "icon": {
     "serverKnownCssClasses": []
-  },
-  "nuxt-scripts": {
-    "version": "1.3.9",
-    "googleStaticMapsProxy": ""
   },
   "session": {
     "name": "nuxt-session",
@@ -2854,7 +2824,7 @@ function readAsset (id) {
   return promises.readFile(resolve$1(serverDir, assets[id].path))
 }
 
-const publicAssetBases = {"/_nuxt/builds/meta/":{"maxAge":31536000},"/_nuxt/builds/":{"maxAge":1},"/_scripts/assets/":{"maxAge":31536000}};
+const publicAssetBases = {"/_nuxt/builds/meta/":{"maxAge":31536000},"/_nuxt/builds/":{"maxAge":1}};
 
 function isPublicAssetURL(id = '') {
   if (assets[id]) {
@@ -3452,6 +3422,26 @@ async function checkRateLimit(key, max = 5, windowMs = 15 * 60 * 1e3) {
   checkInMemory(key, max, windowMs);
 }
 
+async function verifyRecaptcha(token) {
+  const config = useRuntimeConfig();
+  const secret = config.recaptchaSecretKey;
+  if (!secret) {
+    console.warn("[recaptcha] RECAPTCHA_SECRET_KEY tidak dikonfigurasi \u2014 verifikasi dilewati");
+    return;
+  }
+  const res = await $fetch(
+    "https://www.google.com/recaptcha/api/siteverify",
+    {
+      method: "POST",
+      body: new URLSearchParams({ secret, response: token }).toString(),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    }
+  );
+  if (!res.success || res.score < 0.5) {
+    throw createError({ statusCode: 400, statusMessage: "Verifikasi keamanan gagal, coba lagi" });
+  }
+}
+
 const MAX_SIZE = 2 * 1024 * 1024;
 function getS3Client() {
   const config = useRuntimeConfig();
@@ -3485,24 +3475,6 @@ async function uploadToS3(data, filename, contentType, prefix = "products") {
     ContentType: contentType
   }));
   return `/api/s3-image/${key}`;
-}
-
-async function verifyTurnstile(token, ip) {
-  const config = useRuntimeConfig();
-  const secret = config.turnstileSecretKey;
-  if (!secret) {
-    console.warn("[turnstile] TURNSTILE_SECRET_KEY tidak dikonfigurasi \u2014 verifikasi dilewati");
-    return;
-  }
-  const body = new URLSearchParams({ secret, response: token });
-  if (ip) body.set("remoteip", ip);
-  const res = await $fetch(
-    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-    { method: "POST", body: body.toString(), headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-  );
-  if (!res.success) {
-    throw createError({ statusCode: 400, statusMessage: "Verifikasi keamanan gagal, coba lagi" });
-  }
 }
 
 const warnOnceSet = /* @__PURE__ */ new Set();
@@ -3563,984 +3535,6 @@ const _lcD18D = defineCachedEventHandler(async (event) => {
   swr: true,
   maxAge: 60 * 60 * 24 * 7
   // 1 week
-});
-
-const TLD_WILDCARD_RE = /^(?:com|[a-z]{2}|(?:com|co)\.[a-z]{2})$/i;
-const SUBDOMAIN_LABEL_RE = /^[^.]+$/;
-function matchDomain(domain, pattern) {
-  if (!pattern.includes("*"))
-    return domain === pattern || domain.endsWith(`.${pattern}`);
-  if (pattern.startsWith("*.") && pattern.startsWith("*")) {
-    const suffix = pattern.slice(2);
-    if (!domain.endsWith(`.${suffix}`))
-      return false;
-    const label = domain.slice(0, -(suffix.length + 1));
-    return SUBDOMAIN_LABEL_RE.test(label);
-  }
-  if (!pattern.endsWith("*") || pattern.indexOf("*") !== pattern.length - 1)
-    return false;
-  const prefix = pattern.slice(0, -1);
-  if (!domain.startsWith(prefix))
-    return false;
-  const tld = domain.slice(prefix.length);
-  return TLD_WILDCARD_RE.test(tld);
-}
-
-const createNetworkDispatcher = async (createLookup, resolveHostnameOverride) => {
-  const resolveHostname = ((hostname, callback) => {
-    lookup(hostname, { all: true, verbatim: true }, (error, addresses) => {
-      callback(error, addresses);
-    });
-  });
-  const dispatcher = new Agent({
-    connect: {
-      lookup: createLookup(resolveHostname)
-    }
-  });
-  return {
-    fetch: ((input, init) => fetch(input, {
-      ...init,
-      dispatcher
-    })),
-    close: () => dispatcher.close()
-  };
-};
-
-const LOCAL_HOST_SUFFIXES = [
-  "home",
-  "internal",
-  "lan",
-  "local",
-  "localdomain",
-  "localhost"
-];
-function parseIPv4(hostname) {
-  const parts = hostname.split(".");
-  if (parts.length !== 4 || parts.some((part) => !/^\d{1,3}$/.test(part)))
-    return;
-  const octets = parts.map(Number);
-  return octets.every((octet) => octet >= 0 && octet <= 255) ? octets : void 0;
-}
-function isPublicIPv4([a, b, c]) {
-  return a !== 0 && a !== 10 && a !== 127 && !(a === 100 && b >= 64 && b <= 127) && !(a === 169 && b === 254) && !(a === 172 && b >= 16 && b <= 31) && !(a === 192 && b === 0 && c === 0) && !(a === 192 && b === 0 && c === 2) && !(a === 192 && b === 88 && c === 99) && !(a === 192 && b === 168) && !(a === 198 && (b === 18 || b === 19)) && !(a === 198 && b === 51 && c === 100) && !(a === 203 && b === 0 && c === 113) && a < 224;
-}
-function isPublicIPv6(hostname) {
-  const groups = hostname.split(":");
-  const firstGroup = Number.parseInt(groups[0] || "0", 16);
-  if (!Number.isInteger(firstGroup) || firstGroup < 8192 || firstGroup > 16383)
-    return false;
-  const secondGroup = Number.parseInt(groups[1] || "0", 16);
-  return !(firstGroup === 8193 && (secondGroup === 0 || secondGroup === 3512)) && firstGroup !== 8194;
-}
-function isPublicNetworkHostname(input) {
-  const hostname = input.trim().toLowerCase().replace(/^\[|\]$/g, "").split("%", 1)[0].replace(/\.$/, "");
-  if (!hostname)
-    return false;
-  const ipv4 = parseIPv4(hostname);
-  if (ipv4)
-    return isPublicIPv4(ipv4);
-  if (hostname.includes(":"))
-    return isPublicIPv6(hostname);
-  const labels = hostname.split(".");
-  if (labels.length < 2)
-    return false;
-  const suffix = labels.at(-1);
-  return !LOCAL_HOST_SUFFIXES.includes(suffix);
-}
-
-async function closePublicNetworkDispatcher(dispatcher, primaryError) {
-  if (!dispatcher)
-    return;
-  await dispatcher.close().catch((cleanupError) => {
-    if (primaryError !== void 0) {
-      if (primaryError && typeof primaryError === "object")
-        Object.assign(primaryError, { cleanupError });
-      return;
-    }
-    throw cleanupError;
-  });
-}
-function createPublicNetworkLookup(resolveHostname) {
-  const networkLookup = (hostname, options, callback) => {
-    resolveHostname(hostname, (error, addresses) => {
-      if (error) {
-        callback(error, "");
-        return;
-      }
-      if (!addresses.length || addresses.some(({ address }) => !isPublicNetworkHostname(address))) {
-        callback(Object.assign(new Error("Upstream hostname resolved to a non-public address"), {
-          code: "ERR_NUXT_SCRIPTS_PRIVATE_ADDRESS"
-        }), "");
-        return;
-      }
-      if (options.all) {
-        callback(null, addresses);
-        return;
-      }
-      const requestedFamily = options.family === "IPv4" ? 4 : options.family === "IPv6" ? 6 : options.family === 4 || options.family === 6 ? options.family : void 0;
-      const selected = addresses.find(({ family }) => family === requestedFamily) ?? addresses[0];
-      callback(null, selected.address, selected.family);
-    });
-  };
-  return networkLookup;
-}
-async function createPublicNetworkDispatcher(resolveHostnameOverride) {
-  return createNetworkDispatcher(createPublicNetworkLookup);
-}
-function isPrivateNetworkResolutionError(error) {
-  let current = error;
-  for (let depth = 0; depth < 5 && current && typeof current === "object"; depth++) {
-    if (current.code === "ERR_NUXT_SCRIPTS_PRIVATE_ADDRESS")
-      return true;
-    current = current.cause;
-  }
-  return false;
-}
-
-const FULL_PRIVACY = { ip: true, userAgent: true, language: true, screen: true, timezone: true, hardware: true };
-const NO_PRIVACY = { ip: false, userAgent: false, language: false, screen: false, timezone: false, hardware: false };
-const MAJOR_VERSION_RE = /^(\d+)/;
-const VERSION_RE = /^(\d+)(([.\-_])\d+)*/;
-const VERSION_SPLIT_RE = /[.\-_]/;
-const SNAPCHAT_VERSION_RE = /("version"\s*:\s*")(\d+(?:\.\d+)*)/g;
-const GA_VERSION_RE = /;(\d+(?:\.\d+)*)/g;
-const UPPERCASE_RE = /^[A-Z]/;
-const LANG_CODE_RE = /^[a-z]{2}(?:-[a-z]{2,})?$/i;
-function resolvePrivacy(input) {
-  if (input === true)
-    return { ...FULL_PRIVACY };
-  if (input === false || input === void 0)
-    return { ...NO_PRIVACY };
-  return {
-    ip: input.ip ?? false,
-    userAgent: input.userAgent ?? false,
-    language: input.language ?? false,
-    screen: input.screen ?? false,
-    timezone: input.timezone ?? false,
-    hardware: input.hardware ?? false
-  };
-}
-function mergePrivacy(base, override) {
-  if (override === void 0)
-    return base;
-  if (typeof override === "boolean")
-    return resolvePrivacy(override);
-  return {
-    ip: override.ip !== void 0 ? override.ip : base.ip,
-    userAgent: override.userAgent !== void 0 ? override.userAgent : base.userAgent,
-    language: override.language !== void 0 ? override.language : base.language,
-    screen: override.screen !== void 0 ? override.screen : base.screen,
-    timezone: override.timezone !== void 0 ? override.timezone : base.timezone,
-    hardware: override.hardware !== void 0 ? override.hardware : base.hardware
-  };
-}
-const SENSITIVE_HEADERS = [
-  "cookie",
-  "authorization",
-  "proxy-authorization",
-  "x-csrf-token",
-  "www-authenticate"
-];
-const STRIP_PARAMS = {
-  // IP addresses — anonymized to subnet
-  ip: ["uip", "ip", "client_ip_address", "ip_address", "user_ip", "ipaddress", "context.ip"],
-  // Screen/Hardware — generalized to common buckets
-  screen: ["sr", "vp", "sd", "screen", "viewport", "colordepth", "pixelratio", "sh", "sw"],
-  // Hardware capabilities — generalized to common buckets
-  hardware: ["hardwareconcurrency", "devicememory", "cpu", "mem"],
-  // Platform identifiers — low entropy, kept as-is (e.g. "Linux", "x86")
-  platform: ["plat", "platform", "d_a", "d_ot"],
-  // Version strings — generalized to major version only (d_os = Snapchat OS version, uapv = GA platform version)
-  version: ["d_os", "uapv"],
-  // Browser version lists — generalized to major versions (d_bvs = Snapchat, uafvl = GA Client Hints)
-  browserVersion: ["d_bvs", "uafvl"],
-  // Browser data lists — replaced with empty value
-  browserData: ["plugins", "fonts", "audiofingerprint"],
-  // Location/Timezone — generalized
-  location: ["tz", "timezone", "timezoneoffset"],
-  // Canvas/WebGL fingerprints — neutralized at build time via AST rewriting (rewrite-ast.ts).
-  // These params are no longer stripped at runtime; the source APIs (toDataURL, WEBGL_debug_renderer_info)
-  // are neutralized before the script ever runs.
-  // canvas: ['canvas', 'webgl'],
-  // Combined device fingerprinting (X/Twitter dv param contains: timezone, locale, vendor, platform, screen, etc.)
-  deviceInfo: ["dv", "device_info", "deviceinfo"]
-};
-const NORMALIZE_PARAMS = {
-  language: ["ul", "lang", "language", "languages"],
-  userAgent: ["ua", "useragent", "user_agent", "client_user_agent", "context.useragent"]
-};
-function expandIPv6(address) {
-  const halves = address.split("::");
-  if (halves.length > 2)
-    return;
-  const left = halves[0] ? halves[0].split(":") : [];
-  const right = halves[1] ? halves[1].split(":") : [];
-  const valid = (part) => /^[\da-f]{1,4}$/i.test(part);
-  if (!left.every(valid) || !right.every(valid))
-    return;
-  if (halves.length === 1)
-    return left.length === 8 ? left : void 0;
-  const missing = 8 - left.length - right.length;
-  if (missing < 1)
-    return;
-  return [...left, ...Array.from({ length: missing }).fill("0"), ...right];
-}
-function anonymizeIP(ip) {
-  if (ip.includes(":")) {
-    const normalized = ip.split("%", 1)[0] || "";
-    const mappedIPv4 = normalized.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/i)?.[1];
-    if (mappedIPv4)
-      return `::ffff:${anonymizeIP(mappedIPv4)}`;
-    const expanded = expandIPv6(normalized);
-    return expanded ? `${expanded.slice(0, 3).join(":")}::` : normalized;
-  }
-  const parts = ip.split(".");
-  if (parts.length === 4) {
-    parts[3] = "0";
-    return parts.join(".");
-  }
-  return ip;
-}
-function normalizeUserAgent(ua) {
-  const tokens = [
-    ["Edg/", "Edge"],
-    ["OPR/", "Opera"],
-    ["Opera/", "Opera"],
-    ["Firefox/", "Firefox"],
-    ["Chrome/", "Chrome"],
-    ["Safari/", "Safari"]
-  ];
-  for (const [pattern, family] of tokens) {
-    const idx = ua.indexOf(pattern);
-    if (idx !== -1) {
-      const versionStart = idx + pattern.length;
-      const majorVersion = ua.slice(versionStart).match(MAJOR_VERSION_RE)?.[1];
-      if (majorVersion)
-        return `Mozilla/5.0 (compatible; ${family}/${majorVersion}.0)`;
-    }
-  }
-  return "Mozilla/5.0 (compatible)";
-}
-function normalizeLanguage(lang) {
-  return lang.split(",")[0]?.split(";")[0]?.trim() || "en";
-}
-const SCREEN_BUCKETS = {
-  desktop: { w: 1920, h: 1080 },
-  tablet: { w: 768, h: 1024 },
-  mobile: { w: 360, h: 640 }
-};
-function getDeviceClass(width) {
-  if (width >= 1200)
-    return "desktop";
-  if (width >= 700)
-    return "tablet";
-  return "mobile";
-}
-function generalizeScreen(value, dimension) {
-  if (typeof value === "string" && value.includes("x")) {
-    const width = Number.parseInt(value.split("x")[0] || "0");
-    const cls = getDeviceClass(width);
-    return `${SCREEN_BUCKETS[cls].w}x${SCREEN_BUCKETS[cls].h}`;
-  }
-  const num = typeof value === "number" ? value : Number(value);
-  if (!Number.isNaN(num)) {
-    const cls = getDeviceClass(num);
-    const bucketed = dimension === "height" ? SCREEN_BUCKETS[cls].h : SCREEN_BUCKETS[cls].w;
-    return typeof value === "number" ? bucketed : String(bucketed);
-  }
-  return "1920x1080";
-}
-function generalizeHardware(value) {
-  const num = typeof value === "number" ? value : Number(value);
-  if (Number.isNaN(num))
-    return 4;
-  if (num >= 16)
-    return 16;
-  if (num >= 8)
-    return 8;
-  if (num >= 4)
-    return 4;
-  return 2;
-}
-function generalizeVersion(value) {
-  if (typeof value !== "string")
-    return String(value);
-  const match = value.match(VERSION_RE);
-  if (!match)
-    return String(value);
-  const major = match[1];
-  const sep = match[3] || ".";
-  const segmentCount = value.split(VERSION_SPLIT_RE).length;
-  return major + `${sep}0`.repeat(segmentCount - 1);
-}
-function generalizeBrowserVersions(value) {
-  if (typeof value !== "string")
-    return String(value);
-  const zeroSegments = (ver) => {
-    const parts = ver.split(".");
-    return parts[0] + parts.slice(1).map(() => ".0").join("");
-  };
-  if (value.includes('"version"'))
-    return value.replace(SNAPCHAT_VERSION_RE, (_, prefix, ver) => prefix + zeroSegments(ver));
-  if (value.includes(";"))
-    return value.replace(GA_VERSION_RE, (_, ver) => `;${zeroSegments(ver)}`);
-  return value;
-}
-function generalizeTimezone(value) {
-  if (typeof value === "number") {
-    return Math.round(value / 180) * 180;
-  }
-  if (typeof value === "string") {
-    return "UTC";
-  }
-  return 0;
-}
-function anonymizeDeviceInfo(value) {
-  const sep = value.includes("|") ? "|" : "&";
-  const parts = value.split(sep);
-  if (parts.length < 4)
-    return value;
-  const result = [...parts];
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
-    if (part.includes("/") && UPPERCASE_RE.test(part)) {
-      result[i] = String(generalizeTimezone(part));
-      continue;
-    }
-    if (LANG_CODE_RE.test(part)) {
-      result[i] = normalizeLanguage(part);
-      continue;
-    }
-    const num = Number(part);
-    if (!Number.isNaN(num) && num >= 300 && num <= 1e4) {
-      const nextNum = Number(parts[i + 1]);
-      if (!Number.isNaN(nextNum) && nextNum >= 300 && nextNum <= 1e4) {
-        const cls = getDeviceClass(num);
-        result[i] = String(SCREEN_BUCKETS[cls].w);
-        result[i + 1] = String(SCREEN_BUCKETS[cls].h);
-        i++;
-        continue;
-      }
-      result[i] = String(generalizeScreen(num));
-      continue;
-    }
-    if (!Number.isNaN(num) && num < -60) {
-      result[i] = String(generalizeTimezone(num));
-    }
-  }
-  return result.join(sep);
-}
-function matchesParam(key, params) {
-  const lk = key.toLowerCase();
-  return params.some((pm) => {
-    const lp = pm.toLowerCase();
-    return lk === lp || lk.startsWith(`${lp}[`);
-  });
-}
-function mapValue(value, transform) {
-  return Array.isArray(value) ? value.map(transform) : transform(value);
-}
-function mapString(value, transform) {
-  return mapValue(value, (item) => typeof item === "string" ? transform(item) : item);
-}
-function stripPayloadFingerprinting(payload, privacy) {
-  const p = privacy || FULL_PRIVACY;
-  const result = /* @__PURE__ */ Object.create(null);
-  let deviceClasses = [];
-  for (const [key, value] of Object.entries(payload)) {
-    if (key.toLowerCase() === "sw") {
-      const widths = Array.isArray(value) ? value : [value];
-      deviceClasses = widths.map((width) => {
-        const num = typeof width === "number" ? width : Number(width);
-        return Number.isNaN(num) ? void 0 : getDeviceClass(num);
-      });
-    }
-  }
-  for (const [key, value] of Object.entries(payload)) {
-    const lowerKey = key.toLowerCase();
-    const isLanguageParam = NORMALIZE_PARAMS.language.some((pm) => lowerKey === pm.toLowerCase());
-    if (isLanguageParam) {
-      if (Array.isArray(value)) {
-        result[key] = p.language ? value.map((v) => typeof v === "string" ? normalizeLanguage(v) : v) : value;
-      } else if (typeof value === "string") {
-        result[key] = p.language ? normalizeLanguage(value) : value;
-      } else {
-        result[key] = value;
-      }
-      continue;
-    }
-    const isUserAgentParam = NORMALIZE_PARAMS.userAgent.some((pm) => lowerKey === pm.toLowerCase());
-    if (isUserAgentParam) {
-      result[key] = p.userAgent ? mapString(value, normalizeUserAgent) : value;
-      continue;
-    }
-    if (matchesParam(key, STRIP_PARAMS.ip)) {
-      result[key] = p.ip ? mapString(value, anonymizeIP) : value;
-      continue;
-    }
-    if (matchesParam(key, STRIP_PARAMS.screen)) {
-      if (!p.screen) {
-        result[key] = value;
-        continue;
-      }
-      if (["sd", "colordepth", "pixelratio"].includes(lowerKey)) {
-        result[key] = value;
-      } else if (lowerKey === "sh" && deviceClasses.length > 0) {
-        const generalizePairedHeight = (item, index) => {
-          const deviceClass = deviceClasses[index] ?? deviceClasses[0];
-          if (!deviceClass)
-            return generalizeScreen(item, "height");
-          const paired = SCREEN_BUCKETS[deviceClass].h;
-          return typeof item === "number" ? paired : String(paired);
-        };
-        result[key] = Array.isArray(value) ? value.map(generalizePairedHeight) : generalizePairedHeight(value, 0);
-      } else {
-        const dimension = lowerKey === "sw" ? "width" : lowerKey === "sh" ? "height" : void 0;
-        result[key] = mapValue(value, (item) => generalizeScreen(item, dimension));
-      }
-      continue;
-    }
-    if (matchesParam(key, STRIP_PARAMS.hardware)) {
-      result[key] = p.hardware ? mapValue(value, generalizeHardware) : value;
-      continue;
-    }
-    if (matchesParam(key, STRIP_PARAMS.version)) {
-      result[key] = p.hardware ? mapValue(value, generalizeVersion) : value;
-      continue;
-    }
-    if (matchesParam(key, STRIP_PARAMS.browserVersion)) {
-      result[key] = p.hardware ? mapValue(value, generalizeBrowserVersions) : value;
-      continue;
-    }
-    if (matchesParam(key, STRIP_PARAMS.location)) {
-      result[key] = p.timezone ? mapValue(value, generalizeTimezone) : value;
-      continue;
-    }
-    if (matchesParam(key, STRIP_PARAMS.browserData)) {
-      result[key] = p.hardware ? Array.isArray(value) ? [] : typeof value === "number" ? 0 : "" : value;
-      continue;
-    }
-    if (matchesParam(key, STRIP_PARAMS.deviceInfo)) {
-      result[key] = p.hardware ? mapValue(value, (item) => typeof item === "string" ? anonymizeDeviceInfo(item) : "") : value;
-      continue;
-    }
-    if (matchesParam(key, STRIP_PARAMS.platform)) {
-      result[key] = value;
-      continue;
-    }
-    if (Array.isArray(value)) {
-      result[key] = value.map(
-        (item) => typeof item === "object" && item !== null ? stripPayloadFingerprinting(item, privacy) : item
-      );
-    } else if (typeof value === "object" && value !== null) {
-      result[key] = stripPayloadFingerprinting(value, privacy);
-    } else {
-      result[key] = value;
-    }
-  }
-  return result;
-}
-
-const COMPRESSION_RE = /gzip|deflate|br|compress|base64/i;
-const CLIENT_HINT_VERSION_RE = /;v="(\d+)\.[^"]*"/g;
-const MAX_TRANSFORM_BODY_SIZE = 2 * 1024 * 1024;
-const UPSTREAM_TIMEOUT_MS = 15e3;
-const MAX_UPSTREAM_REDIRECTS = 5;
-const REDIRECT_STATUSES = /* @__PURE__ */ new Set([301, 302, 303, 307, 308]);
-const REQUEST_BODY_HEADERS = ["content-encoding", "content-language", "content-length", "content-location", "content-type"];
-const SKIP_RESPONSE_HEADERS = /* @__PURE__ */ new Set([
-  "alt-svc",
-  "clear-site-data",
-  "connection",
-  "content-encoding",
-  "content-length",
-  "keep-alive",
-  "nel",
-  "proxy-authenticate",
-  "proxy-authorization",
-  "report-to",
-  "reporting-endpoints",
-  "set-cookie",
-  "set-cookie2",
-  "strict-transport-security",
-  "te",
-  "trailer",
-  "transfer-encoding",
-  "upgrade",
-  "www-authenticate"
-]);
-const SKIP_REQUEST_HEADERS = /* @__PURE__ */ new Set([
-  "connection",
-  "keep-alive",
-  "proxy-authenticate",
-  "proxy-authorization",
-  "te",
-  "trailer",
-  "transfer-encoding",
-  "upgrade"
-]);
-async function readBodyBytes(event) {
-  const contentLength = Number(getHeaders(event)["content-length"] || 0);
-  if (Number.isFinite(contentLength) && contentLength > MAX_TRANSFORM_BODY_SIZE) {
-    throw createError({ statusCode: 413, statusMessage: "Proxy request body too large" });
-  }
-  const stream = getRequestWebStream(event);
-  if (!stream)
-    return void 0;
-  const reader = stream.getReader();
-  const chunks = [];
-  let total = 0;
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done)
-        break;
-      if (!value)
-        continue;
-      total += value.byteLength;
-      if (total > MAX_TRANSFORM_BODY_SIZE) {
-        try {
-          await reader.cancel("Proxy request body too large");
-        } catch {
-        }
-        throw createError({ statusCode: 413, statusMessage: "Proxy request body too large" });
-      }
-      chunks.push(value);
-    }
-  } finally {
-    reader.releaseLock();
-  }
-  const body = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    body.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return body;
-}
-function withResponseBodyIdleTimeout(body, timeoutMs, onTimeout) {
-  const reader = body.getReader();
-  let stopped = false;
-  let timeoutId;
-  const clearIdleTimeout = () => {
-    if (timeoutId !== void 0) {
-      clearTimeout(timeoutId);
-      timeoutId = void 0;
-    }
-  };
-  return new ReadableStream({
-    async pull(controller) {
-      timeoutId = setTimeout(() => {
-        stopped = true;
-        const error = createError({
-          statusCode: 504,
-          statusMessage: "Gateway Timeout",
-          message: "Upstream response body timed out"
-        });
-        onTimeout();
-        controller.error(error);
-        void reader.cancel(error).catch((cancelError) => {
-          Object.assign(error, { cause: cancelError });
-        });
-      }, timeoutMs);
-      const result = await reader.read().catch((error) => {
-        clearIdleTimeout();
-        if (!stopped)
-          controller.error(error);
-        return void 0;
-      });
-      clearIdleTimeout();
-      if (!result || stopped)
-        return;
-      if (result.done) {
-        stopped = true;
-        controller.close();
-        return;
-      }
-      controller.enqueue(result.value);
-    },
-    async cancel(reason) {
-      stopped = true;
-      clearIdleTimeout();
-      await reader.cancel(reason);
-    }
-  });
-}
-function stripQueryFingerprinting(query, privacy) {
-  const stripped = stripPayloadFingerprinting(query, privacy);
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(stripped)) {
-    const values = Array.isArray(value) ? value : [value];
-    for (const item of values) {
-      if (item !== void 0 && item !== null)
-        params.append(key, typeof item === "object" ? JSON.stringify(item) : String(item));
-    }
-  }
-  return { queryString: params.toString(), stripped };
-}
-function isUpstreamRedirect(status) {
-  return REDIRECT_STATUSES.has(status);
-}
-function upstreamFetchError(err, timedOut) {
-  const blockedPrivateNetwork = isPrivateNetworkResolutionError(err);
-  return createError({
-    statusCode: blockedPrivateNetwork ? 403 : timedOut ? 504 : 502,
-    statusMessage: blockedPrivateNetwork ? "Local network targets are not allowed" : timedOut ? "Gateway Timeout" : "Bad Gateway",
-    message: "Proxy upstream request failed",
-    cause: err,
-    data: {
-      errorName: err?.name,
-      errorCode: timedOut ? "TIMEOUT" : err?.code
-    }
-  });
-}
-function resolveProxyRedirect(response, state, redirectCount, urlAllowed) {
-  const location = response.headers.get("location");
-  if (!location) {
-    throw createError({
-      statusCode: 502,
-      statusMessage: "Invalid upstream redirect",
-      message: "Upstream redirect has no Location header"
-    });
-  }
-  if (redirectCount >= MAX_UPSTREAM_REDIRECTS) {
-    throw createError({
-      statusCode: 502,
-      statusMessage: "Too many upstream redirects",
-      message: "Upstream redirect limit exceeded"
-    });
-  }
-  let nextUrl;
-  try {
-    nextUrl = new URL(location, state.url);
-  } catch (cause) {
-    throw createError({
-      statusCode: 502,
-      statusMessage: "Invalid upstream redirect",
-      message: "Upstream redirect URL is invalid",
-      cause
-    });
-  }
-  if (!urlAllowed(nextUrl)) {
-    throw createError({
-      statusCode: 502,
-      statusMessage: "Unsafe upstream redirect",
-      message: `Upstream redirect target is not allowed: ${nextUrl.origin}`
-    });
-  }
-  const switchToGet = response.status === 303 && state.method !== "GET" && state.method !== "HEAD" || (response.status === 301 || response.status === 302) && state.method === "POST";
-  if (!switchToGet)
-    return { ...state, url: nextUrl };
-  const headers = { ...state.headers };
-  for (const header of REQUEST_BODY_HEADERS)
-    delete headers[header];
-  return { url: nextUrl, method: "GET", body: void 0, headers };
-}
-const _upcABj = defineEventHandler(async (event) => {
-  const config = useRuntimeConfig();
-  const proxyConfig = config["nuxt-scripts-proxy"];
-  if (!proxyConfig) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "First-party proxy not configured"
-    });
-  }
-  const { proxyPrefix, domainPrivacy, aliasToDomain, privacy: globalPrivacy, debug = true } = proxyConfig;
-  const path = event.path;
-  const log = debug ? (message, ...args) => {
-    console.debug(message, ...args);
-  } : () => {
-  };
-  const afterPrefix = path.slice(proxyPrefix.length + 1);
-  const slashIdx = afterPrefix.indexOf("/");
-  const segment = slashIdx > 0 ? afterPrefix.slice(0, slashIdx) : afterPrefix;
-  const remainingPath = slashIdx > 0 ? afterPrefix.slice(slashIdx) : "/";
-  const domain = aliasToDomain && Object.hasOwn(aliasToDomain, segment) ? aliasToDomain[segment] : segment;
-  if (!domain) {
-    log("[proxy] No domain in path:", path);
-    throw createError({
-      statusCode: 404,
-      statusMessage: "No proxy domain found",
-      message: `No domain in proxy path: ${path}`
-    });
-  }
-  if (!isPublicNetworkHostname(domain)) {
-    log("[proxy] Rejected local or non-public target:", domain);
-    throw createError({
-      statusCode: 403,
-      statusMessage: "Local network targets are not allowed"
-    });
-  }
-  let perScriptInput;
-  for (const [configDomain, privacyInput] of Object.entries(domainPrivacy)) {
-    if (matchDomain(domain, configDomain)) {
-      perScriptInput = privacyInput;
-      break;
-    }
-  }
-  if (perScriptInput === void 0) {
-    log("[proxy] Rejected: domain not in allowlist:", domain);
-    throw createError({
-      statusCode: 403,
-      statusMessage: "Domain not allowed",
-      message: `Proxy domain not in allowlist: ${domain}`
-    });
-  }
-  const targetBase = `https://${domain}`;
-  log("[proxy] Matched:", domain, "->", targetBase);
-  const perScriptResolved = resolvePrivacy(perScriptInput ?? true);
-  const privacy = globalPrivacy !== void 0 ? mergePrivacy(perScriptResolved, globalPrivacy) : perScriptResolved;
-  const anyPrivacy = privacy.ip || privacy.userAgent || privacy.language || privacy.screen || privacy.timezone || privacy.hardware;
-  const originalHeaders = getHeaders(event);
-  const originalQuery = getQuery$1(event);
-  const contentType = originalHeaders["content-type"]?.toLowerCase() || "";
-  const compressionParam = originalQuery.compression || "";
-  const method = event.method?.toUpperCase();
-  const isWriteMethod = method === "POST" || method === "PUT" || method === "PATCH";
-  const transformableBodyType = contentType.includes("application/x-www-form-urlencoded") ? "form" : contentType.includes("json") ? "json" : void 0;
-  const hasOpaqueBodyEncoding = Boolean(
-    originalHeaders["content-encoding"] || contentType.includes("octet-stream") || compressionParam && COMPRESSION_RE.test(compressionParam)
-  );
-  const shouldTransformBody = isWriteMethod && anyPrivacy && !hasOpaqueBodyEncoding && transformableBodyType !== void 0;
-  let targetUrl = targetBase + remainingPath;
-  let strippedQueryRecord;
-  if (anyPrivacy) {
-    if (Object.keys(originalQuery).length > 0) {
-      const { queryString, stripped } = stripQueryFingerprinting(originalQuery, privacy);
-      strippedQueryRecord = stripped;
-      const basePath = targetUrl.split("?")[0] || targetUrl;
-      targetUrl = queryString ? `${basePath}?${queryString}` : basePath;
-    }
-  }
-  const headers = {};
-  const connectionHeaderValue = originalHeaders.connection;
-  const connectionNamedHeaders = connectionHeaderValue ? new Set(connectionHeaderValue.split(",").map((h) => h.trim().toLowerCase()).filter(Boolean)) : null;
-  for (const [key, value] of Object.entries(originalHeaders)) {
-    if (!value)
-      continue;
-    const lowerKey = key.toLowerCase();
-    if (lowerKey === "host")
-      continue;
-    if (SKIP_REQUEST_HEADERS.has(lowerKey))
-      continue;
-    if (connectionNamedHeaders?.has(lowerKey))
-      continue;
-    if (SENSITIVE_HEADERS.includes(lowerKey))
-      continue;
-    if (lowerKey === "content-length") {
-      if (shouldTransformBody)
-        continue;
-      headers[lowerKey] = value;
-      continue;
-    }
-    if (lowerKey === "x-forwarded-for" || lowerKey === "x-real-ip" || lowerKey === "forwarded" || lowerKey === "cf-connecting-ip" || lowerKey === "true-client-ip" || lowerKey === "x-client-ip" || lowerKey === "x-cluster-client-ip") {
-      if (privacy.ip)
-        continue;
-      headers[lowerKey] = value;
-      continue;
-    }
-    if (lowerKey === "user-agent") {
-      headers[key] = privacy.userAgent ? normalizeUserAgent(value) : value;
-      continue;
-    }
-    if (lowerKey === "accept-language") {
-      headers[key] = privacy.language ? normalizeLanguage(value) : value;
-      continue;
-    }
-    if (lowerKey === "sec-ch-ua" || lowerKey === "sec-ch-ua-full-version-list") {
-      headers[lowerKey] = privacy.hardware ? value.replace(CLIENT_HINT_VERSION_RE, ';v="$1"') : value;
-      continue;
-    }
-    if (lowerKey === "sec-ch-ua-platform-version" || lowerKey === "sec-ch-ua-arch" || lowerKey === "sec-ch-ua-model" || lowerKey === "sec-ch-ua-bitness") {
-      if (privacy.hardware)
-        continue;
-      headers[lowerKey] = value;
-      continue;
-    }
-    headers[key] = value;
-  }
-  if (!headers["x-forwarded-for"]) {
-    const clientIP = getRequestIP(event, { xForwardedFor: true });
-    if (clientIP) {
-      if (privacy.ip) {
-        headers["x-forwarded-for"] = anonymizeIP(clientIP);
-      } else {
-        headers["x-forwarded-for"] = clientIP;
-      }
-    }
-  } else if (privacy.ip) {
-    headers["x-forwarded-for"] = headers["x-forwarded-for"].split(",").map((ip) => anonymizeIP(ip.trim())).join(", ");
-  }
-  let body;
-  let rawBody;
-  let rawBodyBytes;
-  let passthroughBody = false;
-  if (isWriteMethod) {
-    rawBodyBytes = await readBodyBytes(event);
-    if (!shouldTransformBody) {
-      passthroughBody = true;
-    } else if (transformableBodyType === "form") {
-      const formBody = rawBodyBytes === void 0 ? void 0 : new TextDecoder().decode(rawBodyBytes);
-      rawBody = formBody;
-      if (formBody != null) {
-        const params = new URLSearchParams(formBody);
-        const formRecord = /* @__PURE__ */ Object.create(null);
-        for (const [key, value] of params.entries()) {
-          if (Object.hasOwn(formRecord, key)) {
-            const existing = formRecord[key];
-            formRecord[key] = Array.isArray(existing) ? [...existing, value] : [existing, value];
-          } else {
-            formRecord[key] = value;
-          }
-        }
-        const stripped = stripPayloadFingerprinting(formRecord, privacy);
-        const transformedValues = /* @__PURE__ */ new Map();
-        for (const [key, value] of Object.entries(stripped)) {
-          transformedValues.set(key, Array.isArray(value) ? [...value] : [value]);
-        }
-        const transformed = new URLSearchParams();
-        for (const [key] of params.entries()) {
-          const value = transformedValues.get(key)?.shift();
-          if (value === void 0 || value === null)
-            continue;
-          transformed.append(key, typeof value === "string" ? value : JSON.stringify(value));
-        }
-        body = transformed.toString();
-      }
-    } else {
-      const jsonBody = rawBodyBytes === void 0 ? void 0 : new TextDecoder().decode(rawBodyBytes);
-      if (jsonBody !== void 0) {
-        try {
-          rawBody = JSON.parse(jsonBody);
-        } catch (error) {
-          throw createError({
-            statusCode: 400,
-            statusMessage: "Invalid JSON proxy request body",
-            cause: error
-          });
-        }
-      }
-      if (Array.isArray(rawBody)) {
-        body = rawBody.map(
-          (item) => item && typeof item === "object" && !Array.isArray(item) ? stripPayloadFingerprinting(item, privacy) : item
-        );
-      } else if (rawBody !== null && typeof rawBody === "object") {
-        body = stripPayloadFingerprinting(rawBody, privacy);
-      } else {
-        body = rawBody;
-      }
-    }
-  }
-  const nitro = useNitroApp();
-  await nitro.hooks?.callHook?.("nuxt-scripts:proxy", {
-    timestamp: Date.now(),
-    path: event.path,
-    targetUrl,
-    method: method || "GET",
-    privacy,
-    passthroughBody,
-    original: {
-      headers: { ...originalHeaders },
-      query: originalQuery,
-      body: passthroughBody ? "<passthrough>" : rawBody ?? null
-    },
-    stripped: {
-      headers,
-      query: strippedQueryRecord ?? originalQuery,
-      body: passthroughBody ? "<passthrough>" : body ?? null
-    }
-  });
-  log("[proxy] Fetching:", targetUrl);
-  const controller = new AbortController();
-  let timedOut = false;
-  const timeoutId = setTimeout(() => {
-    timedOut = true;
-    controller.abort();
-  }, UPSTREAM_TIMEOUT_MS);
-  let fetchBody;
-  if (passthroughBody) {
-    if (rawBodyBytes && rawBodyBytes.byteLength > 0)
-      fetchBody = rawBodyBytes;
-  } else if (body !== void 0) {
-    fetchBody = transformableBodyType === "json" ? JSON.stringify(body) : String(body);
-  }
-  const hopAllowed = (url) => url.protocol === "https:" && !url.username && !url.password && (!url.port || url.port === "443") && isPublicNetworkHostname(url.hostname) && Object.keys(domainPrivacy).some((configDomain) => matchDomain(url.hostname, configDomain));
-  let response;
-  let network;
-  try {
-    network = await createPublicNetworkDispatcher();
-    let state = {
-      url: new URL(targetUrl),
-      method: method || "GET",
-      body: fetchBody,
-      headers
-    };
-    for (let redirectCount = 0; ; redirectCount++) {
-      let hop;
-      try {
-        hop = await network.fetch(state.url.toString(), {
-          method: state.method,
-          headers: state.headers,
-          body: state.body,
-          credentials: "omit",
-          // Don't send cookies to third parties
-          signal: controller.signal,
-          redirect: "manual"
-        });
-      } catch (err) {
-        log("[proxy] Upstream error:", err);
-        throw upstreamFetchError(err, timedOut);
-      }
-      log("[proxy] Response:", hop.status, hop.statusText);
-      if (!isUpstreamRedirect(hop.status)) {
-        response = hop;
-        break;
-      }
-      let next;
-      try {
-        next = resolveProxyRedirect(hop, state, redirectCount, hopAllowed);
-      } catch (err) {
-        await hop.body?.cancel(err).catch((cancelError) => Object.assign(err, { cleanupError: cancelError }));
-        throw err;
-      }
-      const redirectDiscarded = new Error("Upstream redirect response body discarded");
-      await hop.body?.cancel(redirectDiscarded).catch((cancelError) => Object.assign(redirectDiscarded, { cause: cancelError }));
-      log("[proxy] Following redirect:", next.url.toString());
-      state = next;
-    }
-    clearTimeout(timeoutId);
-  } catch (err) {
-    clearTimeout(timeoutId);
-    await closePublicNetworkDispatcher(network, err);
-    throw err;
-  }
-  log("[proxy] Upstream settled:", response.status);
-  const responseConnectionHeaders = new Set(
-    (response.headers.get("connection") || "").split(",").map((header) => header.trim().toLowerCase()).filter(Boolean)
-  );
-  response.headers.forEach((value, key) => {
-    const lowerKey = key.toLowerCase();
-    if (!SKIP_RESPONSE_HEADERS.has(lowerKey) && !responseConnectionHeaders.has(lowerKey)) {
-      setResponseHeader(event, key, value);
-    }
-  });
-  setResponseHeader(event, "Content-Security-Policy", "sandbox; default-src 'none'; base-uri 'none'; form-action 'none'");
-  setResponseHeader(event, "X-Content-Type-Options", "nosniff");
-  setResponseStatus(event, response.status, response.statusText);
-  if (!response.body) {
-    await closePublicNetworkDispatcher(network);
-    return null;
-  }
-  const guardedBody = withResponseBodyIdleTimeout(response.body, UPSTREAM_TIMEOUT_MS, () => controller.abort());
-  let streamError;
-  try {
-    return await sendStream(event, guardedBody);
-  } catch (error) {
-    streamError = error;
-    throw error;
-  } finally {
-    await closePublicNetworkDispatcher(network, streamError);
-  }
 });
 
 const _qMmhPB = eventHandler(async (event) => {
@@ -4627,6 +3621,8 @@ function exceedsMaxDepth(raw, maxDepth = MAX_ISLAND_PROP_DEPTH) {
 function exceedsMaxBytes(raw, maxBytes = MAX_ISLAND_BODY_BYTES) {
 	return Buffer.byteLength(raw, "utf8") > maxBytes;
 }
+
+const NUXT_RUNTIME_PAYLOAD_EXTRACTION = false;
 
 // @__NO_SIDE_EFFECTS__
 function createHead(options = {}) {
@@ -5234,11 +4230,9 @@ const handlers = [
   { route: '/auth/google', handler: _lazy_ZjTvV3, lazy: true, middleware: false, method: "get" },
   { route: '/__nuxt_error', handler: _lazy_CW5HzW, lazy: true, middleware: false, method: undefined },
   { route: '/api/_nuxt_icon/:collection', handler: _lcD18D, lazy: false, middleware: false, method: undefined },
-  { route: '/_scripts/p/**', handler: _upcABj, lazy: false, middleware: false, method: undefined },
   { route: '/api/_auth/session', handler: _qMmhPB, lazy: false, middleware: false, method: "delete" },
   { route: '/api/_auth/session', handler: _GRxcGX, lazy: false, middleware: false, method: "get" },
   { route: '/__nuxt_island/**', handler: handler$1, lazy: false, middleware: false, method: undefined },
-  { route: '/_scripts/assets/**', handler: _lazy_CW5HzW, lazy: true, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_CW5HzW, lazy: true, middleware: false, method: undefined }
 ];
 
@@ -6356,8 +5350,8 @@ const sendOtp_post = defineEventHandler(async (event) => {
   var _a, _b, _c, _d;
   const ip = (_c = (_b = (_a = getHeader(event, "x-forwarded-for")) == null ? void 0 : _a.split(",")[0].trim()) != null ? _b : getRequestIP(event)) != null ? _c : "unknown";
   checkRateLimit(`send-otp:${ip}`, 5, 10 * 60 * 1e3);
-  const { email, turnstileToken } = (_d = await readBody(event)) != null ? _d : {};
-  await verifyTurnstile(turnstileToken, ip);
+  const { email, recaptchaToken } = (_d = await readBody(event)) != null ? _d : {};
+  await verifyRecaptcha(recaptchaToken);
   if (!(email == null ? void 0 : email.trim()) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw createError({ statusCode: 400, statusMessage: "Email tidak valid" });
   }
@@ -7328,8 +6322,8 @@ async function renderRoute(event, ssrError) {
 		ssrContext.noSSR = true;
 	}
 	
-	const _PAYLOAD_EXTRACTION = !ssrContext.noSSR && ((routeOptions.isr || routeOptions.cache));
-	const isRenderingPayload = (_PAYLOAD_EXTRACTION || routeOptions.prerender) && PAYLOAD_URL_RE.test(ssrContext.url);
+	!ssrContext.noSSR && (NUXT_RUNTIME_PAYLOAD_EXTRACTION);
+	const isRenderingPayload = (routeOptions.prerender) && PAYLOAD_URL_RE.test(ssrContext.url);
 	if (isRenderingPayload) {
 		const payloadURL = new URL(ssrContext.url, "http://localhost");
 		const url = payloadURL.pathname.slice(0, -`/${PAYLOAD_FILENAME}`.length) || "/";
@@ -7337,7 +6331,6 @@ async function renderRoute(event, ssrError) {
 		ssrContext.url = url + payloadURL.search;
 		event._path = event.node.req.url = ssrContext.url;
 	}
-	const payloadURL = _PAYLOAD_EXTRACTION ? buildPayloadURL(ssrContext) : undefined;
 	
 	const renderer = await getRenderer(ssrContext);
 	const _rendered = await renderer.renderToString(ssrContext).catch(async (error) => {
@@ -7374,15 +6367,6 @@ async function renderRoute(event, ssrError) {
 	const NO_SCRIPTS = routeOptions.noScripts;
 	
 	const { styles, scripts } = getRequestDependencies(ssrContext, renderer.rendererContext);
-	
-	if (_PAYLOAD_EXTRACTION && !NO_SCRIPTS) {
-		ssrContext.head.push({ link: [{
-			rel: "preload",
-			as: "fetch",
-			crossorigin: "anonymous",
-			href: payloadURL
-		} ] }, headEntryOptions);
-	}
 	if (ssrContext["~preloadManifest"] && !NO_SCRIPTS) {
 		ssrContext.head.push({ link: [{
 			rel: "preload",
@@ -7425,11 +6409,7 @@ async function renderRoute(event, ssrError) {
 		const stylesheetHrefs = new Set(link.map((l) => l.href));
 		ssrContext.head.push({ link: [...getPreloadLinks(ssrContext, renderer.rendererContext, dependencyOptions), ...getPrefetchLinks(ssrContext, renderer.rendererContext, dependencyOptions)].filter((l) => !stylesheetHrefs.has(l.href)) }, headEntryOptions);
 		
-		ssrContext.head.push({ script: _PAYLOAD_EXTRACTION ? renderPayloadJsonScript({
-			ssrContext,
-			data: splitPayload(ssrContext).initial,
-			src: payloadURL
-		})  : renderPayloadJsonScript({
+		ssrContext.head.push({ script: renderPayloadJsonScript({
 			ssrContext,
 			data: ssrContext.payload
 		})  }, {
@@ -7474,13 +6454,6 @@ async function renderRoute(event, ssrError) {
 			"x-powered-by": "Nuxt"
 		}
 	};
-}
-function buildPayloadURL(ssrContext) {
-	const url = new URL(ssrContext.url, "http://localhost");
-	const baseURL = ssrContext.runtimeConfig.app.cdnURL || ssrContext.runtimeConfig.app.baseURL;
-	const payloadURL = joinURL(baseURL, url.pathname, PAYLOAD_FILENAME);
-	url.searchParams.set(PAYLOAD_BUILD_ID_PARAM, ssrContext.runtimeConfig.app.buildId);
-	return payloadURL + url.search;
 }
 function normalizeChunks(chunks) {
 	const result = [];

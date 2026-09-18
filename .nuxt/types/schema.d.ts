@@ -1,10 +1,6 @@
 import { RuntimeConfig as UserRuntimeConfig, PublicRuntimeConfig as UserPublicRuntimeConfig } from 'nuxt/schema'
 import { NuxtModule, ModuleDependencyMeta } from '@nuxt/schema'
   interface SharedRuntimeConfig {
-   turnstile: {
-      secretKey: string,
-   },
-
    app: {
       buildId: string,
 
@@ -57,7 +53,7 @@ import { NuxtModule, ModuleDependencyMeta } from '@nuxt/schema'
 
    smtpPass: string,
 
-   turnstileSecretKey: string,
+   recaptchaSecretKey: string,
 
    nitro: {
       envPrefix: string,
@@ -65,12 +61,6 @@ import { NuxtModule, ModuleDependencyMeta } from '@nuxt/schema'
 
    icon: {
       serverKnownCssClasses: Array<any>,
-   },
-
-   "nuxt-scripts": {
-      version: string,
-
-      googleStaticMapsProxy: any,
    },
 
    session: {
@@ -594,27 +584,9 @@ import { NuxtModule, ModuleDependencyMeta } from '@nuxt/schema'
    },
   }
   interface SharedPublicRuntimeConfig {
-   turnstile: {
-      siteKey: string,
-   },
-
-   turnstileSiteKey: string,
+   recaptchaSiteKey: string,
 
    freeShippingMin: string,
-
-   "nuxt-scripts": {
-      version: string,
-
-      prefix: string,
-
-      defaultScriptOptions: {
-         trigger: string,
-      },
-
-      googleStaticMapsProxy: any,
-
-      endpoints: any,
-   },
 
    auth: {
       loadStrategy: string,
@@ -626,8 +598,6 @@ declare module '@nuxt/schema' {
     ["@nuxtjs/color-mode"]?: ModuleDependencyMeta<typeof import("@nuxtjs/color-mode").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
     ["@nuxtjs/tailwindcss"]?: ModuleDependencyMeta<typeof import("@nuxtjs/tailwindcss").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
     ["@nuxt/ui"]?: ModuleDependencyMeta<typeof import("@nuxt/ui").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
-    ["@nuxt/scripts"]?: ModuleDependencyMeta<typeof import("@nuxt/scripts").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
-    ["@nuxtjs/turnstile"]?: ModuleDependencyMeta<typeof import("@nuxtjs/turnstile").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
     ["auth-utils"]?: ModuleDependencyMeta<typeof import("nuxt-auth-utils").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
     ["@nuxt/telemetry"]?: ModuleDependencyMeta<typeof import("@nuxt/telemetry").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
   }
@@ -648,14 +618,6 @@ declare module '@nuxt/schema' {
      * Configuration for `@nuxt/ui`
      */
     ["ui"]: typeof import("@nuxt/ui").default extends NuxtModule<infer O, unknown, boolean> ? O | false : Record<string, any> | false
-    /**
-     * Configuration for `@nuxt/scripts`
-     */
-    ["scripts"]: typeof import("@nuxt/scripts").default extends NuxtModule<infer O, unknown, boolean> ? O | false : Record<string, any> | false
-    /**
-     * Configuration for `@nuxtjs/turnstile`
-     */
-    ["turnstile"]: typeof import("@nuxtjs/turnstile").default extends NuxtModule<infer O, unknown, boolean> ? O | false : Record<string, any> | false
     /**
      * Configuration for `nuxt-auth-utils`
      */
@@ -683,14 +645,6 @@ declare module '@nuxt/schema' {
      */
     ["ui"]?: typeof import("@nuxt/ui").default extends NuxtModule<infer O, unknown, boolean> ? Partial<O> | false : Record<string, any> | false
     /**
-     * Configuration for `@nuxt/scripts`
-     */
-    ["scripts"]?: typeof import("@nuxt/scripts").default extends NuxtModule<infer O, unknown, boolean> ? Partial<O> | false : Record<string, any> | false
-    /**
-     * Configuration for `@nuxtjs/turnstile`
-     */
-    ["turnstile"]?: typeof import("@nuxtjs/turnstile").default extends NuxtModule<infer O, unknown, boolean> ? Partial<O> | false : Record<string, any> | false
-    /**
      * Configuration for `nuxt-auth-utils`
      */
     ["auth"]?: typeof import("nuxt-auth-utils").default extends NuxtModule<infer O, unknown, boolean> ? Partial<O> | false : Record<string, any> | false
@@ -698,7 +652,7 @@ declare module '@nuxt/schema' {
      * Configuration for `@nuxt/telemetry`
      */
     ["telemetry"]?: typeof import("@nuxt/telemetry").default extends NuxtModule<infer O, unknown, boolean> ? Partial<O> | false : Record<string, any> | false
-    modules?: (undefined | null | false | NuxtModule<any> | string | [NuxtModule | string, Record<string, any>] | ["@nuxt/icon", Exclude<NuxtConfig["icon"], boolean>] | ["@nuxtjs/color-mode", Exclude<NuxtConfig["colorMode"], boolean>] | ["@nuxtjs/tailwindcss", Exclude<NuxtConfig["tailwindcss"], boolean>] | ["@nuxt/ui", Exclude<NuxtConfig["ui"], boolean>] | ["@nuxt/scripts", Exclude<NuxtConfig["scripts"], boolean>] | ["@nuxtjs/turnstile", Exclude<NuxtConfig["turnstile"], boolean>] | ["nuxt-auth-utils", Exclude<NuxtConfig["auth"], boolean>] | ["@nuxt/telemetry", Exclude<NuxtConfig["telemetry"], boolean>])[],
+    modules?: (undefined | null | false | NuxtModule<any> | string | [NuxtModule | string, Record<string, any>] | ["@nuxt/icon", Exclude<NuxtConfig["icon"], boolean>] | ["@nuxtjs/color-mode", Exclude<NuxtConfig["colorMode"], boolean>] | ["@nuxtjs/tailwindcss", Exclude<NuxtConfig["tailwindcss"], boolean>] | ["@nuxt/ui", Exclude<NuxtConfig["ui"], boolean>] | ["nuxt-auth-utils", Exclude<NuxtConfig["auth"], boolean>] | ["@nuxt/telemetry", Exclude<NuxtConfig["telemetry"], boolean>])[],
   }
   interface RuntimeConfig extends UserRuntimeConfig {}
   interface PublicRuntimeConfig extends UserPublicRuntimeConfig {}
@@ -709,8 +663,6 @@ declare module 'nuxt/schema' {
     ["@nuxtjs/color-mode"]?: ModuleDependencyMeta<typeof import("@nuxtjs/color-mode").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
     ["@nuxtjs/tailwindcss"]?: ModuleDependencyMeta<typeof import("@nuxtjs/tailwindcss").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
     ["@nuxt/ui"]?: ModuleDependencyMeta<typeof import("@nuxt/ui").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
-    ["@nuxt/scripts"]?: ModuleDependencyMeta<typeof import("@nuxt/scripts").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
-    ["@nuxtjs/turnstile"]?: ModuleDependencyMeta<typeof import("@nuxtjs/turnstile").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
     ["auth-utils"]?: ModuleDependencyMeta<typeof import("nuxt-auth-utils").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
     ["@nuxt/telemetry"]?: ModuleDependencyMeta<typeof import("@nuxt/telemetry").default extends NuxtModule<infer O> ? O | false : Record<string, unknown>> | false
   }
@@ -735,16 +687,6 @@ declare module 'nuxt/schema' {
      * @see https://www.npmjs.com/package/@nuxt/ui
      */
     ["ui"]: typeof import("@nuxt/ui").default extends NuxtModule<infer O, unknown, boolean> ? O | false : Record<string, any> | false
-    /**
-     * Configuration for `@nuxt/scripts`
-     * @see https://www.npmjs.com/package/@nuxt/scripts
-     */
-    ["scripts"]: typeof import("@nuxt/scripts").default extends NuxtModule<infer O, unknown, boolean> ? O | false : Record<string, any> | false
-    /**
-     * Configuration for `@nuxtjs/turnstile`
-     * @see https://www.npmjs.com/package/@nuxtjs/turnstile
-     */
-    ["turnstile"]: typeof import("@nuxtjs/turnstile").default extends NuxtModule<infer O, unknown, boolean> ? O | false : Record<string, any> | false
     /**
      * Configuration for `nuxt-auth-utils`
      * @see https://www.npmjs.com/package/nuxt-auth-utils
@@ -778,16 +720,6 @@ declare module 'nuxt/schema' {
      */
     ["ui"]?: typeof import("@nuxt/ui").default extends NuxtModule<infer O, unknown, boolean> ? Partial<O> | false : Record<string, any> | false
     /**
-     * Configuration for `@nuxt/scripts`
-     * @see https://www.npmjs.com/package/@nuxt/scripts
-     */
-    ["scripts"]?: typeof import("@nuxt/scripts").default extends NuxtModule<infer O, unknown, boolean> ? Partial<O> | false : Record<string, any> | false
-    /**
-     * Configuration for `@nuxtjs/turnstile`
-     * @see https://www.npmjs.com/package/@nuxtjs/turnstile
-     */
-    ["turnstile"]?: typeof import("@nuxtjs/turnstile").default extends NuxtModule<infer O, unknown, boolean> ? Partial<O> | false : Record<string, any> | false
-    /**
      * Configuration for `nuxt-auth-utils`
      * @see https://www.npmjs.com/package/nuxt-auth-utils
      */
@@ -797,7 +729,7 @@ declare module 'nuxt/schema' {
      * @see https://www.npmjs.com/package/@nuxt/telemetry
      */
     ["telemetry"]?: typeof import("@nuxt/telemetry").default extends NuxtModule<infer O, unknown, boolean> ? Partial<O> | false : Record<string, any> | false
-    modules?: (undefined | null | false | NuxtModule<any> | string | [NuxtModule | string, Record<string, any>] | ["@nuxt/icon", Exclude<NuxtConfig["icon"], boolean>] | ["@nuxtjs/color-mode", Exclude<NuxtConfig["colorMode"], boolean>] | ["@nuxtjs/tailwindcss", Exclude<NuxtConfig["tailwindcss"], boolean>] | ["@nuxt/ui", Exclude<NuxtConfig["ui"], boolean>] | ["@nuxt/scripts", Exclude<NuxtConfig["scripts"], boolean>] | ["@nuxtjs/turnstile", Exclude<NuxtConfig["turnstile"], boolean>] | ["nuxt-auth-utils", Exclude<NuxtConfig["auth"], boolean>] | ["@nuxt/telemetry", Exclude<NuxtConfig["telemetry"], boolean>])[],
+    modules?: (undefined | null | false | NuxtModule<any> | string | [NuxtModule | string, Record<string, any>] | ["@nuxt/icon", Exclude<NuxtConfig["icon"], boolean>] | ["@nuxtjs/color-mode", Exclude<NuxtConfig["colorMode"], boolean>] | ["@nuxtjs/tailwindcss", Exclude<NuxtConfig["tailwindcss"], boolean>] | ["@nuxt/ui", Exclude<NuxtConfig["ui"], boolean>] | ["nuxt-auth-utils", Exclude<NuxtConfig["auth"], boolean>] | ["@nuxt/telemetry", Exclude<NuxtConfig["telemetry"], boolean>])[],
   }
   interface RuntimeConfig extends SharedRuntimeConfig {}
   interface PublicRuntimeConfig extends SharedPublicRuntimeConfig {}

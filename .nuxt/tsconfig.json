@@ -7,9 +7,6 @@
       "vue-router/auto-routes": [
         "../node_modules/vue-router/vue-router-auto-routes"
       ],
-      "@types/cloudflare-turnstile": [
-        "../node_modules/@types/cloudflare-turnstile"
-      ],
       "nuxt": [
         "../node_modules/nuxt"
       ],
@@ -60,9 +57,6 @@
       ],
       "nitropack/runtime": [
         "../node_modules/nitropack/runtime"
-      ],
-      "#nuxt-scripts/h3": [
-        "../node_modules/h3/dist/index"
       ],
       "~": [
         ".."
@@ -132,15 +126,6 @@
       ],
       "#color-mode-options": [
         "./color-mode-options.mjs"
-      ],
-      "#nuxt-scripts": [
-        "../node_modules/@nuxt/scripts/dist/runtime"
-      ],
-      "#nuxt-scripts/*": [
-        "../node_modules/@nuxt/scripts/dist/runtime/*"
-      ],
-      "#nuxt-scripts/network-dispatcher": [
-        "../node_modules/@nuxt/scripts/dist/runtime/server/utils/network-dispatcher.node"
       ],
       "#auth-utils": [
         "../node_modules/nuxt-auth-utils/dist/runtime/types/index"
