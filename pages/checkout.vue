@@ -144,37 +144,37 @@
               <p class="text-sm font-normal" style="color:rgb(22,163,74)">Selamat! Kamu mendapat gratis ongkir ke seluruh Indonesia.</p>
             </div>
 
+            <!-- Satu blok per toko — keranjang lintas toko, ongkir dihitung dari kota asal masing-masing (PRD §11 Fase 5) -->
             <template v-else>
-              <!-- Courier selector -->
-              <div>
-                <p class="text-sm font-normal mb-3" style="color:rgba(9,11,12,0.6)">Pilih Kurir</p>
+              <div v-for="g in groupedByStore" :key="g.storeId || 'null'" class="rounded-3xl p-4 space-y-3" style="background:white">
+                <p class="text-sm font-normal" style="color:rgba(9,11,12,0.6)">{{ g.storeName || 'MINTS' }}</p>
+
                 <div class="flex flex-wrap gap-2">
                   <button
                     v-for="c in couriers"
                     :key="c"
                     class="px-4 py-2 rounded-full text-sm font-normal transition-all"
-                    :style="form.courierCode === c ? 'background:#090b0c;color:white' : 'background:white;color:#090b0c'"
-                    @click="selectCourier(c)"
+                    :style="shippingState[g.storeId || 'null']?.courierCode === c ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.05);color:#090b0c'"
+                    @click="selectCourier(g.storeId, c)"
                   >{{ c.toUpperCase() }}</button>
                 </div>
-              </div>
 
-              <!-- Services -->
-              <div class="space-y-2">
-                <div
-                  v-for="svc in shippingServices"
-                  :key="svc.service"
-                  class="flex items-center justify-between rounded-2xl p-4 cursor-pointer transition-all"
-                  :style="selectedService?.service === svc.service ? 'background:#090b0c;color:white' : 'background:white;color:#090b0c'"
-                  @click="selectedService = svc"
-                >
-                  <div>
-                    <p class="text-sm font-normal">{{ form.courierCode.toUpperCase() }} {{ svc.service }}</p>
-                    <p class="text-xs mt-0.5" :style="selectedService?.service === svc.service ? 'color:rgba(255,255,255,0.55)' : 'color:rgba(9,11,12,0.4)'">{{ svc.description }} · Est. {{ svc.cost[0]?.etd || '?' }} hari</p>
+                <div class="space-y-2">
+                  <div
+                    v-for="svc in shippingState[g.storeId || 'null']?.services || []"
+                    :key="svc.service"
+                    class="flex items-center justify-between rounded-2xl p-3 cursor-pointer transition-all"
+                    :style="shippingState[g.storeId || 'null']?.selected?.service === svc.service ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.03);color:#090b0c'"
+                    @click="shippingState[g.storeId || 'null'].selected = svc"
+                  >
+                    <div>
+                      <p class="text-sm font-normal">{{ shippingState[g.storeId || 'null']?.courierCode.toUpperCase() }} {{ svc.service }}</p>
+                      <p class="text-xs mt-0.5" :style="shippingState[g.storeId || 'null']?.selected?.service === svc.service ? 'color:rgba(255,255,255,0.55)' : 'color:rgba(9,11,12,0.4)'">{{ svc.description }} · Est. {{ svc.cost[0]?.etd || '?' }} hari</p>
+                    </div>
+                    <p class="text-sm font-normal tabular-nums shrink-0">{{ formatPrice(svc.cost[0]?.value || 0) }}</p>
                   </div>
-                  <p class="text-sm font-normal tabular-nums shrink-0">{{ formatPrice(svc.cost[0]?.value || 0) }}</p>
+                  <div v-if="!(shippingState[g.storeId || 'null']?.services || []).length" class="text-center py-6 text-sm" style="color:rgba(9,11,12,0.4)">Tidak ada layanan tersedia untuk rute ini</div>
                 </div>
-                <div v-if="!shippingServices.length" class="text-center py-8 text-sm" style="color:rgba(9,11,12,0.4)">Tidak ada layanan tersedia untuk rute ini</div>
               </div>
             </template>
 
@@ -363,7 +363,7 @@
 definePageMeta({ middleware: 'buyer' })
 useSeoMeta({ title: 'Checkout — MINTS' })
 
-const { cartItems, itemCount, subtotal, freeShippingMin, clearCart, removeItem } = useCart()
+const { cartItems, itemCount, subtotal, freeShippingMin, groupedByStore, clearCart, removeItem } = useCart()
 const { user, fetchMe } = useAuth()
 const router = useRouter()
 
@@ -382,16 +382,14 @@ const form = reactive({
   address: '',
   cityId: '',
   cityName: '',
-  courierCode: 'jne',
-  courierService: '',
   paymentMethod: ''
 })
 
 const citySearch = ref('')
 const cities = ref<any[]>([])
 const showCityDropdown = ref(false)
-const shippingServices = ref<any[]>([])
-const selectedService = ref<any>(null)
+// Satu entri per toko (storeId | 'null'): pengiriman dipilih per toko, PRD §11 Fase 5
+const shippingState = reactive<Record<string, { courierCode: string; services: any[]; selected: any }>>({})
 const loadingShipping = ref(false)
 const placing = ref(false)
 const orderError = ref('')
@@ -431,22 +429,36 @@ const paymentMethods = computed(() => {
 
 const canStep0 = computed(() => form.buyerName.trim().length >= 3 && /^(08|628|\+628)\d{8,12}$/.test(form.buyerPhone))
 const canStep1 = computed(() => form.address.trim().length >= 10 && !!form.cityId)
-const canStep2 = computed(() => subtotal.value >= freeShippingMin.value || !!selectedService.value)
+// Semua toko harus punya layanan terpilih, kecuali seluruh keranjang sudah gratis ongkir
+const canStep2 = computed(() => {
+  if (subtotal.value >= freeShippingMin.value) return true
+  return groupedByStore.value.every(g => !!shippingState[g.storeId || 'null']?.selected)
+})
 
+// Total ongkir dijumlah dari semua toko (masing-masing gratis bila subtotal keranjang total >= freeShippingMin,
+// konsisten dengan backend yang mengecek subtotal per toko — di sini subtotal keranjang dipakai sebagai gate global)
 const finalShippingCost = computed(() => {
   if (subtotal.value >= freeShippingMin.value) return 0
-  return selectedService.value?.cost?.[0]?.value || 0
+  return groupedByStore.value.reduce((sum, g) => {
+    const sel = shippingState[g.storeId || 'null']?.selected
+    return sum + (sel?.cost?.[0]?.value || 0)
+  }, 0)
 })
 
 const shippingLabel = computed(() => {
   if (subtotal.value >= freeShippingMin.value) return 'Gratis Ongkir'
-  if (!selectedService.value) return '-'
-  return `${form.courierCode.toUpperCase()} ${selectedService.value.service}`
+  const n = groupedByStore.value.length
+  return n > 1 ? `${n} toko` : (shippingState[groupedByStore.value[0]?.storeId || 'null']?.selected ? 'Dipilih' : '-')
 })
 
 const shippingCostDisplay = computed(() => finalShippingCost.value === 0 ? 'GRATIS' : formatPrice(finalShippingCost.value))
 const selectedPaymentMethodLabel = computed(() => paymentMethods.value.find((p: any) => p.code === form.paymentMethod)?.name || '-')
-const totalWeight = computed(() => cartItems.value.reduce((sum, item) => sum + (item.qty * 300), 0))
+
+function storeWeight(storeId: string | null) {
+  const key = storeId || 'null'
+  const items = groupedByStore.value.find(g => (g.storeId || 'null') === key)?.items || []
+  return items.reduce((sum, item) => sum + (item.qty * 300), 0)
+}
 
 let citySearchTimeout: ReturnType<typeof setTimeout>
 function searchCities() {
@@ -467,27 +479,35 @@ function selectCity(city: any) {
 async function loadShipping() {
   loadingShipping.value = true
   step.value = 2
-  selectedService.value = null
-  shippingServices.value = []
   try {
-    if (subtotal.value < freeShippingMin.value) await fetchShippingCosts()
+    if (subtotal.value < freeShippingMin.value) {
+      for (const g of groupedByStore.value) {
+        const key = g.storeId || 'null'
+        if (!shippingState[key]) shippingState[key] = { courierCode: 'jne', services: [], selected: null }
+        else shippingState[key].selected = null
+      }
+      await Promise.all(groupedByStore.value.map(g => fetchShippingCosts(g.storeId)))
+    }
   } finally {
     loadingShipping.value = false
   }
 }
 
-async function fetchShippingCosts() {
+async function fetchShippingCosts(storeId: string | null) {
+  const key = storeId || 'null'
+  const state = shippingState[key]
   const res = await $fetch<any>('/api/shipping/cost', {
-    query: { destination: form.cityId, weight: totalWeight.value, courier: form.courierCode }
+    query: { destination: form.cityId, weight: storeWeight(storeId), courier: state.courierCode, storeId: storeId || undefined }
   })
-  shippingServices.value = res.services || []
+  state.services = res.services || []
 }
 
-async function selectCourier(code: string) {
-  form.courierCode = code
-  selectedService.value = null
+async function selectCourier(storeId: string | null, code: string) {
+  const key = storeId || 'null'
+  shippingState[key].courierCode = code
+  shippingState[key].selected = null
   loadingShipping.value = true
-  await fetchShippingCosts().finally(() => { loadingShipping.value = false })
+  await fetchShippingCosts(storeId).finally(() => { loadingShipping.value = false })
 }
 
 function formatPrice(n: number) {
@@ -499,6 +519,17 @@ async function placeOrder() {
   orderError.value = ''
   soldOutError.value = ''
   try {
+    const shippingByStore: Record<string, { courierCode?: string; courierService?: string; cost?: number }> = {}
+    for (const g of groupedByStore.value) {
+      const key = g.storeId || 'null'
+      const state = shippingState[key]
+      shippingByStore[key] = {
+        courierCode: state?.courierCode,
+        courierService: state?.selected?.service,
+        cost: state?.selected?.cost?.[0]?.value || 0
+      }
+    }
+
     const res = await $fetch<any>('/api/checkout/regular', {
       method: 'POST',
       body: {
@@ -507,9 +538,7 @@ async function placeOrder() {
         address: form.address,
         cityId: form.cityId,
         cityName: form.cityName,
-        courierCode: form.courierCode,
-        courierService: selectedService.value?.service || '',
-        shippingCost: finalShippingCost.value,
+        shippingByStore,
         totalSubtotal: subtotal.value,
         items: cartItems.value.map(i => ({
           productId: i.productId,
@@ -521,11 +550,11 @@ async function placeOrder() {
       }
     })
 
-    const firstOrderId = res.orders?.[0]?.orderId
-    if (firstOrderId) {
+    const orderIds = (res.orders || []).map((o: any) => o.orderId)
+    if (orderIds.length) {
       const payRes = await $fetch<any>('/api/payment/create-transaction', {
         method: 'POST',
-        body: { orderId: firstOrderId, paymentMethod: form.paymentMethod }
+        body: { orderIds, paymentMethod: form.paymentMethod }
       })
       clearCart()
       if (payRes.paymentUrl) {

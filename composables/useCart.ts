@@ -3,6 +3,8 @@ const CART_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 export interface CartItem {
   productId: string
+  storeId: string | null
+  storeName: string | null
   title: string
   imageUrl: string
   price: number
@@ -82,5 +84,19 @@ export function useCart() {
     if (process.client) localStorage.removeItem(CART_KEY)
   }
 
-  return { cartItems, itemCount, subtotal, freeShippingMin, freeShippingProgress, freeShippingRemaining, addItem, removeItem, updateQty, clearCart }
+  // Kelompokkan keranjang per toko untuk checkout lintas toko — PRD §9/§11 Fase 5.
+  // Item tanpa storeId (data lama) dikelompokkan di bawah key 'null'.
+  const groupedByStore = computed(() => {
+    const groups = new Map<string, { storeId: string | null; storeName: string | null; items: CartItem[]; subtotal: number }>()
+    for (const item of cartItems.value) {
+      const key = item.storeId || 'null'
+      if (!groups.has(key)) groups.set(key, { storeId: item.storeId, storeName: item.storeName, items: [], subtotal: 0 })
+      const g = groups.get(key)!
+      g.items.push(item)
+      g.subtotal += item.price * item.qty
+    }
+    return Array.from(groups.values())
+  })
+
+  return { cartItems, itemCount, subtotal, freeShippingMin, freeShippingProgress, freeShippingRemaining, groupedByStore, addItem, removeItem, updateQty, clearCart }
 }

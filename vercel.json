@@ -9,5 +9,10 @@
       "source": "/api/categories(.*)",
       "headers": [{ "key": "Vary", "value": "Accept-Encoding" }]
     }
+  ],
+  "crons": [
+    { "path": "/api/cron/store-expiry", "schedule": "0 1 * * *" },
+    { "path": "/api/cron/cleanup-media", "schedule": "30 1 * * *" },
+    { "path": "/api/cron/reconcile-counters", "schedule": "0 2 * * *" }
   ]
 }

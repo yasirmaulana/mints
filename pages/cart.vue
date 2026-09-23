@@ -37,53 +37,57 @@
               <span class="text-xs font-normal uppercase tracking-[0.16rem]" style="color:rgba(9,11,12,0.5)">Produk Dipilih</span>
             </div>
 
-            <div
-              v-for="item in cartItems"
-              :key="`${item.productId}-${item.variantId}`"
-              class="flex gap-4 rounded-3xl p-4"
-              style="background:white"
-            >
-              <!-- Image -->
-              <div class="shrink-0 w-20 h-20 rounded-2xl overflow-hidden" style="background:rgba(9,11,12,0.05)">
-                <img :src="item.imageUrl" :alt="item.title" class="w-full h-full object-cover" />
-              </div>
-
-              <!-- Info -->
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-normal leading-snug tracking-tight line-clamp-2">{{ item.title }}</p>
-                <p v-if="item.size" class="mt-1 text-xs" style="color:rgba(9,11,12,0.45)">Ukuran: {{ item.size }}</p>
-                <p class="mt-2 text-sm font-normal tabular-nums">Rp&nbsp;{{ formatPrice(item.price * item.qty) }}</p>
-              </div>
-
-              <!-- Controls -->
-              <div class="flex flex-col items-end justify-between shrink-0">
-                <!-- Stok warning -->
-                <p
-                  v-if="item.variantId && stockMap[item.variantId] !== undefined && item.qty >= stockMap[item.variantId]"
-                  class="text-[10px] mb-1 text-right"
-                  style="color:rgb(220,38,38)"
-                >Stok tersisa {{ stockMap[item.variantId] }}</p>
-                <!-- Qty -->
-                <div class="flex items-center rounded-full overflow-hidden" style="background:rgba(9,11,12,0.06)">
-                  <button
-                    class="w-8 h-8 flex items-center justify-center text-lg leading-none transition-colors hover:bg-black/10"
-                    style="color:#090b0c"
-                    @click="updateQty(item.productId, item.variantId, item.qty - 1)"
-                  >−</button>
-                  <span class="w-7 text-center text-sm tabular-nums font-normal">{{ item.qty }}</span>
-                  <button
-                    class="w-8 h-8 flex items-center justify-center text-lg leading-none transition-colors hover:bg-black/10 disabled:opacity-30 disabled:cursor-not-allowed"
-                    style="color:#090b0c"
-                    :disabled="item.variantId ? item.qty >= (stockMap[item.variantId] ?? Infinity) : false"
-                    @click="updateQty(item.productId, item.variantId, item.qty + 1)"
-                  >+</button>
+            <!-- Dikelompokkan per toko — keranjang lintas toko, PRD §9/§11 Fase 5 -->
+            <div v-for="g in groupedByStore" :key="g.storeId || 'null'" class="space-y-3">
+              <p class="text-xs font-normal px-1" style="color:rgba(9,11,12,0.45)">{{ g.storeName || 'MINTS' }}</p>
+              <div
+                v-for="item in g.items"
+                :key="`${item.productId}-${item.variantId}`"
+                class="flex gap-4 rounded-3xl p-4"
+                style="background:white"
+              >
+                <!-- Image -->
+                <div class="shrink-0 w-20 h-20 rounded-2xl overflow-hidden" style="background:rgba(9,11,12,0.05)">
+                  <img :src="item.imageUrl" :alt="item.title" class="w-full h-full object-cover" />
                 </div>
-                <!-- Remove -->
-                <button
-                  class="text-xs transition-opacity hover:opacity-100 opacity-40"
-                  style="color:#090b0c"
-                  @click="removeItem(item.productId, item.variantId)"
-                >Hapus</button>
+
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-normal leading-snug tracking-tight line-clamp-2">{{ item.title }}</p>
+                  <p v-if="item.size" class="mt-1 text-xs" style="color:rgba(9,11,12,0.45)">Ukuran: {{ item.size }}</p>
+                  <p class="mt-2 text-sm font-normal tabular-nums">Rp&nbsp;{{ formatPrice(item.price * item.qty) }}</p>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex flex-col items-end justify-between shrink-0">
+                  <!-- Stok warning -->
+                  <p
+                    v-if="item.variantId && stockMap[item.variantId] !== undefined && item.qty >= stockMap[item.variantId]"
+                    class="text-[10px] mb-1 text-right"
+                    style="color:rgb(220,38,38)"
+                  >Stok tersisa {{ stockMap[item.variantId] }}</p>
+                  <!-- Qty -->
+                  <div class="flex items-center rounded-full overflow-hidden" style="background:rgba(9,11,12,0.06)">
+                    <button
+                      class="w-8 h-8 flex items-center justify-center text-lg leading-none transition-colors hover:bg-black/10"
+                      style="color:#090b0c"
+                      @click="updateQty(item.productId, item.variantId, item.qty - 1)"
+                    >−</button>
+                    <span class="w-7 text-center text-sm tabular-nums font-normal">{{ item.qty }}</span>
+                    <button
+                      class="w-8 h-8 flex items-center justify-center text-lg leading-none transition-colors hover:bg-black/10 disabled:opacity-30 disabled:cursor-not-allowed"
+                      style="color:#090b0c"
+                      :disabled="item.variantId ? item.qty >= (stockMap[item.variantId] ?? Infinity) : false"
+                      @click="updateQty(item.productId, item.variantId, item.qty + 1)"
+                    >+</button>
+                  </div>
+                  <!-- Remove -->
+                  <button
+                    class="text-xs transition-opacity hover:opacity-100 opacity-40"
+                    style="color:#090b0c"
+                    @click="removeItem(item.productId, item.variantId)"
+                  >Hapus</button>
+                </div>
               </div>
             </div>
           </div>
@@ -160,7 +164,7 @@
 
 <script setup lang="ts">
 useSeoMeta({ title: 'Keranjang — MINTS' })
-const { cartItems, itemCount, subtotal, freeShippingProgress, freeShippingRemaining, removeItem, updateQty } = useCart()
+const { cartItems, itemCount, subtotal, freeShippingProgress, freeShippingRemaining, groupedByStore, removeItem, updateQty } = useCart()
 function formatPrice(n: number) { return n.toLocaleString('id-ID') }
 
 const stockMap = ref<Record<string, number>>({})

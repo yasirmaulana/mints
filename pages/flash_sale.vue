@@ -355,6 +355,7 @@ interface Product {
   status: 'AVAILABLE' | 'SOLD_OUT'
   sessionId: string | null
   maskedPhone?: string | null
+  store?: { id: string; name: string } | null
 }
 
 useHead({ title: 'Flash Sale — Mints' })
@@ -494,6 +495,8 @@ async function buyNow(product: Product) {
   clearCart()
   addItem({
     productId: product.id,
+    storeId: product.store?.id ?? null,
+    storeName: product.store?.name ?? null,
     title: product.title,
     imageUrl: product.imageUrl,
     price: Number(product.price),

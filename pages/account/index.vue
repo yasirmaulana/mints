@@ -28,6 +28,34 @@
         <NuxtLink to="/account/orders" class="flex-1 text-center rounded-full py-2 text-sm font-normal" style="color:rgba(9,11,12,0.6)">Pesanan</NuxtLink>
       </div>
 
+      <!-- Toko Saya -->
+      <div class="rounded-3xl p-6 md:p-8 mb-6" style="background:white">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <p class="text-sm font-normal mb-1">Toko Saya</p>
+            <p class="text-sm" style="color:rgba(9,11,12,0.55)">
+              <span v-if="loadingStores">Memuat…</span>
+              <span v-else-if="!myStores.length">Anda belum punya toko. Aktifkan sekarang, gratis.</span>
+              <span v-else>{{ myStores.length }} toko aktif</span>
+            </p>
+          </div>
+          <NuxtLink
+            :to="myStores.length ? '/toko/dashboard' : '/toko/aktivasi'"
+            class="rounded-full px-5 py-2.5 text-sm font-normal"
+            style="background:#090b0c;color:white"
+          >{{ myStores.length ? 'Kelola Toko' : 'Buka Toko' }}</NuxtLink>
+        </div>
+        <div v-if="myStores.length" class="mt-4 flex flex-wrap gap-2">
+          <NuxtLink
+            v-for="s in myStores"
+            :key="s.id"
+            :to="`/toko/dashboard?store=${s.id}`"
+            class="rounded-full px-4 py-2 text-xs font-normal"
+            style="background:#f5f5f2;color:#090b0c"
+          >{{ s.name }} — {{ s.plan.name }}</NuxtLink>
+        </div>
+      </div>
+
       <div class="rounded-3xl p-6 md:p-8 space-y-6" style="background:white">
         <!-- Profile form -->
         <div class="grid gap-5 sm:grid-cols-2">
@@ -99,6 +127,16 @@ definePageMeta({ middleware: 'buyer' })
 useSeoMeta({ title: 'Akun Saya — MINTS' })
 
 const { user, fetchMe, logout } = useAuth()
+
+const myStores = ref<any[]>([])
+const loadingStores = ref(true)
+try {
+  myStores.value = await $fetch('/api/store/mine', { headers: useRequestHeaders(['cookie']) })
+} catch {
+  // gagal memuat toko tidak boleh menghalangi halaman akun tetap terbuka
+} finally {
+  loadingStores.value = false
+}
 
 const profile = reactive({ name: '', email: '', phone: '', gender: '', birthDate: '' })
 const originalProfile = reactive({ name: '', email: '', phone: '', gender: '', birthDate: '' })

@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   if (!rawPath) throw createError({ statusCode: 400 })
 
   // Prevent path traversal — only allow paths under known prefixes
-  const ALLOWED_PREFIXES = ['products/', 'payments/', 'uploads/']
+  const ALLOWED_PREFIXES = ['products/', 'payments/', 'uploads/', 'stores/']
   const normalised = rawPath.replace(/\.\.\//g, '').replace(/^\/+/, '')
   if (!ALLOWED_PREFIXES.some(p => normalised.startsWith(p))) {
     throw createError({ statusCode: 403, statusMessage: 'Akses tidak diizinkan' })

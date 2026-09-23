@@ -11,10 +11,9 @@
 
         <NuxtLink to="/" class="absolute left-1/2 -translate-x-1/2 font-black text-xl tracking-tighter" style="font-family:'Inter Tight',sans-serif;color:#090b0c;letter-spacing:-0.04em">MINTS</NuxtLink>
 
-        <NuxtLink to="/cart" class="ml-auto relative flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-normal transition-opacity hover:opacity-85" style="background:#090b0c;color:white">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.98 1.61h9.72a2 2 0 001.98-1.61L23 6H6"/></svg>
-          Keranjang
-          <span v-if="itemCount > 0" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full text-[10px] font-bold flex items-center justify-center px-1" style="background:#fabc3f;color:#090b0c">{{ itemCount }}</span>
+        <NuxtLink to="/cart" class="ml-auto relative flex items-center justify-center w-10 h-10 transition-opacity hover:opacity-60" style="color:#090b0c" aria-label="Keranjang">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6L4 3H2"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>
+          <span v-if="itemCount" class="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[10px] leading-none" style="background:#090b0c;color:white">{{ itemCount }}</span>
         </NuxtLink>
       </div>
     </header>
@@ -203,6 +202,7 @@ interface Product {
   estimatedReadyDate: string | null
   category: { id: string; name: string; slug: string } | null
   variants: Variant[]
+  store: { id: string; name: string; cityId: string | null; cityName: string | null } | null
 }
 
 const { data: product, pending } = await useFetch<Product>(`/api/products/${route.params.id}`)
@@ -237,6 +237,8 @@ function handleAddToCart() {
   if (!product.value) return
   addItem({
     productId: product.value.id,
+    storeId: product.value.store?.id ?? null,
+    storeName: product.value.store?.name ?? null,
     title: product.value.title,
     imageUrl: product.value.imageUrl,
     price: Number(product.value.price),

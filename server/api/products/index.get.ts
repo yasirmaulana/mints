@@ -5,7 +5,8 @@ function maskPhone(phone: string) {
 export default defineEventHandler(async (event) => {
   const { sessionId, categoryId, productType, status, search } = getQuery(event)
 
-  const where: Record<string, any> = {}
+  // Katalog publik hanya menampilkan produk dari toko berstatus ACTIVE — PRD §11 Fase 2.
+  const where: Record<string, any> = { store: { status: 'ACTIVE' } }
 
   if (sessionId) where.sessionId = String(sessionId)
   if (categoryId) where.categoryId = String(categoryId)
@@ -15,11 +16,13 @@ export default defineEventHandler(async (event) => {
 
   const products = await prisma.product.findMany({
     where,
-    orderBy: { createdAt: 'desc' },
+    // Prioritas pencarian berdasarkan paket toko (searchPriority lebih tinggi tampil lebih dulu) — PRD §11 Fase 6.
+    orderBy: [{ store: { plan: { searchPriority: 'desc' } } }, { createdAt: 'desc' }],
     include: {
       category: { select: { id: true, name: true, slug: true } },
       variants: { orderBy: { size: 'asc' } },
-      orders: { select: { buyerPhone: true }, take: 1 }
+      orders: { select: { buyerPhone: true }, take: 1 },
+      store: { select: { id: true, name: true, cityId: true, cityName: true, plan: { select: { hasVerifiedBadge: true } } } }
     }
   })
 
