@@ -1,3 +1,8 @@
+// Checkout lintas toko — PRD §11 Fase 5. Keranjang dipecah per toko: satu Order per item,
+// storeId & ongkir diambil per kelompok toko. Pembayaran tetap satu transaksi Duitku yang
+// mencakup semua order (lihat server/api/payment/create-transaction.post.ts).
+// Komisi platform (plan.commissionPercent / Order.commissionAmount) untuk sementara tidak
+// dipakai — dihitung ulang bila fitur ini diaktifkan kembali.
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const buyerId = getCookie(event, 'buyer_session')
@@ -19,24 +24,23 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const freeShippingMin = Number(config.public.freeShippingMin || 500000)
 
-  // Validate stock & calculate order total
   const items: { productId: string; variantId: string | null; qty: number; size: string | null; source?: string }[] = body.items
+  // shippingByStore: { [storeId | 'null']: { courierCode, courierService, cost } } — dipilih per toko di step pengiriman.
+  const shippingByStore: Record<string, { courierCode?: string; courierService?: string; cost?: number }> = body.shippingByStore || {}
 
   const orders = await prisma.$transaction(async (tx) => {
-    const createdOrders = []
+    const createdOrders: { orderId: string; title: string; storeId: string | null; amount: number }[] = []
+    const storeSubtotals = new Map<string, number>() // storeId|'null' -> subtotal produk
+    const storeFirstOrder = new Map<string, string>() // storeId|'null' -> id order pertama (penampung ongkir)
 
+    // Pass 1: validasi stok, buat Order, kumpulkan subtotal per toko.
     for (const item of items) {
-      // Check variant stock if applicable
       if (item.variantId) {
         const variant = await tx.productVariant.findUnique({ where: { id: item.variantId } })
         if (!variant || variant.stock < item.qty) {
           throw createError({ statusCode: 400, statusMessage: `Stok ${item.size || item.variantId} tidak cukup` })
         }
-        await tx.productVariant.update({
-          where: { id: item.variantId },
-          data: { stock: { decrement: item.qty } }
-        })
-        // Mark sold out if all variants exhausted
+        await tx.productVariant.update({ where: { id: item.variantId }, data: { stock: { decrement: item.qty } } })
         const remainingStock = await tx.productVariant.aggregate({
           where: { productId: item.productId },
           _sum: { stock: true }
@@ -48,34 +52,53 @@ export default defineEventHandler(async (event) => {
 
       const product = await tx.product.findUnique({
         where: { id: item.productId },
-        select: { id: true, title: true, price: true, productType: true, status: true }
+        select: { id: true, title: true, price: true, productType: true, status: true, storeId: true }
       })
       if (!product) throw createError({ statusCode: 404, statusMessage: 'Produk tidak ditemukan' })
       if (!item.variantId && product.status === 'SOLD_OUT') {
         throw createError({ statusCode: 400, statusMessage: `${product.title} sudah habis terjual` })
       }
 
+      const storeKey = product.storeId || 'null'
+      const qty = item.qty || 1
+      const lineSubtotal = Number(product.price) * qty
+      storeSubtotals.set(storeKey, (storeSubtotals.get(storeKey) || 0) + lineSubtotal)
+
       const orderSource = (item.source as 'REGULAR' | 'FLASH_SALE' | 'OFFLINE') || 'REGULAR'
       const order = await tx.order.create({
         data: {
           productId: item.productId,
           variantId: item.variantId || null,
-          qty: item.qty || 1,
+          qty,
           buyerId: buyerId || null,
           buyerName: body.buyerName,
           buyerPhone: body.buyerPhone,
           address: body.address,
           cityId: body.cityId,
           cityName: body.cityName,
-          courierCode: body.courierCode || null,
-          courierService: body.courierService || null,
-          shippingCost: Number(body.totalSubtotal) >= freeShippingMin ? 0 : (body.shippingCost || 0),
+          storeId: product.storeId,
           status: 'PENDING_PAYMENT',
           source: orderSource
         }
       })
 
-      createdOrders.push({ orderId: order.id, title: product.title })
+      if (!storeFirstOrder.has(storeKey)) storeFirstOrder.set(storeKey, order.id)
+      createdOrders.push({ orderId: order.id, title: product.title, storeId: product.storeId, amount: lineSubtotal })
+    }
+
+    // Pass 2: tempel ongkir (di order pertama tiap toko saja, agar tidak dobel saat dijumlah).
+    for (const [storeKey, firstOrderId] of storeFirstOrder) {
+      const subtotal = storeSubtotals.get(storeKey) || 0
+      const shipping = shippingByStore[storeKey] || {}
+      const shippingCost = subtotal >= freeShippingMin ? 0 : Number(shipping.cost || 0)
+      await tx.order.update({
+        where: { id: firstOrderId },
+        data: {
+          courierCode: shipping.courierCode || null,
+          courierService: shipping.courierService || null,
+          shippingCost
+        }
+      })
     }
 
     return createdOrders

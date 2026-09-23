@@ -744,6 +744,104 @@
         </div>
       </div>
 
+      <!-- Tab: Toko -->
+      <div v-else-if="activeTab === 'stores'" class="space-y-4">
+        <div class="flex items-center gap-3">
+          <select v-model="storeStatusFilter" class="border rounded-lg px-3 py-2 text-sm" @change="refreshStores()">
+            <option value="">Semua Status</option>
+            <option v-for="s in ['DRAFT','PENDING_REVIEW','ACTIVE','REJECTED','SUSPENDED','EXPIRED','ARCHIVED']" :key="s" :value="s">{{ s }}</option>
+          </select>
+        </div>
+        <div class="card divide-y">
+          <div v-for="s in stores" :key="s.id" class="p-4 flex items-center gap-4">
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-sm text-gray-900">{{ s.name }} <span class="text-xs text-gray-400">/{{ s.slug }}</span></p>
+              <p class="text-xs text-gray-500">{{ s.owner?.name }} · {{ s.owner?.phone }} · Paket {{ s.plan?.name }}</p>
+              <p class="text-xs text-gray-400">Kedaluwarsa {{ new Date(s.expiresAt).toLocaleDateString('id-ID') }}</p>
+              <p v-if="s.rejectReason" class="text-xs text-red-500 mt-1">Alasan: {{ s.rejectReason }}</p>
+            </div>
+            <span class="text-xs font-semibold px-2 py-1 rounded-full" :class="storeStatusClass(s.status)">{{ s.status }}</span>
+            <div class="flex gap-2 shrink-0">
+              <button v-if="s.status === 'PENDING_REVIEW'" class="text-xs font-semibold px-3 py-1.5 rounded-full bg-gray-900 text-white hover:opacity-85" @click="setStoreStatus(s, 'ACTIVE')">Setujui</button>
+              <button v-if="s.status === 'PENDING_REVIEW' || s.status === 'ACTIVE'" class="text-xs font-semibold px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200" @click="promptStoreReason(s, s.status === 'ACTIVE' ? 'SUSPENDED' : 'REJECTED')">
+                {{ s.status === 'ACTIVE' ? 'Tangguhkan' : 'Tolak' }}
+              </button>
+              <button v-if="s.status === 'SUSPENDED' || s.status === 'REJECTED' || s.status === 'EXPIRED'" class="text-xs font-semibold px-3 py-1.5 rounded-full bg-gray-900 text-white hover:opacity-85" @click="setStoreStatus(s, 'ACTIVE')">Aktifkan</button>
+            </div>
+          </div>
+          <p v-if="!stores?.length" class="p-6 text-center text-sm text-gray-400">Tidak ada toko</p>
+        </div>
+      </div>
+
+      <!-- Tab: Paket -->
+      <div v-else-if="activeTab === 'plans'" class="space-y-4">
+        <div class="card divide-y">
+          <div v-for="p in plans" :key="p.id" class="p-4 space-y-3">
+            <div class="flex items-center justify-between">
+              <p class="font-bold text-sm text-gray-900">{{ p.name }} <span class="text-xs text-gray-400">({{ p.tier }})</span></p>
+              <button class="text-xs font-semibold px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200" @click="openPlanForm(p)">Edit</button>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-gray-500">
+              <span>Harga: Rp {{ Number(p.priceMonthly).toLocaleString('id-ID') }}/{{ p.durationDays }}hr</span>
+              <span>Prioritas: {{ p.searchPriority }}</span>
+              <span>Badge: {{ p.hasVerifiedBadge ? 'Ya' : 'Tidak' }}</span>
+              <span>Max produk: {{ p.maxProducts ?? '∞' }}</span>
+              <span>Max storage: {{ p.maxStorageMb ?? '∞' }} MB</span>
+              <span>Aktif: {{ p.isActive ? 'Ya' : 'Tidak' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal edit paket -->
+        <div v-if="showPlanModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" @click.self="showPlanModal = false">
+          <div class="bg-white rounded-2xl p-6 w-full max-w-md space-y-3 max-h-[90vh] overflow-y-auto">
+            <h3 class="font-bold text-gray-900">Edit Paket {{ planForm.name }}</h3>
+            <label class="block text-xs text-gray-500">Nama<input v-model="planForm.name" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" /></label>
+            <label class="block text-xs text-gray-500">Harga/bulan (Rp)<input v-model.number="planForm.priceMonthly" type="number" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" /></label>
+            <label class="block text-xs text-gray-500">Prioritas pencarian<input v-model.number="planForm.searchPriority" type="number" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" /></label>
+            <label class="block text-xs text-gray-500">Max produk (kosongkan = tak terbatas)<input v-model.number="planForm.maxProducts" type="number" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" /></label>
+            <label class="block text-xs text-gray-500">Max storage MB<input v-model.number="planForm.maxStorageMb" type="number" class="w-full border rounded-lg px-3 py-2 text-sm mt-1" /></label>
+            <label class="flex items-center gap-2 text-sm"><input v-model="planForm.hasVerifiedBadge" type="checkbox" /> Badge terverifikasi</label>
+            <label class="flex items-center gap-2 text-sm"><input v-model="planForm.isActive" type="checkbox" /> Paket aktif</label>
+            <div class="flex gap-2 pt-2">
+              <button class="btn-secondary-full" @click="showPlanModal = false">Batal</button>
+              <button class="btn-primary-full" :disabled="savingPlan" @click="savePlanForm">Simpan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Langganan -->
+      <div v-else-if="activeTab === 'subscriptions'" class="space-y-4">
+        <div class="card p-6 grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div>
+            <p class="text-xs text-gray-400">Total Pendapatan</p>
+            <p class="text-lg font-bold text-gray-900">Rp {{ (subscriptionsData?.report?.totalRevenue ?? 0).toLocaleString('id-ID') }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400">Langganan Terbayar</p>
+            <p class="text-lg font-bold text-gray-900">{{ subscriptionsData?.report?.paidCount ?? 0 }}</p>
+          </div>
+          <div v-for="(amount, planName) in (subscriptionsData?.report?.revenueByPlan || {})" :key="planName">
+            <p class="text-xs text-gray-400">{{ planName }}</p>
+            <p class="text-sm font-semibold text-gray-900">Rp {{ Number(amount).toLocaleString('id-ID') }}</p>
+          </div>
+        </div>
+        <div class="card divide-y">
+          <div v-for="s in subscriptionsData?.subscriptions" :key="s.id" class="p-4 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-semibold text-gray-900">{{ s.store?.name }} — {{ s.plan?.name }}</p>
+              <p class="text-xs text-gray-400">{{ new Date(s.periodStart).toLocaleDateString('id-ID') }} – {{ new Date(s.periodEnd).toLocaleDateString('id-ID') }}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-semibold tabular-nums">Rp {{ Number(s.amount).toLocaleString('id-ID') }}</p>
+              <span class="text-xs" :class="s.status === 'ACTIVE' ? 'text-green-600' : 'text-gray-400'">{{ s.status }}</span>
+            </div>
+          </div>
+          <p v-if="!subscriptionsData?.subscriptions?.length" class="p-6 text-center text-sm text-gray-400">Belum ada langganan</p>
+        </div>
+      </div>
+
       <div v-if="activeTab === 'settings'" class="space-y-6">
 
       <!-- ── Pengaturan Ongkir ── -->
@@ -1327,6 +1425,9 @@ const tabs = [
   { key: 'categories', label: 'Kategori' },
   { key: 'chat', label: 'Chat' },
   { key: 'config', label: 'Flash Sale' },
+  { key: 'stores', label: 'Toko' },
+  { key: 'plans', label: 'Paket' },
+  { key: 'subscriptions', label: 'Langganan' },
   { key: 'settings', label: 'Pengaturan' }
 ]
 
@@ -2199,6 +2300,67 @@ async function deleteAdmin(id: string) {
     deletingAdminId.value = null
   }
 }
+
+// ── Fase 6: Toko/Paket/Langganan ──
+const storeStatusFilter = ref('')
+const { data: stores, refresh: refreshStores } = await useFetch<any[]>('/api/admin/stores', {
+  query: computed(() => ({ status: storeStatusFilter.value || undefined }))
+})
+
+function storeStatusClass(status: string) {
+  const map: Record<string, string> = {
+    ACTIVE: 'bg-green-100 text-green-700',
+    PENDING_REVIEW: 'bg-amber-100 text-amber-700',
+    SUSPENDED: 'bg-red-100 text-red-700',
+    REJECTED: 'bg-red-100 text-red-700',
+    EXPIRED: 'bg-gray-200 text-gray-600',
+    DRAFT: 'bg-gray-100 text-gray-500',
+    ARCHIVED: 'bg-gray-100 text-gray-400'
+  }
+  return map[status] || 'bg-gray-100 text-gray-500'
+}
+
+async function setStoreStatus(store: any, status: string, reason?: string) {
+  try {
+    await $fetch(`/api/admin/stores/${store.id}/status`, { method: 'PATCH', body: { status, reason } })
+    await refreshStores()
+    showToast('success', 'Status toko diperbarui')
+  } catch (e: any) {
+    showToast('error', e?.data?.statusMessage || 'Gagal memperbarui status toko')
+  }
+}
+
+function promptStoreReason(store: any, status: string) {
+  const reason = prompt(status === 'SUSPENDED' ? 'Alasan penangguhan toko:' : 'Alasan penolakan toko:')
+  if (!reason) return
+  setStoreStatus(store, status, reason)
+}
+
+const { data: plans, refresh: refreshPlans } = await useFetch<any[]>('/api/admin/plans')
+const showPlanModal = ref(false)
+const savingPlan = ref(false)
+const planForm = reactive<Record<string, any>>({})
+
+function openPlanForm(p: any) {
+  Object.assign(planForm, p)
+  showPlanModal.value = true
+}
+
+async function savePlanForm() {
+  savingPlan.value = true
+  try {
+    await $fetch(`/api/admin/plans/${planForm.id}`, { method: 'PATCH', body: planForm })
+    await refreshPlans()
+    showPlanModal.value = false
+    showToast('success', 'Paket berhasil disimpan')
+  } catch (e: any) {
+    showToast('error', e?.data?.statusMessage || 'Gagal menyimpan paket')
+  } finally {
+    savingPlan.value = false
+  }
+}
+
+const { data: subscriptionsData } = await useFetch<any>('/api/admin/subscriptions')
 
 // Offline Order
 const showOfflineOrderModal = ref(false)

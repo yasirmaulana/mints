@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const { destination, weight, courier } = getQuery(event)
+  const { destination, weight, courier, storeId } = getQuery(event)
 
   if (!destination || !weight || !courier) {
     throw createError({ statusCode: 400, statusMessage: 'destination, weight, courier wajib diisi' })
@@ -8,9 +8,17 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const freeShippingMin = Number(config.public.freeShippingMin || 500000)
 
-  // Prioritas: DB > env > fallback default Surabaya (501)
-  const dbOrigin = await prisma.storeSettings.findUnique({ where: { key: 'shipping_origin_city_id' } })
-  const origin = dbOrigin?.value || config.rajaOngkirOriginCityId || '501'
+  // Origin per toko (checkout lintas toko, PRD §11 Fase 5) bila storeId diberikan,
+  // jika tidak fallback ke pengaturan lama: DB > env > default Surabaya (501).
+  let origin: string | null = null
+  if (storeId) {
+    const store = await prisma.store.findUnique({ where: { id: String(storeId) }, select: { cityId: true } })
+    origin = store?.cityId || null
+  }
+  if (!origin) {
+    const dbOrigin = await prisma.storeSettings.findUnique({ where: { key: 'shipping_origin_city_id' } })
+    origin = dbOrigin?.value || config.rajaOngkirOriginCityId || '501'
+  }
 
   const body = new URLSearchParams({
     origin: String(origin),

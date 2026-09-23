@@ -5,11 +5,16 @@ export default defineEventHandler(async (event) => {
     where: { id },
     include: {
       category: { select: { id: true, name: true, slug: true } },
-      variants: { orderBy: { size: 'asc' } }
+      variants: { orderBy: { size: 'asc' } },
+      store: { select: { id: true, name: true, status: true, cityId: true, cityName: true } }
     }
   })
 
-  if (!product) throw createError({ statusCode: 404, statusMessage: 'Produk tidak ditemukan' })
+  // Toko non-ACTIVE dianggap tidak ada bagi pembeli — sama seperti aturan halaman toko (§6.4).
+  if (!product || product.store?.status !== 'ACTIVE') {
+    throw createError({ statusCode: 404, statusMessage: 'Produk tidak ditemukan' })
+  }
+  const { store, ...result } = product
 
-  return product
+  return { ...result, store: { id: store.id, name: store.name, cityId: store.cityId, cityName: store.cityName } }
 })

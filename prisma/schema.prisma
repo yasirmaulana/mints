@@ -35,6 +35,30 @@ enum OrderSource {
   REGULAR
 }
 
+enum PlanTier {
+  FREE
+  PREMIUM
+  GOLD
+  PLATINUM
+}
+
+enum StoreStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  REJECTED
+  SUSPENDED
+  EXPIRED
+  ARCHIVED
+}
+
+enum SubscriptionStatus {
+  PENDING_PAYMENT
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
 model Admin {
   id        String   @id @default(uuid())
   username  String   @unique
@@ -56,9 +80,14 @@ model FlashSaleConfig {
   startTime DateTime
   endTime   DateTime
   isActive  Boolean   @default(true)
+  // storeId nullable: null = sesi flash sale legacy milik platform (kompatibilitas data lama)
+  storeId   String?
+  store     Store?    @relation(fields: [storeId], references: [id], onDelete: Cascade)
   products  Product[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@index([storeId])
 }
 
 model Product {
@@ -69,6 +98,7 @@ model Product {
   originalPrice      Decimal?         @db.Decimal(12, 2)
   imageUrl           String
   images             String[]
+  videoUrl           String?
   status             ProductStatus    @default(AVAILABLE)
   productType        ProductType      @default(REGULAR)
   categoryId         String?
@@ -78,10 +108,17 @@ model Product {
   estimatedReadyDate DateTime?
   sessionId          String?
   session            FlashSaleConfig? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  // storeId sementara nullable selama migrasi backfill (lihat prisma/seed-multi-toko.js),
+  // lalu diwajibkan (NOT NULL) setelah backfill selesai — lihat catatan migrasi PRD §5.3
+  storeId            String?
+  store              Store?           @relation(fields: [storeId], references: [id], onDelete: Cascade)
   variants           ProductVariant[]
   orders             Order[]
+  media              StoreMedia[]
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
+
+  @@index([storeId])
 }
 
 model ProductVariant {
@@ -113,6 +150,7 @@ model Buyer {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   orders    Order[]
+  stores    Store[]
 }
 
 model EmailOtp {
@@ -127,40 +165,49 @@ model EmailOtp {
 }
 
 model Order {
-  id             String      @id @default(uuid())
-  productId      String
-  product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variantId      String?
-  qty            Int         @default(1)
-  buyerId        String?
-  buyer          Buyer?      @relation(fields: [buyerId], references: [id], onDelete: SetNull)
-  buyerName      String
-  buyerPhone     String
-  paymentProof   String?
-  status         OrderStatus @default(PENDING_PAYMENT)
-  source         OrderSource @default(FLASH_SALE)
-  notifyCount    Int         @default(0)
-  lastNotifiedAt DateTime?
+  id               String      @id @default(uuid())
+  productId        String
+  product          Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId        String?
+  qty              Int         @default(1)
+  buyerId          String?
+  buyer            Buyer?      @relation(fields: [buyerId], references: [id], onDelete: SetNull)
+  buyerName        String
+  buyerPhone       String
+  paymentProof     String?
+  status           OrderStatus @default(PENDING_PAYMENT)
+  source           OrderSource @default(FLASH_SALE)
+  notifyCount      Int         @default(0)
+  lastNotifiedAt   DateTime?
   // Checkout fields (used for REGULAR orders)
-  address        String?
-  cityId         String?
-  cityName       String?
-  courierCode    String?
-  courierService String?
-  shippingCost   Int?
-  payment        Payment?
-  shipment       Shipment?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  address          String?
+  cityId           String?
+  cityName         String?
+  courierCode      String?
+  courierService   String?
+  shippingCost     Int?
+  // storeId sementara nullable selama migrasi backfill — lihat catatan migrasi PRD §5.3
+  storeId          String?
+  store            Store?      @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  commissionAmount Int?
+  payoutStatus     String      @default("PENDING")
+  payment          Payment?
+  shipment         Shipment?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   @@index([buyerId])
+  @@index([storeId])
 }
 
 model Payment {
   id              String    @id @default(uuid())
   orderId         String    @unique
   order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  duitkuReference String    @unique
+  // Tidak lagi @unique: checkout lintas toko membuat satu transaksi Duitku yang dibagi ke
+  // beberapa Order (satu per toko), sehingga beberapa Payment berbagi duitkuReference yang sama
+  // (PRD §11 Fase 5 "satu pembayaran → beberapa order").
+  duitkuReference String
   paymentUrl      String?
   paymentMethod   String?
   vaNumber        String?
@@ -170,6 +217,8 @@ model Payment {
   rawCallback     Json?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
+  @@index([duitkuReference])
 }
 
 model Shipment {
@@ -196,10 +245,14 @@ model ChatSession {
   buyerName  String
   productId  String?
   orderId    String?
+  // null = chat lama sebelum multi-toko, diarahkan ke admin platform
+  storeId    String?
   isRead     Boolean       @default(false)
   messages   ChatMessage[]
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
+
+  @@index([storeId])
 }
 
 model ChatMessage {
@@ -209,4 +262,106 @@ model ChatMessage {
   sender    String
   body      String
   createdAt DateTime    @default(now())
+}
+
+/// Definisi paket langganan toko — diubah admin lewat dashboard tanpa deploy ulang.
+/// Batasan bernilai null berarti tidak terbatas.
+model Plan {
+  id                    String         @id @default(uuid())
+  tier                  PlanTier       @unique
+  name                  String
+  priceMonthly          Int // Rupiah; 0 untuk FREE. NILAI SEMENTARA — lihat PRD §14 pertanyaan terbuka.
+  durationDays          Int            @default(30)
+  maxStores             Int?
+  maxProducts           Int?
+  maxImagesPerProduct   Int?
+  maxVideosPerProduct   Int?
+  maxImageSizeMb        Int?
+  maxVideoSizeMb        Int?
+  maxVideoDurationSec   Int?
+  maxStorageMb          Int?
+  maxVariantsPerProduct Int?
+  maxFlashSaleSessions  Int?
+  commissionPercent     Decimal        @db.Decimal(5, 2)
+  hasCustomDomain       Boolean        @default(false)
+  hasVerifiedBadge      Boolean        @default(false)
+  searchPriority        Int            @default(0)
+  isActive              Boolean        @default(true)
+  stores                Store[]
+  subscriptions         Subscription[]
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+}
+
+model Store {
+  id            String            @id @default(uuid())
+  ownerId       String
+  owner         Buyer             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name          String
+  slug          String            @unique
+  description   String?
+  logoUrl       String?
+  bannerUrl     String?
+  phone         String
+  address       String?
+  cityId        String?
+  cityName      String?
+  status        StoreStatus       @default(DRAFT)
+  rejectReason  String?
+  planId        String
+  plan          Plan              @relation(fields: [planId], references: [id])
+  expiresAt     DateTime
+  // Counter terdenormalisasi — sumber kebenaran untuk pengecekan kuota (lihat server/utils/plan-limits.ts)
+  productCount  Int               @default(0)
+  storageUsedKb Int               @default(0)
+  products      Product[]
+  orders        Order[]
+  flashSales    FlashSaleConfig[]
+  media         StoreMedia[]
+  subscriptions Subscription[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([ownerId])
+  @@index([status, expiresAt])
+}
+
+/// Catatan setiap file yang diunggah penjual — dipakai untuk menghitung kuota storage
+/// dan menghapus objek S3 saat produk/toko dihapus. Diisi mulai Fase 3 (upload media toko).
+model StoreMedia {
+  id          String   @id @default(uuid())
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  kind        String // "IMAGE" | "VIDEO"
+  s3Key       String   @unique
+  url         String
+  sizeKb      Int
+  durationSec Int?
+  mimeType    String
+  createdAt   DateTime @default(now())
+
+  @@index([storeId])
+  @@index([productId])
+}
+
+model Subscription {
+  id              String             @id @default(uuid())
+  storeId         String
+  store           Store              @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  planId          String
+  plan            Plan               @relation(fields: [planId], references: [id])
+  status          SubscriptionStatus @default(PENDING_PAYMENT)
+  amount          Int
+  periodStart     DateTime
+  periodEnd       DateTime
+  duitkuReference String?            @unique
+  paymentUrl      String?
+  paidAt          DateTime?
+  rawCallback     Json?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([storeId])
 }

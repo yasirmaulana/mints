@@ -42,6 +42,7 @@ export default defineNuxtConfig({
     duitkuCallbackUrl: process.env.DUITKU_CALLBACK_URL || '',
     duitkuReturnUrl: process.env.DUITKU_RETURN_URL || '',
     appUrl: process.env.APP_URL || 'https://mints.id',
+    cronSecret: process.env.CRON_SECRET || '',
     // SMTP Gmail
     smtpUser: process.env.SMTP_USER || '',
     smtpPass: process.env.SMTP_PASS || '',

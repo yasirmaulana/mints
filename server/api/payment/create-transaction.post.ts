@@ -1,42 +1,48 @@
+// Buat transaksi pembayaran untuk satu atau beberapa Order sekaligus (checkout lintas toko,
+// PRD §11 Fase 5 "satu pembayaran → beberapa order"). Semua Payment yang dibuat berbagi
+// duitkuReference yang sama — satu transaksi Duitku, dipecah ke Payment per order.
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { orderId, paymentMethod } = body
+  const { paymentMethod } = body
+  const orderIds: string[] = Array.isArray(body.orderIds) ? body.orderIds : (body.orderId ? [body.orderId] : [])
 
-  if (!orderId || !paymentMethod) {
-    throw createError({ statusCode: 400, statusMessage: 'orderId dan paymentMethod wajib diisi' })
+  if (!orderIds.length || !paymentMethod) {
+    throw createError({ statusCode: 400, statusMessage: 'orderIds dan paymentMethod wajib diisi' })
   }
 
   const buyerId = getCookie(event, 'buyer_session')
 
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
+  const orders = await prisma.order.findMany({
+    where: { id: { in: orderIds } },
     include: { product: true }
   })
-  if (!order) throw createError({ statusCode: 404, statusMessage: 'Order tidak ditemukan' })
+  if (orders.length !== orderIds.length) throw createError({ statusCode: 404, statusMessage: 'Order tidak ditemukan' })
 
-  // Ownership: jika order terikat akun, harus login dengan akun yang sama
-  if (order.buyerId && order.buyerId !== buyerId) {
-    throw createError({ statusCode: 403, statusMessage: 'Akses tidak diizinkan' })
-  }
-  if (order.status !== 'PENDING_PAYMENT') {
-    throw createError({ statusCode: 400, statusMessage: 'Order sudah diproses atau dibatalkan' })
+  for (const order of orders) {
+    if (order.buyerId && order.buyerId !== buyerId) {
+      throw createError({ statusCode: 403, statusMessage: 'Akses tidak diizinkan' })
+    }
+    if (order.status !== 'PENDING_PAYMENT') {
+      throw createError({ statusCode: 400, statusMessage: 'Order sudah diproses atau dibatalkan' })
+    }
   }
 
-  const merchantOrderId = `MINTS-${orderId.slice(0, 8)}-${Date.now()}`
+  const merchantOrderId = `MINTS-${orderIds[0].slice(0, 8)}-${Date.now()}`
   const expiredAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+  const totalAmount = orders.reduce((sum, o) => sum + Number(o.product.price) * o.qty + (o.shippingCost || 0), 0)
 
-  // Transfer Bank Manual — tidak perlu gateway, simpan Payment record langsung
+  // Transfer Bank Manual — tidak perlu gateway, simpan Payment record langsung per order
   if (paymentMethod === 'FT') {
-    await prisma.payment.create({
-      data: {
-        orderId,
+    await prisma.payment.createMany({
+      data: orders.map(o => ({
+        orderId: o.id,
         duitkuReference: merchantOrderId,
         paymentUrl: null,
         paymentMethod: 'FT',
         vaNumber: null,
         status: 'pending',
         expiredAt
-      }
+      }))
     })
     return { paymentUrl: null, merchantOrderId }
   }
@@ -52,18 +58,19 @@ export default defineEventHandler(async (event) => {
 
   const baseUrl = getDuitkuBaseUrl(isProduction)
 
-  const amount = String(Number(order.product.price) + (order.shippingCost || 0))
+  const amount = String(totalAmount)
   const signature = duitkuSignature(merchantCode, merchantOrderId, amount, apiKey)
+  const buyer = orders[0]
 
   const payload = {
     merchantCode,
     paymentAmount: Number(amount),
     paymentMethod,
     merchantOrderId,
-    productDetails: order.product.title,
-    customerVaName: order.buyerName,
-    email: `${order.buyerPhone.replace(/\D/g, '')}@mints.id`,
-    phoneNumber: order.buyerPhone,
+    productDetails: orders.length > 1 ? `${orders[0].product.title} +${orders.length - 1} lainnya` : orders[0].product.title,
+    customerVaName: buyer.buyerName,
+    email: `${buyer.buyerPhone.replace(/\D/g, '')}@mints.id`,
+    phoneNumber: buyer.buyerPhone,
     additionalParam: '',
     merchantUserInfo: '',
     callbackUrl: config.duitkuCallbackUrl,
@@ -82,16 +89,16 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: duitkuRes.statusMessage || 'Gagal membuat transaksi Duitku' })
   }
 
-  await prisma.payment.create({
-    data: {
-      orderId,
+  await prisma.payment.createMany({
+    data: orders.map(o => ({
+      orderId: o.id,
       duitkuReference: merchantOrderId,
       paymentUrl: duitkuRes.paymentUrl,
       paymentMethod,
       vaNumber: duitkuRes.vaNumber || null,
       status: 'pending',
       expiredAt
-    }
+    }))
   })
 
   return { paymentUrl: duitkuRes.paymentUrl, merchantOrderId }
