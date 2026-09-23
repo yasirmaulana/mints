@@ -9,7 +9,14 @@ declare global {
   const appendHeaders: typeof import('../../node_modules/h3').appendHeaders
   const appendResponseHeader: typeof import('../../node_modules/h3').appendResponseHeader
   const appendResponseHeaders: typeof import('../../node_modules/h3').appendResponseHeaders
+  const assertCanAddProduct: typeof import('../../server/utils/plan-limits').assertCanAddProduct
+  const assertCanCreateFlashSale: typeof import('../../server/utils/plan-limits').assertCanCreateFlashSale
+  const assertCanCreateStore: typeof import('../../server/utils/plan-limits').assertCanCreateStore
+  const assertMediaAllowed: typeof import('../../server/utils/plan-limits').assertMediaAllowed
   const assertMethod: typeof import('../../node_modules/h3').assertMethod
+  const assertPlanChangeAllowed: typeof import('../../server/utils/plan-limits').assertPlanChangeAllowed
+  const assertVariantCount: typeof import('../../server/utils/plan-limits').assertVariantCount
+  const buildQuotaSummary: typeof import('../../server/utils/plan-limits').buildQuotaSummary
   const cachedEventHandler: typeof import('../../node_modules/nitropack/dist/runtime/internal/cache').cachedEventHandler
   const cachedFunction: typeof import('../../node_modules/nitropack/dist/runtime/internal/cache').cachedFunction
   const callNodeListener: typeof import('../../node_modules/h3').callNodeListener
@@ -90,6 +97,7 @@ declare global {
   const defineWebSocket: typeof import('../../node_modules/h3').defineWebSocket
   const defineWebSocketHandler: typeof import('../../node_modules/h3').defineWebSocketHandler
   const deleteCookie: typeof import('../../node_modules/h3').deleteCookie
+  const deleteS3Object: typeof import('../../server/utils/s3').deleteS3Object
   const duitkuCallbackSignature: typeof import('../../server/utils/duitku').duitkuCallbackSignature
   const duitkuSignature: typeof import('../../server/utils/duitku').duitkuSignature
   const dynamicEventHandler: typeof import('../../node_modules/h3').dynamicEventHandler
@@ -125,12 +133,15 @@ declare global {
   const getRouterParams: typeof import('../../node_modules/h3').getRouterParams
   const getS3Client: typeof import('../../server/utils/s3').getS3Client
   const getSession: typeof import('../../node_modules/h3').getSession
+  const getStoreContext: typeof import('../../server/utils/plan-limits').getStoreContext
   const getUserSession: typeof import('../../node_modules/nuxt-auth-utils/dist/runtime/server/utils/session').getUserSession
   const getValidatedQuery: typeof import('../../node_modules/h3').getValidatedQuery
   const getValidatedRouterParams: typeof import('../../node_modules/h3').getValidatedRouterParams
   const handleCacheHeaders: typeof import('../../node_modules/h3').handleCacheHeaders
   const handleCors: typeof import('../../node_modules/h3').handleCors
   const hashPassword: typeof import('../../node_modules/nuxt-auth-utils/dist/runtime/server/utils/password').hashPassword
+  const headS3Object: typeof import('../../server/utils/s3').headS3Object
+  const isAllowedVideoMime: typeof import('../../server/utils/s3').isAllowedVideoMime
   const isCorsOriginAllowed: typeof import('../../node_modules/h3').isCorsOriginAllowed
   const isError: typeof import('../../node_modules/h3').isError
   const isEvent: typeof import('../../node_modules/h3').isEvent
@@ -143,6 +154,7 @@ declare global {
   const nitroPlugin: typeof import('../../node_modules/nitropack/dist/runtime/internal/plugin').nitroPlugin
   const parseCookies: typeof import('../../node_modules/h3').parseCookies
   const passwordNeedsReHash: typeof import('../../node_modules/nuxt-auth-utils/dist/runtime/server/utils/password').passwordNeedsReHash
+  const presignVideoUpload: typeof import('../../server/utils/s3').presignVideoUpload
   const prisma: typeof import('../../server/utils/prisma').prisma
   const promisifyNodeListener: typeof import('../../node_modules/h3').promisifyNodeListener
   const proxyRequest: typeof import('../../node_modules/h3').proxyRequest
@@ -180,6 +192,7 @@ declare global {
   const setResponseHeaders: typeof import('../../node_modules/h3').setResponseHeaders
   const setResponseStatus: typeof import('../../node_modules/h3').setResponseStatus
   const setUserSession: typeof import('../../node_modules/nuxt-auth-utils/dist/runtime/server/utils/session').setUserSession
+  const slugify: typeof import('../../server/utils/slug').slugify
   const splitCookiesString: typeof import('../../node_modules/h3').splitCookiesString
   const toEventHandler: typeof import('../../node_modules/h3').toEventHandler
   const toNodeListener: typeof import('../../node_modules/h3').toNodeListener
@@ -196,6 +209,7 @@ declare global {
   const useRuntimeConfig: typeof import('../../node_modules/nitropack/dist/runtime/internal/config').useRuntimeConfig
   const useSession: typeof import('../../node_modules/h3').useSession
   const useStorage: typeof import('../../node_modules/nitropack/dist/runtime/internal/storage').useStorage
+  const validateStoreSlug: typeof import('../../server/utils/slug').validateStoreSlug
   const verifyAdminToken: typeof import('../../server/utils/auth').verifyAdminToken
   const verifyPassword: typeof import('../../node_modules/nuxt-auth-utils/dist/runtime/server/utils/password').verifyPassword
   const verifyRecaptcha: typeof import('../../server/utils/recaptcha').verifyRecaptcha
@@ -354,6 +368,9 @@ declare global {
   // @ts-ignore
   export type { SessionHooks } from '../../node_modules/nuxt-auth-utils/dist/runtime/server/utils/session.d'
   import('../../node_modules/nuxt-auth-utils/dist/runtime/server/utils/session.d')
+  // @ts-ignore
+  export type { StoreContext } from '../../server/utils/plan-limits'
+  import('../../server/utils/plan-limits')
 }
 export { H3Event, H3Error, appendCorsHeaders, appendCorsPreflightHeaders, appendHeader, appendHeaders, appendResponseHeader, appendResponseHeaders, assertMethod, callNodeListener, clearResponseHeaders, clearSession, createApp, createAppEventHandler, createError, createEvent, createEventStream, createRouter, defaultContentType, defineEventHandler, defineLazyEventHandler, defineNodeListener, defineNodeMiddleware, defineRequestMiddleware, defineResponseMiddleware, defineWebSocket, defineWebSocketHandler, deleteCookie, dynamicEventHandler, eventHandler, fetchWithEvent, fromNodeMiddleware, fromPlainHandler, fromWebHandler, getCookie, getHeader, getHeaders, getMethod, getProxyRequestHeaders, getQuery, getRequestFingerprint, getRequestHeader, getRequestHeaders, getRequestHost, getRequestIP, getRequestPath, getRequestProtocol, getRequestURL, getRequestWebStream, getResponseHeader, getResponseHeaders, getResponseStatus, getResponseStatusText, getRouterParam, getRouterParams, getSession, getValidatedQuery, getValidatedRouterParams, handleCacheHeaders, handleCors, isCorsOriginAllowed, isError, isEvent, isEventHandler, isMethod, isPreflightRequest, isStream, isWebResponse, lazyEventHandler, parseCookies, promisifyNodeListener, proxyRequest, readBody, readFormData, readMultipartFormData, readRawBody, readValidatedBody, removeResponseHeader, sanitizeStatusCode, sanitizeStatusMessage, sealSession, send, sendError, sendIterable, sendNoContent, sendProxy, sendRedirect, sendStream, sendWebResponse, serveStatic, setCookie, setHeader, setHeaders, setResponseHeader, setResponseHeaders, setResponseStatus, splitCookiesString, toEventHandler, toNodeListener, toPlainHandler, toWebHandler, toWebRequest, unsealSession, updateSession, useBase, useSession, writeEarlyHints } from 'h3';
 export { useNitroApp } from 'nitropack/runtime/internal/app';
@@ -425,8 +442,10 @@ export { requireBuyerSession } from '/home/yasir/Documents/Project/p_otomatisin/
 export { duitkuSignature, duitkuCallbackSignature, getDuitkuBaseUrl } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/duitku';
 export { resolveBankInfo, sendPaymentNotice, getBulkTemplate } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/fonnte';
 export { sendOtpEmail } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/mailer';
+export { getStoreContext, assertCanCreateStore, assertCanAddProduct, assertVariantCount, assertMediaAllowed, assertCanCreateFlashSale, assertPlanChangeAllowed, buildQuotaSummary } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/plan-limits';
 export { prisma } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/prisma';
 export { checkRateLimit } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/rate-limit';
 export { verifyRecaptcha } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/recaptcha';
-export { getS3Client, uploadToS3 } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/s3';
+export { getS3Client, uploadToS3, isAllowedVideoMime, presignVideoUpload, headS3Object, deleteS3Object } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/s3';
+export { validateStoreSlug, slugify } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/slug';
 export { verifyTurnstile } from '/home/yasir/Documents/Project/p_otomatisin/mints/server/utils/turnstile';

@@ -2,16 +2,17 @@ import process from 'node:process';globalThis._importMeta_={url:import.meta.url,
 import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, getCookie, getResponseStatus, getQuery as getQuery$1, deleteCookie, setCookie, useSession, getRequestWebStream, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getRouterParam, readBody, getHeader, getRequestIP, readMultipartFormData, getResponseStatusText } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/h3/dist/index.mjs';
 import { Server } from 'node:http';
 import { resolve, join, dirname } from 'node:path';
-import crypto$1, { createHash } from 'node:crypto';
+import crypto$1, { createHash, randomUUID } from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
 import { escapeHtml } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@vue/shared/dist/shared.cjs.js';
 import viteNodeEntry_mjs from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs';
 import { viteNodeFetch } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
 import bcrypt from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/bcryptjs/index.js';
-import { PutObjectCommand, S3Client, GetObjectCommand } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@aws-sdk/client-s3/dist-cjs/index.js';
 import nodemailer from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/nodemailer/dist/esm/nodemailer.js';
 import { Ratelimit } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@upstash/ratelimit/dist/index.js';
 import { Redis } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@upstash/redis/nodejs.mjs';
+import { PutObjectCommand, S3Client, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command, GetObjectCommand } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@aws-sdk/client-s3/dist-cjs/index.js';
+import { getSignedUrl } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/@aws-sdk/s3-request-presigner/dist-cjs/index.js';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL, encodePath } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/ufo/dist/index.mjs';
 import defu, { defuFn, defu as defu$1 } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/defu/dist/defu.mjs';
 import { FetchError, createFetch, Headers as Headers$1 } from 'file:///home/yasir/Documents/Project/p_otomatisin/mints/node_modules/ofetch/dist/node.mjs';
@@ -961,12 +962,13 @@ const _inlineRuntimeConfig = {
   "s3Region": "kencana",
   "rajaOngkirKey": "iRLqlUWb13493535a11ce5ecb4cPiSCo",
   "rajaOngkirOriginCityId": "501",
-  "duitkuMerchantCode": "m1234",
-  "duitkuApiKey": "api_key",
+  "duitkuMerchantCode": "DS35537",
+  "duitkuApiKey": "26519b837da6c40372ca78ab58694be3",
   "duitkuIsProduction": "false",
-  "duitkuCallbackUrl": "https://mints.id/api/payment/callback",
-  "duitkuReturnUrl": "https://mints.id/orders",
+  "duitkuCallbackUrl": "https://mints.otomatisin.web.id/api/payment/callback",
+  "duitkuReturnUrl": "https://mints.otomatisin.web.id/account/orders",
   "appUrl": "https://mints.id",
+  "cronSecret": "",
   "smtpUser": "otomatisinwebid@gmail.com",
   "smtpPass": "zlqw qtmf mmwu mfni",
   "recaptchaSecretKey": "6Ld99cEtAAAAABNLxll8_QQMfU2czYDbZ0xJo7sk",
@@ -2821,16 +2823,16 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"36aad-aKtOr72vq27UOY1ti8TGwAwfm1Y\"",
-    "mtime": "2026-09-18T08:00:26.077Z",
-    "size": 223917,
+    "etag": "\"46bd9-rZ7BbXAAxODymWcYJrzOcMpwrso\"",
+    "mtime": "2026-09-23T13:51:32.351Z",
+    "size": 289753,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"c19b8-nRaMyf2LjDM3BomsZ5zuV04Il6U\"",
-    "mtime": "2026-09-18T08:00:26.078Z",
-    "size": 793016,
+    "etag": "\"f7e61-F6N46045wRAI4Um5Gm2IO9J+Z3s\"",
+    "mtime": "2026-09-23T13:51:32.351Z",
+    "size": 1015393,
     "path": "index.mjs.map"
   }
 };
@@ -3381,6 +3383,155 @@ async function sendOtpEmail(to, code, appName = "MINTS") {
   });
 }
 
+async function loadStoreWithPlan(storeId) {
+  return prisma.store.findUnique({
+    where: { id: storeId },
+    include: { plan: true }
+  });
+}
+async function getStoreContext(event, storeId, opts = { requireActive: true }) {
+  const buyer = await requireBuyerSession(event);
+  const store = await loadStoreWithPlan(storeId);
+  if (!store) {
+    throw createError({ statusCode: 404, statusMessage: "Toko tidak ditemukan" });
+  }
+  if (store.ownerId !== buyer.id) {
+    throw createError({ statusCode: 404, statusMessage: "Toko tidak ditemukan" });
+  }
+  if (opts.requireActive !== false && store.status !== "ACTIVE") {
+    throw createError({ statusCode: 403, statusMessage: `Toko berstatus ${store.status} \u2014 tidak dapat melakukan aksi ini` });
+  }
+  return { store };
+}
+async function assertCanCreateStore(buyerId, planId) {
+  const plan = await prisma.plan.findUnique({ where: { id: planId } });
+  if (!plan || !plan.isActive) {
+    throw createError({ statusCode: 400, statusMessage: "Paket tidak valid" });
+  }
+  if (plan.maxStores !== null) {
+    const count = await prisma.store.count({
+      where: { ownerId: buyerId, status: { not: "ARCHIVED" } }
+    });
+    if (count >= plan.maxStores) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: `Paket ${plan.name} membatasi maksimal ${plan.maxStores} toko. Upgrade paket untuk membuka toko baru.`
+      });
+    }
+  }
+  return plan;
+}
+function assertCanAddProduct(ctx) {
+  const { store } = ctx;
+  const max = store.plan.maxProducts;
+  if (max !== null && store.productCount >= max) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: `Paket ${store.plan.name} membatasi maksimal ${max} produk. Upgrade paket atau hapus produk lain.`
+    });
+  }
+}
+function assertVariantCount(ctx, variantCount) {
+  const max = ctx.store.plan.maxVariantsPerProduct;
+  if (max !== null && variantCount > max) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: `Paket ${ctx.store.plan.name} membatasi maksimal ${max} varian ukuran per produk.`
+    });
+  }
+}
+function assertMediaAllowed(ctx, files, existing = { images: 0, videos: 0 }) {
+  var _a;
+  const { plan } = ctx.store;
+  const newImages = files.filter((f) => f.kind === "IMAGE").length;
+  const newVideos = files.filter((f) => f.kind === "VIDEO").length;
+  if (plan.maxImagesPerProduct !== null && existing.images + newImages > plan.maxImagesPerProduct) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: `Paket ${plan.name} membatasi maksimal ${plan.maxImagesPerProduct} foto per produk.`
+    });
+  }
+  if (plan.maxVideosPerProduct !== null && existing.videos + newVideos > plan.maxVideosPerProduct) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: `Paket ${plan.name} membatasi maksimal ${plan.maxVideosPerProduct} video per produk.`
+    });
+  }
+  for (const file of files) {
+    if (file.kind === "IMAGE" && plan.maxImageSizeMb !== null && file.sizeKb > plan.maxImageSizeMb * 1024) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: `Ukuran foto melebihi batas paket ${plan.name} (maks. ${plan.maxImageSizeMb} MB).`
+      });
+    }
+    if (file.kind === "VIDEO") {
+      if (plan.maxVideoSizeMb !== null && file.sizeKb > plan.maxVideoSizeMb * 1024) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: `Ukuran video melebihi batas paket ${plan.name} (maks. ${plan.maxVideoSizeMb} MB).`
+        });
+      }
+      if (plan.maxVideoDurationSec !== null && ((_a = file.durationSec) != null ? _a : 0) > plan.maxVideoDurationSec) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: `Durasi video melebihi batas paket ${plan.name} (maks. ${plan.maxVideoDurationSec} detik).`
+        });
+      }
+    }
+  }
+  if (plan.maxStorageMb !== null) {
+    const totalNewKb = files.reduce((sum, f) => sum + f.sizeKb, 0);
+    const limitKb = plan.maxStorageMb * 1024;
+    if (ctx.store.storageUsedKb + totalNewKb > limitKb) {
+      const remainingMb = Math.max(0, (limitKb - ctx.store.storageUsedKb) / 1024).toFixed(1);
+      throw createError({
+        statusCode: 403,
+        statusMessage: `Kuota penyimpanan toko tidak cukup. Sisa: ${remainingMb} MB dari ${plan.maxStorageMb} MB.`
+      });
+    }
+  }
+}
+function assertPlanChangeAllowed(ctx, targetPlan) {
+  const { store } = ctx;
+  if (targetPlan.maxProducts !== null && store.productCount > targetPlan.maxProducts) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: `Paket ${targetPlan.name} membatasi maksimal ${targetPlan.maxProducts} produk. Hapus produk hingga di bawah batas sebelum pindah ke paket ini.`
+    });
+  }
+  if (targetPlan.maxStorageMb !== null && store.storageUsedKb > targetPlan.maxStorageMb * 1024) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: `Paket ${targetPlan.name} membatasi penyimpanan maksimal ${targetPlan.maxStorageMb} MB. Hapus media hingga di bawah batas sebelum pindah ke paket ini.`
+    });
+  }
+}
+function buildQuotaSummary(ctx) {
+  const { store } = ctx;
+  const { plan } = store;
+  const daysLeft = Math.ceil((store.expiresAt.getTime() - Date.now()) / (1e3 * 60 * 60 * 24));
+  return {
+    id: store.id,
+    name: store.name,
+    slug: store.slug,
+    plan: { tier: plan.tier, name: plan.name, maxStores: plan.maxStores },
+    status: store.status,
+    expiresAt: store.expiresAt,
+    daysLeft,
+    products: { used: store.productCount, max: plan.maxProducts },
+    storageMb: { used: Math.round(store.storageUsedKb / 1024 * 10) / 10, max: plan.maxStorageMb },
+    limits: {
+      maxImagesPerProduct: plan.maxImagesPerProduct,
+      maxVideosPerProduct: plan.maxVideosPerProduct,
+      maxImageSizeMb: plan.maxImageSizeMb,
+      maxVideoSizeMb: plan.maxVideoSizeMb,
+      maxVideoDurationSec: plan.maxVideoDurationSec,
+      maxVariantsPerProduct: plan.maxVariantsPerProduct,
+      maxFlashSaleSessions: plan.maxFlashSaleSessions
+    }
+  };
+}
+
 const limiterCache = /* @__PURE__ */ new Map();
 let redis = null;
 function getRedis() {
@@ -3491,6 +3642,96 @@ async function uploadToS3(data, filename, contentType, prefix = "products") {
     ContentType: contentType
   }));
   return `/api/s3-image/${key}`;
+}
+const ALLOWED_VIDEO_MIME = /* @__PURE__ */ new Set(["video/mp4", "video/quicktime", "video/webm"]);
+const VIDEO_EXT = { "video/mp4": "mp4", "video/quicktime": "mov", "video/webm": "webm" };
+const PRESIGN_EXPIRES_SEC = 600;
+function isAllowedVideoMime(mime) {
+  return ALLOWED_VIDEO_MIME.has(mime);
+}
+async function presignVideoUpload(storeId, productId, mimeType) {
+  if (!isAllowedVideoMime(mimeType)) {
+    throw createError({ statusCode: 400, statusMessage: "Tipe video tidak diizinkan. Gunakan MP4, MOV, atau WebM" });
+  }
+  const config = useRuntimeConfig();
+  const client = getS3Client();
+  const ext = VIDEO_EXT[mimeType];
+  const key = `stores/${storeId}/${productId}/${randomUUID()}.${ext}`;
+  const url = await getSignedUrl(
+    client,
+    new PutObjectCommand({ Bucket: config.s3Bucket, Key: key, ContentType: mimeType }),
+    { expiresIn: PRESIGN_EXPIRES_SEC }
+  );
+  return { uploadUrl: url, s3Key: key, expiresIn: PRESIGN_EXPIRES_SEC };
+}
+async function headS3Object(key) {
+  const config = useRuntimeConfig();
+  const client = getS3Client();
+  try {
+    const res = await client.send(new HeadObjectCommand({ Bucket: config.s3Bucket, Key: key }));
+    return { exists: true, sizeBytes: res.ContentLength || 0, contentType: res.ContentType };
+  } catch {
+    return { exists: false, sizeBytes: 0, contentType: void 0 };
+  }
+}
+async function deleteS3Object(key) {
+  const config = useRuntimeConfig();
+  const client = getS3Client();
+  await client.send(new DeleteObjectCommand({ Bucket: config.s3Bucket, Key: key })).catch(() => {
+  });
+}
+
+const RESERVED_SLUGS = /* @__PURE__ */ new Set([
+  "admin",
+  "api",
+  "account",
+  "checkout",
+  "cart",
+  "login",
+  "logout",
+  "register",
+  "mints",
+  "orders",
+  "track",
+  "faq",
+  "privasi",
+  "syarat-ketentuan",
+  "kebijakan-pengembalian",
+  "panduan-ukuran",
+  "tentang-kami",
+  "flash-sale",
+  "koleksi",
+  "products",
+  "toko",
+  "store",
+  "stores",
+  "plans",
+  "subscription",
+  "assets",
+  "_nuxt",
+  "favicon",
+  "sitemap",
+  "robots",
+  "aktivasi",
+  "dashboard",
+  "produk",
+  "pesanan"
+]);
+const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+function validateStoreSlug(slug) {
+  if (slug.length < 3 || slug.length > 40) {
+    return { ok: false, message: "Slug toko harus 3\u201340 karakter" };
+  }
+  if (!SLUG_PATTERN.test(slug)) {
+    return { ok: false, message: "Slug hanya boleh huruf kecil, angka, dan tanda hubung (tidak di awal/akhir)" };
+  }
+  if (RESERVED_SLUGS.has(slug)) {
+    return { ok: false, message: "Slug ini tidak dapat digunakan" };
+  }
+  return { ok: true };
+}
+function slugify(input) {
+  return input.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
 }
 
 const warnOnceSet = /* @__PURE__ */ new Set();
@@ -4128,30 +4369,35 @@ const _lazy_BQIed_ = () => Promise.resolve().then(function () { return admins_ge
 const _lazy_RfaPM3 = () => Promise.resolve().then(function () { return admins_post$1; });
 const _lazy_3jgDDX = () => Promise.resolve().then(function () { return _id__delete$7; });
 const _lazy__yqt0J = () => Promise.resolve().then(function () { return _id__delete$5; });
-const _lazy_l5fHzD = () => Promise.resolve().then(function () { return index_get$f; });
-const _lazy_XBZAfQ = () => Promise.resolve().then(function () { return index_post$3; });
+const _lazy_l5fHzD = () => Promise.resolve().then(function () { return index_get$v; });
+const _lazy_XBZAfQ = () => Promise.resolve().then(function () { return index_post$7; });
 const _lazy_aoy1P6 = () => Promise.resolve().then(function () { return reply_post$1; });
-const _lazy_LS5sYQ = () => Promise.resolve().then(function () { return index_get$d; });
+const _lazy_LS5sYQ = () => Promise.resolve().then(function () { return index_get$t; });
 const _lazy_YXUhDR = () => Promise.resolve().then(function () { return config_post$1; });
 const _lazy_zgHEQk = () => Promise.resolve().then(function () { return _id__delete$3; });
-const _lazy_D71gOl = () => Promise.resolve().then(function () { return _id__patch$1; });
-const _lazy_Fci4SR = () => Promise.resolve().then(function () { return index_get$b; });
+const _lazy_D71gOl = () => Promise.resolve().then(function () { return _id__patch$3; });
+const _lazy_Fci4SR = () => Promise.resolve().then(function () { return index_get$r; });
 const _lazy_XCmZOw = () => Promise.resolve().then(function () { return login_post$1; });
 const _lazy_DsPwBN = () => Promise.resolve().then(function () { return logout_post$3; });
 const _lazy_oPWSth = () => Promise.resolve().then(function () { return cancel_patch$1; });
 const _lazy_DR1Ytj = () => Promise.resolve().then(function () { return notify_post$1; });
-const _lazy_2itD4b = () => Promise.resolve().then(function () { return shipment_post$1; });
-const _lazy_g7cb36 = () => Promise.resolve().then(function () { return status_patch$1; });
+const _lazy_2itD4b = () => Promise.resolve().then(function () { return shipment_post$3; });
+const _lazy_g7cb36 = () => Promise.resolve().then(function () { return status_patch$5; });
 const _lazy_9y_LEw = () => Promise.resolve().then(function () { return uploadProof_post$1; });
 const _lazy_NDO_ct = () => Promise.resolve().then(function () { return bulkNotify_post$1; });
-const _lazy_C9JkIR = () => Promise.resolve().then(function () { return index_get$9; });
+const _lazy_C9JkIR = () => Promise.resolve().then(function () { return index_get$p; });
 const _lazy_xJIDzk = () => Promise.resolve().then(function () { return offline_post$1; });
+const _lazy_gtV6CQ = () => Promise.resolve().then(function () { return _id__patch$1; });
+const _lazy_aPzN_q = () => Promise.resolve().then(function () { return index_get$n; });
 const _lazy_KqdiYd = () => Promise.resolve().then(function () { return _id__delete$1; });
 const _lazy_qI6aAn = () => Promise.resolve().then(function () { return stock_patch$1; });
-const _lazy_XbxiBR = () => Promise.resolve().then(function () { return index_get$7; });
-const _lazy_P75Guf = () => Promise.resolve().then(function () { return index_post$1; });
+const _lazy_XbxiBR = () => Promise.resolve().then(function () { return index_get$l; });
+const _lazy_P75Guf = () => Promise.resolve().then(function () { return index_post$5; });
 const _lazy_sXCsut = () => Promise.resolve().then(function () { return settings_get$3; });
 const _lazy_CwyZ4k = () => Promise.resolve().then(function () { return settings_put$1; });
+const _lazy_VUHKbd = () => Promise.resolve().then(function () { return status_patch$3; });
+const _lazy_thdJ8f = () => Promise.resolve().then(function () { return index_get$j; });
+const _lazy_aVyrbb = () => Promise.resolve().then(function () { return index_get$h; });
 const _lazy_Jb2wQx = () => Promise.resolve().then(function () { return waTemplate_get$1; });
 const _lazy_SSy4Pw = () => Promise.resolve().then(function () { return waTemplate_put$1; });
 const _lazy_cctNiS = () => Promise.resolve().then(function () { return analyticsConfig_get$1; });
@@ -4162,24 +4408,52 @@ const _lazy_Db6jMY = () => Promise.resolve().then(function () { return verifyOtp
 const _lazy_hi3qtl = () => Promise.resolve().then(function () { return orders_get$1; });
 const _lazy_q7T3uz = () => Promise.resolve().then(function () { return password_patch$1; });
 const _lazy__URDNX = () => Promise.resolve().then(function () { return profile_patch$1; });
-const _lazy_PwUBuS = () => Promise.resolve().then(function () { return index_get$5; });
+const _lazy_PwUBuS = () => Promise.resolve().then(function () { return index_get$f; });
 const _lazy_IqasZS = () => Promise.resolve().then(function () { return messages_get$1; });
 const _lazy_VkZORE = () => Promise.resolve().then(function () { return messages_post$1; });
 const _lazy_bwpPh8 = () => Promise.resolve().then(function () { return start_post$1; });
 const _lazy_Pj7fWU = () => Promise.resolve().then(function () { return regular_post$1; });
+const _lazy_GthoIq = () => Promise.resolve().then(function () { return cleanupMedia$1; });
+const _lazy_uBC7Kr = () => Promise.resolve().then(function () { return reconcileCounters$1; });
+const _lazy_c0O6xB = () => Promise.resolve().then(function () { return storeExpiry$1; });
 const _lazy_QIpR3S = () => Promise.resolve().then(function () { return config_get$1; });
 const _lazy_ll6SVl = () => Promise.resolve().then(function () { return track_get$3; });
-const _lazy_6vuowY = () => Promise.resolve().then(function () { return index_get$3; });
-const _lazy_nsd8A_ = () => Promise.resolve().then(function () { return callback_post$1; });
+const _lazy_6vuowY = () => Promise.resolve().then(function () { return index_get$d; });
+const _lazy_nsd8A_ = () => Promise.resolve().then(function () { return callback_post$3; });
 const _lazy_IVHrPt = () => Promise.resolve().then(function () { return createTransaction_post$1; });
 const _lazy_GNRQjq = () => Promise.resolve().then(function () { return settings_get$1; });
+const _lazy_0Xf_Lg = () => Promise.resolve().then(function () { return plans_get$1; });
 const _lazy_hz5WvZ = () => Promise.resolve().then(function () { return _id__get$1; });
-const _lazy_zWM6F4 = () => Promise.resolve().then(function () { return index_get$1; });
+const _lazy_zWM6F4 = () => Promise.resolve().then(function () { return index_get$b; });
 const _lazy_N0zask = () => Promise.resolve().then(function () { return status_get$1; });
 const _lazy_xHEEaV = () => Promise.resolve().then(function () { return stock_get$1; });
 const _lazy_7aiXuF = () => Promise.resolve().then(function () { return ____path__get$1; });
 const _lazy_vGN5Zf = () => Promise.resolve().then(function () { return cities_get$1; });
 const _lazy_Ntvqfy = () => Promise.resolve().then(function () { return cost_get$1; });
+const _lazy_5qxP5V = () => Promise.resolve().then(function () { return sitemapStores_xml_get$1; });
+const _lazy_C4L2UB = () => Promise.resolve().then(function () { return image_post$1; });
+const _lazy_rHSE0_ = () => Promise.resolve().then(function () { return index_get$9; });
+const _lazy_Wr4Mz0 = () => Promise.resolve().then(function () { return index_patch$1; });
+const _lazy_hs0FrR = () => Promise.resolve().then(function () { return _mid__delete$1; });
+const _lazy_erlTYQ = () => Promise.resolve().then(function () { return confirm_post$1; });
+const _lazy_UARddR = () => Promise.resolve().then(function () { return presign_post$1; });
+const _lazy_V3xXtX = () => Promise.resolve().then(function () { return shipment_post$1; });
+const _lazy_wl0dWm = () => Promise.resolve().then(function () { return status_patch$1; });
+const _lazy_rMYbo2 = () => Promise.resolve().then(function () { return index_get$7; });
+const _lazy_D07a7K = () => Promise.resolve().then(function () { return _pid__delete$1; });
+const _lazy_jyT_0E = () => Promise.resolve().then(function () { return _pid__patch$1; });
+const _lazy_e7YjGe = () => Promise.resolve().then(function () { return index_get$5; });
+const _lazy_V1fRmS = () => Promise.resolve().then(function () { return index_post$3; });
+const _lazy_xd_MC3 = () => Promise.resolve().then(function () { return quota_get$1; });
+const _lazy_9ttCrY = () => Promise.resolve().then(function () { return subscribe_post$1; });
+const _lazy_eicob6 = () => Promise.resolve().then(function () { return categories_post$1; });
+const _lazy_0JILps = () => Promise.resolve().then(function () { return index_post$1; });
+const _lazy_ApRl2W = () => Promise.resolve().then(function () { return mine_get$1; });
+const _lazy_yT4rIr = () => Promise.resolve().then(function () { return categories_get$1; });
+const _lazy_OX2sBL = () => Promise.resolve().then(function () { return index_get$3; });
+const _lazy_vyJR9W = () => Promise.resolve().then(function () { return products_get$1; });
+const _lazy_lcUXU7 = () => Promise.resolve().then(function () { return index_get$1; });
+const _lazy_ocWjn5 = () => Promise.resolve().then(function () { return callback_post$1; });
 const _lazy_KvZJ3d = () => Promise.resolve().then(function () { return track_get$1; });
 const _lazy_ZjTvV3 = () => Promise.resolve().then(function () { return google_get$1; });
 const _lazy_CW5HzW = () => Promise.resolve().then(function () { return renderer; });
@@ -4210,12 +4484,17 @@ const handlers = [
   { route: '/api/admin/orders/bulk-notify', handler: _lazy_NDO_ct, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/orders', handler: _lazy_C9JkIR, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/orders/offline', handler: _lazy_xJIDzk, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/plans/:id', handler: _lazy_gtV6CQ, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/admin/plans', handler: _lazy_aPzN_q, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/products/:id', handler: _lazy_KqdiYd, lazy: true, middleware: false, method: "delete" },
   { route: '/api/admin/products/:id/stock', handler: _lazy_qI6aAn, lazy: true, middleware: false, method: "patch" },
   { route: '/api/admin/products', handler: _lazy_XbxiBR, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/products', handler: _lazy_P75Guf, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/settings', handler: _lazy_sXCsut, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/settings', handler: _lazy_CwyZ4k, lazy: true, middleware: false, method: "put" },
+  { route: '/api/admin/stores/:id/status', handler: _lazy_VUHKbd, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/admin/stores', handler: _lazy_thdJ8f, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/subscriptions', handler: _lazy_aVyrbb, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/wa-template', handler: _lazy_Jb2wQx, lazy: true, middleware: false, method: "get" },
   { route: '/api/admin/wa-template', handler: _lazy_SSy4Pw, lazy: true, middleware: false, method: "put" },
   { route: '/api/analytics-config', handler: _lazy_cctNiS, lazy: true, middleware: false, method: "get" },
@@ -4231,12 +4510,16 @@ const handlers = [
   { route: '/api/chat/:sessionId/messages', handler: _lazy_VkZORE, lazy: true, middleware: false, method: "post" },
   { route: '/api/chat/start', handler: _lazy_bwpPh8, lazy: true, middleware: false, method: "post" },
   { route: '/api/checkout/regular', handler: _lazy_Pj7fWU, lazy: true, middleware: false, method: "post" },
+  { route: '/api/cron/cleanup-media', handler: _lazy_GthoIq, lazy: true, middleware: false, method: undefined },
+  { route: '/api/cron/reconcile-counters', handler: _lazy_uBC7Kr, lazy: true, middleware: false, method: undefined },
+  { route: '/api/cron/store-expiry', handler: _lazy_c0O6xB, lazy: true, middleware: false, method: undefined },
   { route: '/api/flash-sale/config', handler: _lazy_QIpR3S, lazy: true, middleware: false, method: "get" },
   { route: '/api/orders/:id/track', handler: _lazy_ll6SVl, lazy: true, middleware: false, method: "get" },
   { route: '/api/orders', handler: _lazy_6vuowY, lazy: true, middleware: false, method: "get" },
   { route: '/api/payment/callback', handler: _lazy_nsd8A_, lazy: true, middleware: false, method: "post" },
   { route: '/api/payment/create-transaction', handler: _lazy_IVHrPt, lazy: true, middleware: false, method: "post" },
   { route: '/api/payment/settings', handler: _lazy_GNRQjq, lazy: true, middleware: false, method: "get" },
+  { route: '/api/plans', handler: _lazy_0Xf_Lg, lazy: true, middleware: false, method: "get" },
   { route: '/api/products/:id', handler: _lazy_hz5WvZ, lazy: true, middleware: false, method: "get" },
   { route: '/api/products', handler: _lazy_zWM6F4, lazy: true, middleware: false, method: "get" },
   { route: '/api/products/status', handler: _lazy_N0zask, lazy: true, middleware: false, method: "get" },
@@ -4244,6 +4527,30 @@ const handlers = [
   { route: '/api/s3-image/**:path', handler: _lazy_7aiXuF, lazy: true, middleware: false, method: "get" },
   { route: '/api/shipping/cities', handler: _lazy_vGN5Zf, lazy: true, middleware: false, method: "get" },
   { route: '/api/shipping/cost', handler: _lazy_Ntvqfy, lazy: true, middleware: false, method: "get" },
+  { route: '/api/sitemap-stores.xml', handler: _lazy_5qxP5V, lazy: true, middleware: false, method: "get" },
+  { route: '/api/store/:id/image', handler: _lazy_C4L2UB, lazy: true, middleware: false, method: "post" },
+  { route: '/api/store/:id', handler: _lazy_rHSE0_, lazy: true, middleware: false, method: "get" },
+  { route: '/api/store/:id', handler: _lazy_Wr4Mz0, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/store/:id/media/:mid', handler: _lazy_hs0FrR, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/store/:id/media/confirm', handler: _lazy_erlTYQ, lazy: true, middleware: false, method: "post" },
+  { route: '/api/store/:id/media/presign', handler: _lazy_UARddR, lazy: true, middleware: false, method: "post" },
+  { route: '/api/store/:id/orders/:oid/shipment', handler: _lazy_V3xXtX, lazy: true, middleware: false, method: "post" },
+  { route: '/api/store/:id/orders/:oid/status', handler: _lazy_wl0dWm, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/store/:id/orders', handler: _lazy_rMYbo2, lazy: true, middleware: false, method: "get" },
+  { route: '/api/store/:id/products/:pid', handler: _lazy_D07a7K, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/store/:id/products/:pid', handler: _lazy_jyT_0E, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/store/:id/products', handler: _lazy_e7YjGe, lazy: true, middleware: false, method: "get" },
+  { route: '/api/store/:id/products', handler: _lazy_V1fRmS, lazy: true, middleware: false, method: "post" },
+  { route: '/api/store/:id/quota', handler: _lazy_xd_MC3, lazy: true, middleware: false, method: "get" },
+  { route: '/api/store/:id/subscribe', handler: _lazy_9ttCrY, lazy: true, middleware: false, method: "post" },
+  { route: '/api/store/categories', handler: _lazy_eicob6, lazy: true, middleware: false, method: "post" },
+  { route: '/api/store', handler: _lazy_0JILps, lazy: true, middleware: false, method: "post" },
+  { route: '/api/store/mine', handler: _lazy_ApRl2W, lazy: true, middleware: false, method: "get" },
+  { route: '/api/stores/:slug/categories', handler: _lazy_yT4rIr, lazy: true, middleware: false, method: "get" },
+  { route: '/api/stores/:slug', handler: _lazy_OX2sBL, lazy: true, middleware: false, method: "get" },
+  { route: '/api/stores/:slug/products', handler: _lazy_vyJR9W, lazy: true, middleware: false, method: "get" },
+  { route: '/api/stores', handler: _lazy_lcUXU7, lazy: true, middleware: false, method: "get" },
+  { route: '/api/subscription/callback', handler: _lazy_ocWjn5, lazy: true, middleware: false, method: "post" },
   { route: '/api/track', handler: _lazy_KvZJ3d, lazy: true, middleware: false, method: "get" },
   { route: '/auth/google', handler: _lazy_ZjTvV3, lazy: true, middleware: false, method: "get" },
   { route: '/__nuxt_error', handler: _lazy_CW5HzW, lazy: true, middleware: false, method: undefined },
@@ -4593,7 +4900,7 @@ const _id__delete$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   default: _id__delete$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$e = defineEventHandler(async (event) => {
+const index_get$u = defineEventHandler(async (event) => {
   requireAdminSession(event);
   return await prisma.category.findMany({
     orderBy: { name: "asc" },
@@ -4601,12 +4908,12 @@ const index_get$e = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$f = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$v = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$e
+  default: index_get$u
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_post$2 = defineEventHandler(async (event) => {
+const index_post$6 = defineEventHandler(async (event) => {
   requireAdminSession(event);
   const { name } = await readBody(event);
   if (!(name == null ? void 0 : name.trim())) throw createError({ statusCode: 400, statusMessage: "Nama kategori wajib diisi" });
@@ -4614,9 +4921,9 @@ const index_post$2 = defineEventHandler(async (event) => {
   return await prisma.category.create({ data: { name: name.trim(), slug } });
 });
 
-const index_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_post$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_post$2
+  default: index_post$6
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const reply_post = defineEventHandler(async (event) => {
@@ -4654,7 +4961,7 @@ const reply_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   default: reply_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$c = defineEventHandler(async (event) => {
+const index_get$s = defineEventHandler(async (event) => {
   await requireAdminSession(event);
   const sessions = await prisma.chatSession.findMany({
     orderBy: { updatedAt: "desc" },
@@ -4665,9 +4972,9 @@ const index_get$c = defineEventHandler(async (event) => {
   return sessions;
 });
 
-const index_get$d = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$t = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$c
+  default: index_get$s
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const config_post = defineEventHandler(async (event) => {
@@ -4708,7 +5015,7 @@ const _id__delete$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   default: _id__delete$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const _id__patch = defineEventHandler(async (event) => {
+const _id__patch$2 = defineEventHandler(async (event) => {
   requireAdminSession(event);
   const id = getRouterParam(event, "id");
   const { isActive } = await readBody(event);
@@ -4718,12 +5025,12 @@ const _id__patch = defineEventHandler(async (event) => {
   });
 });
 
-const _id__patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const _id__patch$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: _id__patch
+  default: _id__patch$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$a = defineEventHandler(async (event) => {
+const index_get$q = defineEventHandler(async (event) => {
   requireAdminSession(event);
   return await prisma.flashSaleConfig.findMany({
     orderBy: { startTime: "asc" },
@@ -4733,9 +5040,9 @@ const index_get$a = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$b = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$r = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$a
+  default: index_get$q
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const login_post = defineEventHandler(async (event) => {
@@ -4870,7 +5177,7 @@ const notify_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   default: notify_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const shipment_post = defineEventHandler(async (event) => {
+const shipment_post$2 = defineEventHandler(async (event) => {
   await requireAdminSession(event);
   const id = getRouterParam(event, "id");
   const body = await readBody(event);
@@ -4909,12 +5216,12 @@ Cek status pengiriman: ${config.appUrl}/track?no=${trackingNo}&courier=${courier
   return shipment;
 });
 
-const shipment_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const shipment_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: shipment_post
+  default: shipment_post$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const status_patch = defineEventHandler(async (event) => {
+const status_patch$4 = defineEventHandler(async (event) => {
   await requireAdminSession(event);
   const id = getRouterParam(event, "id");
   const { status } = await readBody(event);
@@ -4929,9 +5236,9 @@ const status_patch = defineEventHandler(async (event) => {
   return order;
 });
 
-const status_patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const status_patch$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: status_patch
+  default: status_patch$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const uploadProof_post = defineEventHandler(async (event) => {
@@ -5013,7 +5320,7 @@ const bulkNotify_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineP
   default: bulkNotify_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$8 = defineEventHandler(async (event) => {
+const index_get$o = defineEventHandler(async (event) => {
   requireAdminSession(event);
   return await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
@@ -5033,9 +5340,9 @@ const index_get$8 = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$p = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$8
+  default: index_get$o
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const offline_post = defineEventHandler(async (event) => {
@@ -5068,6 +5375,55 @@ const offline_post = defineEventHandler(async (event) => {
 const offline_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: offline_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const NUMERIC_FIELDS = [
+  "priceMonthly",
+  "durationDays",
+  "maxStores",
+  "maxProducts",
+  "maxImagesPerProduct",
+  "maxVideosPerProduct",
+  "maxImageSizeMb",
+  "maxVideoSizeMb",
+  "maxVideoDurationSec",
+  "maxStorageMb",
+  "maxVariantsPerProduct",
+  "maxFlashSaleSessions",
+  "searchPriority"
+];
+const _id__patch = defineEventHandler(async (event) => {
+  await requireAdminSession(event);
+  const id = getRouterParam(event, "id");
+  const body = await readBody(event);
+  const data = {};
+  if (body == null ? void 0 : body.name) data.name = String(body.name).trim();
+  if ((body == null ? void 0 : body.commissionPercent) !== void 0) data.commissionPercent = Number(body.commissionPercent);
+  if ((body == null ? void 0 : body.hasCustomDomain) !== void 0) data.hasCustomDomain = Boolean(body.hasCustomDomain);
+  if ((body == null ? void 0 : body.hasVerifiedBadge) !== void 0) data.hasVerifiedBadge = Boolean(body.hasVerifiedBadge);
+  if ((body == null ? void 0 : body.isActive) !== void 0) data.isActive = Boolean(body.isActive);
+  for (const key of NUMERIC_FIELDS) {
+    if ((body == null ? void 0 : body[key]) === void 0) continue;
+    data[key] = body[key] === null ? null : Number(body[key]);
+  }
+  const plan = await prisma.plan.findUnique({ where: { id } });
+  if (!plan) throw createError({ statusCode: 404, statusMessage: "Paket tidak ditemukan" });
+  return prisma.plan.update({ where: { id }, data });
+});
+
+const _id__patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _id__patch
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get$m = defineEventHandler(async (event) => {
+  await requireAdminSession(event);
+  return prisma.plan.findMany({ orderBy: { searchPriority: "asc" } });
+});
+
+const index_get$n = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$m
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__delete = defineEventHandler(async (event) => {
@@ -5114,7 +5470,7 @@ const stock_patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   default: stock_patch
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$6 = defineEventHandler(async (event) => {
+const index_get$k = defineEventHandler(async (event) => {
   const { categoryId, productType, status, search } = getQuery$1(event);
   const where = {};
   if (categoryId) where.categoryId = String(categoryId);
@@ -5131,12 +5487,12 @@ const index_get$6 = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$l = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$6
+  default: index_get$k
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_post = defineEventHandler(async (event) => {
+const index_post$4 = defineEventHandler(async (event) => {
   var _a;
   requireAdminSession(event);
   const formData = await readMultipartFormData(event);
@@ -5219,9 +5575,9 @@ const index_post = defineEventHandler(async (event) => {
   return product;
 });
 
-const index_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_post$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_post
+  default: index_post$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const ALLOWED_KEYS$2 = /* @__PURE__ */ new Set([
@@ -5275,6 +5631,93 @@ const settings_put = defineEventHandler(async (event) => {
 const settings_put$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: settings_put
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const ALLOWED = {
+  DRAFT: [],
+  PENDING_REVIEW: ["ACTIVE", "REJECTED"],
+  ACTIVE: ["SUSPENDED", "REJECTED"],
+  REJECTED: ["ACTIVE"],
+  SUSPENDED: ["ACTIVE"],
+  EXPIRED: ["ACTIVE"],
+  ARCHIVED: []
+};
+const status_patch$2 = defineEventHandler(async (event) => {
+  await requireAdminSession(event);
+  const id = getRouterParam(event, "id");
+  const body = await readBody(event);
+  const status = String((body == null ? void 0 : body.status) || "");
+  const reason = (body == null ? void 0 : body.reason) ? String(body.reason).trim().slice(0, 500) : null;
+  const store = await prisma.store.findUnique({ where: { id }, select: { status: true } });
+  if (!store) throw createError({ statusCode: 404, statusMessage: "Toko tidak ditemukan" });
+  const allowed = ALLOWED[store.status] || [];
+  if (!allowed.includes(status)) {
+    throw createError({ statusCode: 400, statusMessage: `Tidak bisa mengubah status dari ${store.status} ke ${status}` });
+  }
+  if ((status === "REJECTED" || status === "SUSPENDED") && !reason) {
+    throw createError({ statusCode: 400, statusMessage: "Alasan wajib diisi untuk menolak/menangguhkan toko" });
+  }
+  const updated = await prisma.store.update({
+    where: { id },
+    data: {
+      status,
+      rejectReason: status === "REJECTED" || status === "SUSPENDED" ? reason : null
+    }
+  });
+  return updated;
+});
+
+const status_patch$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: status_patch$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get$i = defineEventHandler(async (event) => {
+  await requireAdminSession(event);
+  const { status, search } = getQuery$1(event);
+  const where = {};
+  if (status) where.status = String(status);
+  if (search) where.name = { contains: String(search), mode: "insensitive" };
+  return prisma.store.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    include: {
+      owner: { select: { name: true, phone: true, email: true } },
+      plan: { select: { tier: true, name: true, searchPriority: true, hasVerifiedBadge: true } }
+    }
+  });
+});
+
+const index_get$j = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$i
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get$g = defineEventHandler(async (event) => {
+  await requireAdminSession(event);
+  const { status } = getQuery$1(event);
+  const where = {};
+  if (status) where.status = String(status);
+  const subscriptions = await prisma.subscription.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    include: {
+      store: { select: { name: true, slug: true } },
+      plan: { select: { name: true, tier: true } }
+    }
+  });
+  const paid = subscriptions.filter((s) => s.status === "ACTIVE" || s.paidAt);
+  const totalRevenue = paid.reduce((sum, s) => sum + s.amount, 0);
+  const revenueByPlan = {};
+  for (const s of paid) {
+    revenueByPlan[s.plan.name] = (revenueByPlan[s.plan.name] || 0) + s.amount;
+  }
+  return { subscriptions, report: { totalRevenue, paidCount: paid.length, revenueByPlan } };
+});
+
+const index_get$h = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$g
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const DEFAULTS = {
@@ -5562,7 +6005,7 @@ const profile_patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePro
   default: profile_patch
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$4 = defineEventHandler(async (event) => {
+const index_get$e = defineEventHandler(async (event) => {
   setResponseHeader(event, "Cache-Control", "s-maxage=300, stale-while-revalidate=600");
   return await prisma.category.findMany({
     orderBy: { name: "asc" },
@@ -5570,9 +6013,9 @@ const index_get$4 = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$f = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$4
+  default: index_get$e
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const messages_get = defineEventHandler(async (event) => {
@@ -5678,19 +6121,19 @@ const regular_post = defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
   const freeShippingMin = Number(config.public.freeShippingMin || 5e5);
   const items = body.items;
+  const shippingByStore = body.shippingByStore || {};
   const orders = await prisma.$transaction(async (tx) => {
     var _a;
     const createdOrders = [];
+    const storeSubtotals = /* @__PURE__ */ new Map();
+    const storeFirstOrder = /* @__PURE__ */ new Map();
     for (const item of items) {
       if (item.variantId) {
         const variant = await tx.productVariant.findUnique({ where: { id: item.variantId } });
         if (!variant || variant.stock < item.qty) {
           throw createError({ statusCode: 400, statusMessage: `Stok ${item.size || item.variantId} tidak cukup` });
         }
-        await tx.productVariant.update({
-          where: { id: item.variantId },
-          data: { stock: { decrement: item.qty } }
-        });
+        await tx.productVariant.update({ where: { id: item.variantId }, data: { stock: { decrement: item.qty } } });
         const remainingStock = await tx.productVariant.aggregate({
           where: { productId: item.productId },
           _sum: { stock: true }
@@ -5701,32 +6144,48 @@ const regular_post = defineEventHandler(async (event) => {
       }
       const product = await tx.product.findUnique({
         where: { id: item.productId },
-        select: { id: true, title: true, price: true, productType: true, status: true }
+        select: { id: true, title: true, price: true, productType: true, status: true, storeId: true }
       });
       if (!product) throw createError({ statusCode: 404, statusMessage: "Produk tidak ditemukan" });
       if (!item.variantId && product.status === "SOLD_OUT") {
         throw createError({ statusCode: 400, statusMessage: `${product.title} sudah habis terjual` });
       }
+      const storeKey = product.storeId || "null";
+      const qty = item.qty || 1;
+      const lineSubtotal = Number(product.price) * qty;
+      storeSubtotals.set(storeKey, (storeSubtotals.get(storeKey) || 0) + lineSubtotal);
       const orderSource = item.source || "REGULAR";
       const order = await tx.order.create({
         data: {
           productId: item.productId,
           variantId: item.variantId || null,
-          qty: item.qty || 1,
+          qty,
           buyerId: buyerId || null,
           buyerName: body.buyerName,
           buyerPhone: body.buyerPhone,
           address: body.address,
           cityId: body.cityId,
           cityName: body.cityName,
-          courierCode: body.courierCode || null,
-          courierService: body.courierService || null,
-          shippingCost: Number(body.totalSubtotal) >= freeShippingMin ? 0 : body.shippingCost || 0,
+          storeId: product.storeId,
           status: "PENDING_PAYMENT",
           source: orderSource
         }
       });
-      createdOrders.push({ orderId: order.id, title: product.title });
+      if (!storeFirstOrder.has(storeKey)) storeFirstOrder.set(storeKey, order.id);
+      createdOrders.push({ orderId: order.id, title: product.title, storeId: product.storeId, amount: lineSubtotal });
+    }
+    for (const [storeKey, firstOrderId] of storeFirstOrder) {
+      const subtotal = storeSubtotals.get(storeKey) || 0;
+      const shipping = shippingByStore[storeKey] || {};
+      const shippingCost = subtotal >= freeShippingMin ? 0 : Number(shipping.cost || 0);
+      await tx.order.update({
+        where: { id: firstOrderId },
+        data: {
+          courierCode: shipping.courierCode || null,
+          courierService: shipping.courierService || null,
+          shippingCost
+        }
+      });
     }
     return createdOrders;
   });
@@ -5736,6 +6195,117 @@ const regular_post = defineEventHandler(async (event) => {
 const regular_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: regular_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const ORPHAN_AGE_MS = 24 * 60 * 60 * 1e3;
+const cleanupMedia = defineEventHandler(async (event) => {
+  var _a;
+  const config = useRuntimeConfig();
+  const auth = getHeader(event, "authorization");
+  if (!config.cronSecret || auth !== `Bearer ${config.cronSecret}`) {
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+  }
+  const client = getS3Client();
+  const confirmedKeys = new Set((await prisma.storeMedia.findMany({ select: { s3Key: true } })).map((m) => m.s3Key));
+  let deleted = 0;
+  let continuationToken;
+  do {
+    const page = await client.send(new ListObjectsV2Command({
+      Bucket: config.s3Bucket,
+      Prefix: "stores/",
+      ContinuationToken: continuationToken
+    }));
+    for (const obj of page.Contents || []) {
+      if (!obj.Key || confirmedKeys.has(obj.Key)) continue;
+      const age = Date.now() - (((_a = obj.LastModified) == null ? void 0 : _a.getTime()) || 0);
+      if (age > ORPHAN_AGE_MS) {
+        await deleteS3Object(obj.Key);
+        deleted++;
+      }
+    }
+    continuationToken = page.IsTruncated ? page.NextContinuationToken : void 0;
+  } while (continuationToken);
+  return { deleted };
+});
+
+const cleanupMedia$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: cleanupMedia
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const reconcileCounters = defineEventHandler(async (event) => {
+  var _a;
+  const config = useRuntimeConfig();
+  const auth = getHeader(event, "authorization");
+  if (!config.cronSecret || auth !== `Bearer ${config.cronSecret}`) {
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+  }
+  const stores = await prisma.store.findMany({ select: { id: true, productCount: true, storageUsedKb: true } });
+  let fixed = 0;
+  for (const store of stores) {
+    const [productCount, storageAgg] = await Promise.all([
+      prisma.product.count({ where: { storeId: store.id } }),
+      prisma.storeMedia.aggregate({ where: { storeId: store.id }, _sum: { sizeKb: true } })
+    ]);
+    const storageUsedKb = (_a = storageAgg._sum.sizeKb) != null ? _a : 0;
+    if (productCount !== store.productCount || storageUsedKb !== store.storageUsedKb) {
+      await prisma.store.update({ where: { id: store.id }, data: { productCount, storageUsedKb } });
+      fixed++;
+    }
+  }
+  return { checked: stores.length, fixed };
+});
+
+const reconcileCounters$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: reconcileCounters
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const REMINDER_DAYS = [7, 3, 1];
+const DAY_MS = 24 * 60 * 60 * 1e3;
+function startOfDay(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+const storeExpiry = defineEventHandler(async (event) => {
+  const config = useRuntimeConfig();
+  const auth = getHeader(event, "authorization");
+  if (!config.cronSecret || auth !== `Bearer ${config.cronSecret}`) {
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+  }
+  const now = /* @__PURE__ */ new Date();
+  const expired = await prisma.store.updateMany({
+    where: { status: "ACTIVE", expiresAt: { lt: now } },
+    data: { status: "EXPIRED" }
+  });
+  let notified = 0;
+  const fonnteKey = config.fonnteApiKey;
+  const waTemplate = await prisma.waTemplate.findUnique({ where: { key: "store_expiry_reminder" } });
+  for (const daysLeft of REMINDER_DAYS) {
+    const targetDay = startOfDay(new Date(now.getTime() + daysLeft * DAY_MS));
+    const nextDay = new Date(targetDay.getTime() + DAY_MS);
+    const stores = await prisma.store.findMany({
+      where: { status: "ACTIVE", expiresAt: { gte: targetDay, lt: nextDay } },
+      select: { id: true, name: true, phone: true, expiresAt: true }
+    });
+    for (const store of stores) {
+      if (!fonnteKey || !store.phone) continue;
+      const tanggal = store.expiresAt.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+      const msg = (waTemplate == null ? void 0 : waTemplate.template) ? waTemplate.template.replace("{name}", store.name).replace("{days}", String(daysLeft)).replace("{date}", tanggal) : `Halo ${store.name}! Tokomu di MINTS akan berakhir dalam ${daysLeft} hari (${tanggal}). Perpanjang sekarang agar tetap tampil untuk pembeli: ${config.appUrl}/toko/langganan`;
+      await $fetch("https://api.fonnte.com/send", {
+        method: "POST",
+        headers: { Authorization: fonnteKey },
+        body: { target: store.phone, message: msg }
+      }).catch(() => {
+      });
+      notified++;
+    }
+  }
+  return { expired: expired.count, notified };
+});
+
+const storeExpiry$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: storeExpiry
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const config_get = defineEventHandler(async () => {
@@ -5800,7 +6370,7 @@ const track_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
   default: track_get$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$2 = defineEventHandler(async (event) => {
+const index_get$c = defineEventHandler(async (event) => {
   const { phone } = getQuery$1(event);
   if (!phone) throw createError({ statusCode: 400, statusMessage: "phone wajib diisi" });
   const phoneStr = String(phone).replace(/\s/g, "");
@@ -5823,12 +6393,12 @@ const index_get$2 = defineEventHandler(async (event) => {
   return orders;
 });
 
-const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$d = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$2
+  default: index_get$c
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const callback_post = defineEventHandler(async (event) => {
+const callback_post$2 = defineEventHandler(async (event) => {
   const body = await readBody(event);
   const config = useRuntimeConfig();
   const merchantCode = config.duitkuMerchantCode;
@@ -5838,34 +6408,30 @@ const callback_post = defineEventHandler(async (event) => {
   if (signature !== expectedSignature) {
     throw createError({ statusCode: 401, statusMessage: "Invalid signature" });
   }
-  const payment = await prisma.payment.findUnique({
+  const payments = await prisma.payment.findMany({
     where: { duitkuReference: merchantOrderId },
     include: { order: { select: { id: true, buyerName: true, buyerPhone: true, productId: true, variantId: true, qty: true } } }
   });
-  if (!payment) {
+  if (!payments.length) {
     throw createError({ statusCode: 404, statusMessage: "Payment not found" });
   }
-  config.duitkuIsProduction !== "true";
   if (resultCode === "00") {
     await prisma.$transaction([
-      prisma.payment.update({
-        where: { id: payment.id },
-        data: {
-          status: "paid",
-          paidAt: /* @__PURE__ */ new Date(),
-          rawCallback: body
-        }
+      prisma.payment.updateMany({
+        where: { duitkuReference: merchantOrderId },
+        data: { status: "paid", paidAt: /* @__PURE__ */ new Date(), rawCallback: body }
       }),
-      prisma.order.update({
-        where: { id: payment.orderId },
+      prisma.order.updateMany({
+        where: { id: { in: payments.map((p) => p.orderId) } },
         data: { status: "PAID" }
       })
     ]);
-    const order = payment.order;
+    const order = payments[0].order;
     const fonnteKey = config.fonnteApiKey;
     if (fonnteKey && (order == null ? void 0 : order.buyerPhone)) {
       const waTemplate = await prisma.waTemplate.findUnique({ where: { key: "payment_success" } });
-      const msg = (waTemplate == null ? void 0 : waTemplate.template) ? waTemplate.template.replace("{name}", order.buyerName).replace("{orderId}", order.id.slice(0, 8).toUpperCase()) : `Halo ${order.buyerName}! Pembayaran kamu telah diterima. Order #${order.id.slice(0, 8).toUpperCase()} sedang diproses. Terima kasih sudah belanja di MINTS! \u{1F6CD}\uFE0F`;
+      const orderLabel = payments.length > 1 ? `${payments.length} pesanan` : `Order #${order.id.slice(0, 8).toUpperCase()}`;
+      const msg = (waTemplate == null ? void 0 : waTemplate.template) ? waTemplate.template.replace("{name}", order.buyerName).replace("{orderId}", order.id.slice(0, 8).toUpperCase()) : `Halo ${order.buyerName}! Pembayaran kamu telah diterima. ${orderLabel} sedang diproses. Terima kasih sudah belanja di MINTS! \u{1F6CD}\uFE0F`;
       await $fetch("https://api.fonnte.com/send", {
         method: "POST",
         headers: { Authorization: fonnteKey },
@@ -5874,68 +6440,74 @@ const callback_post = defineEventHandler(async (event) => {
       });
     }
   } else if (resultCode === "01") ; else {
-    const order = payment.order;
     await prisma.$transaction(async (tx) => {
       var _a;
-      await tx.payment.update({ where: { id: payment.id }, data: { status: "failed", rawCallback: body } });
-      await tx.order.update({ where: { id: payment.orderId }, data: { status: "CANCELLED" } });
-      if (order == null ? void 0 : order.variantId) {
-        await tx.productVariant.update({
-          where: { id: order.variantId },
-          data: { stock: { increment: order.qty } }
-        });
-        const totalStock = await tx.productVariant.aggregate({
-          where: { productId: order.productId },
-          _sum: { stock: true }
-        });
-        await tx.product.update({
-          where: { id: order.productId },
-          data: { status: ((_a = totalStock._sum.stock) != null ? _a : 0) > 0 ? "AVAILABLE" : "SOLD_OUT" }
-        });
-      } else if (order == null ? void 0 : order.productId) {
-        await tx.product.update({ where: { id: order.productId }, data: { status: "AVAILABLE" } });
+      await tx.payment.updateMany({ where: { duitkuReference: merchantOrderId }, data: { status: "failed", rawCallback: body } });
+      await tx.order.updateMany({ where: { id: { in: payments.map((p) => p.orderId) } }, data: { status: "CANCELLED" } });
+      for (const { order } of payments) {
+        if (!order) continue;
+        if (order.variantId) {
+          await tx.productVariant.update({
+            where: { id: order.variantId },
+            data: { stock: { increment: order.qty } }
+          });
+          const totalStock = await tx.productVariant.aggregate({
+            where: { productId: order.productId },
+            _sum: { stock: true }
+          });
+          await tx.product.update({
+            where: { id: order.productId },
+            data: { status: ((_a = totalStock._sum.stock) != null ? _a : 0) > 0 ? "AVAILABLE" : "SOLD_OUT" }
+          });
+        } else if (order.productId) {
+          await tx.product.update({ where: { id: order.productId }, data: { status: "AVAILABLE" } });
+        }
       }
     });
   }
   return { success: true };
 });
 
-const callback_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const callback_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: callback_post
+  default: callback_post$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const createTransaction_post = defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { orderId, paymentMethod } = body;
-  if (!orderId || !paymentMethod) {
-    throw createError({ statusCode: 400, statusMessage: "orderId dan paymentMethod wajib diisi" });
+  const { paymentMethod } = body;
+  const orderIds = Array.isArray(body.orderIds) ? body.orderIds : body.orderId ? [body.orderId] : [];
+  if (!orderIds.length || !paymentMethod) {
+    throw createError({ statusCode: 400, statusMessage: "orderIds dan paymentMethod wajib diisi" });
   }
   const buyerId = getCookie(event, "buyer_session");
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
+  const orders = await prisma.order.findMany({
+    where: { id: { in: orderIds } },
     include: { product: true }
   });
-  if (!order) throw createError({ statusCode: 404, statusMessage: "Order tidak ditemukan" });
-  if (order.buyerId && order.buyerId !== buyerId) {
-    throw createError({ statusCode: 403, statusMessage: "Akses tidak diizinkan" });
+  if (orders.length !== orderIds.length) throw createError({ statusCode: 404, statusMessage: "Order tidak ditemukan" });
+  for (const order of orders) {
+    if (order.buyerId && order.buyerId !== buyerId) {
+      throw createError({ statusCode: 403, statusMessage: "Akses tidak diizinkan" });
+    }
+    if (order.status !== "PENDING_PAYMENT") {
+      throw createError({ statusCode: 400, statusMessage: "Order sudah diproses atau dibatalkan" });
+    }
   }
-  if (order.status !== "PENDING_PAYMENT") {
-    throw createError({ statusCode: 400, statusMessage: "Order sudah diproses atau dibatalkan" });
-  }
-  const merchantOrderId = `MINTS-${orderId.slice(0, 8)}-${Date.now()}`;
+  const merchantOrderId = `MINTS-${orderIds[0].slice(0, 8)}-${Date.now()}`;
   const expiredAt = new Date(Date.now() + 24 * 60 * 60 * 1e3);
+  const totalAmount = orders.reduce((sum, o) => sum + Number(o.product.price) * o.qty + (o.shippingCost || 0), 0);
   if (paymentMethod === "FT") {
-    await prisma.payment.create({
-      data: {
-        orderId,
+    await prisma.payment.createMany({
+      data: orders.map((o) => ({
+        orderId: o.id,
         duitkuReference: merchantOrderId,
         paymentUrl: null,
         paymentMethod: "FT",
         vaNumber: null,
         status: "pending",
         expiredAt
-      }
+      }))
     });
     return { paymentUrl: null, merchantOrderId };
   }
@@ -5947,17 +6519,18 @@ const createTransaction_post = defineEventHandler(async (event) => {
     throw createError({ statusCode: 503, statusMessage: "Payment gateway belum dikonfigurasi. Hubungi admin." });
   }
   const baseUrl = getDuitkuBaseUrl(isProduction);
-  const amount = String(Number(order.product.price) + (order.shippingCost || 0));
+  const amount = String(totalAmount);
   const signature = duitkuSignature(merchantCode, merchantOrderId, amount, apiKey);
+  const buyer = orders[0];
   const payload = {
     merchantCode,
     paymentAmount: Number(amount),
     paymentMethod,
     merchantOrderId,
-    productDetails: order.product.title,
-    customerVaName: order.buyerName,
-    email: `${order.buyerPhone.replace(/\D/g, "")}@mints.id`,
-    phoneNumber: order.buyerPhone,
+    productDetails: orders.length > 1 ? `${orders[0].product.title} +${orders.length - 1} lainnya` : orders[0].product.title,
+    customerVaName: buyer.buyerName,
+    email: `${buyer.buyerPhone.replace(/\D/g, "")}@mints.id`,
+    phoneNumber: buyer.buyerPhone,
     additionalParam: "",
     merchantUserInfo: "",
     callbackUrl: config.duitkuCallbackUrl,
@@ -5974,16 +6547,16 @@ const createTransaction_post = defineEventHandler(async (event) => {
   if (duitkuRes.statusCode !== "00") {
     throw createError({ statusCode: 400, statusMessage: duitkuRes.statusMessage || "Gagal membuat transaksi Duitku" });
   }
-  await prisma.payment.create({
-    data: {
-      orderId,
+  await prisma.payment.createMany({
+    data: orders.map((o) => ({
+      orderId: o.id,
       duitkuReference: merchantOrderId,
       paymentUrl: duitkuRes.paymentUrl,
       paymentMethod,
       vaNumber: duitkuRes.vaNumber || null,
       status: "pending",
       expiredAt
-    }
+    }))
   });
   return { paymentUrl: duitkuRes.paymentUrl, merchantOrderId };
 });
@@ -6009,17 +6582,36 @@ const settings_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProp
   default: settings_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const plans_get = defineEventHandler(async (event) => {
+  const plans = await prisma.plan.findMany({
+    where: { isActive: true },
+    orderBy: { searchPriority: "asc" }
+  });
+  setResponseHeader(event, "Cache-Control", "s-maxage=300, stale-while-revalidate=3600");
+  return plans;
+});
+
+const plans_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: plans_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
 const _id__get = defineEventHandler(async (event) => {
+  var _a;
   const id = getRouterParam(event, "id");
   const product = await prisma.product.findUnique({
     where: { id },
     include: {
       category: { select: { id: true, name: true, slug: true } },
-      variants: { orderBy: { size: "asc" } }
+      variants: { orderBy: { size: "asc" } },
+      store: { select: { id: true, name: true, status: true, cityId: true, cityName: true } }
     }
   });
-  if (!product) throw createError({ statusCode: 404, statusMessage: "Produk tidak ditemukan" });
-  return product;
+  if (!product || ((_a = product.store) == null ? void 0 : _a.status) !== "ACTIVE") {
+    throw createError({ statusCode: 404, statusMessage: "Produk tidak ditemukan" });
+  }
+  const { store, ...result } = product;
+  return { ...result, store: { id: store.id, name: store.name, cityId: store.cityId, cityName: store.cityName } };
 });
 
 const _id__get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
@@ -6030,9 +6622,9 @@ const _id__get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty
 function maskPhone(phone) {
   return phone.length > 3 ? phone.slice(0, -3) + "xxx" : "xxx";
 }
-const index_get = defineEventHandler(async (event) => {
+const index_get$a = defineEventHandler(async (event) => {
   const { sessionId, categoryId, productType, status, search } = getQuery$1(event);
-  const where = {};
+  const where = { store: { status: "ACTIVE" } };
   if (sessionId) where.sessionId = String(sessionId);
   if (categoryId) where.categoryId = String(categoryId);
   if (productType) where.productType = String(productType);
@@ -6040,11 +6632,13 @@ const index_get = defineEventHandler(async (event) => {
   if (search) where.title = { contains: String(search), mode: "insensitive" };
   const products = await prisma.product.findMany({
     where,
-    orderBy: { createdAt: "desc" },
+    // Prioritas pencarian berdasarkan paket toko (searchPriority lebih tinggi tampil lebih dulu) — PRD §11 Fase 6.
+    orderBy: [{ store: { plan: { searchPriority: "desc" } } }, { createdAt: "desc" }],
     include: {
       category: { select: { id: true, name: true, slug: true } },
       variants: { orderBy: { size: "asc" } },
-      orders: { select: { buyerPhone: true }, take: 1 }
+      orders: { select: { buyerPhone: true }, take: 1 },
+      store: { select: { id: true, name: true, cityId: true, cityName: true, plan: { select: { hasVerifiedBadge: true } } } }
     }
   });
   if (!search && !sessionId) {
@@ -6061,9 +6655,9 @@ const index_get = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$b = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get
+  default: index_get$a
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const status_get = defineEventHandler(async (event) => {
@@ -6102,7 +6696,7 @@ const ____path__get = defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
   const rawPath = getRouterParam(event, "path");
   if (!rawPath) throw createError({ statusCode: 400 });
-  const ALLOWED_PREFIXES = ["products/", "payments/", "uploads/"];
+  const ALLOWED_PREFIXES = ["products/", "payments/", "uploads/", "stores/"];
   const normalised = rawPath.replace(/\.\.\//g, "").replace(/^\/+/, "");
   if (!ALLOWED_PREFIXES.some((p) => normalised.startsWith(p))) {
     throw createError({ statusCode: 403, statusMessage: "Akses tidak diizinkan" });
@@ -6164,14 +6758,21 @@ const cities_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 
 const cost_get = defineEventHandler(async (event) => {
   var _a;
-  const { destination, weight, courier } = getQuery$1(event);
+  const { destination, weight, courier, storeId } = getQuery$1(event);
   if (!destination || !weight || !courier) {
     throw createError({ statusCode: 400, statusMessage: "destination, weight, courier wajib diisi" });
   }
   const config = useRuntimeConfig();
   const freeShippingMin = Number(config.public.freeShippingMin || 5e5);
-  const dbOrigin = await prisma.storeSettings.findUnique({ where: { key: "shipping_origin_city_id" } });
-  const origin = (dbOrigin == null ? void 0 : dbOrigin.value) || config.rajaOngkirOriginCityId || "501";
+  let origin = null;
+  if (storeId) {
+    const store = await prisma.store.findUnique({ where: { id: String(storeId) }, select: { cityId: true } });
+    origin = (store == null ? void 0 : store.cityId) || null;
+  }
+  if (!origin) {
+    const dbOrigin = await prisma.storeSettings.findUnique({ where: { key: "shipping_origin_city_id" } });
+    origin = (dbOrigin == null ? void 0 : dbOrigin.value) || config.rajaOngkirOriginCityId || "501";
+  }
   const body = new URLSearchParams({
     origin: String(origin),
     destination: String(destination),
@@ -6198,6 +6799,899 @@ const cost_get = defineEventHandler(async (event) => {
 const cost_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: cost_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const sitemapStores_xml_get = defineEventHandler(async (event) => {
+  const config = useRuntimeConfig();
+  const stores = await prisma.store.findMany({
+    where: { status: "ACTIVE" },
+    select: { slug: true, updatedAt: true }
+  });
+  const urls = stores.map(
+    (s) => `<url><loc>${config.appUrl}/toko/${s.slug}</loc><lastmod>${s.updatedAt.toISOString()}</lastmod></url>`
+  ).join("");
+  setResponseHeader(event, "Content-Type", "application/xml");
+  setResponseHeader(event, "Cache-Control", "s-maxage=3600, stale-while-revalidate=86400");
+  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`;
+});
+
+const sitemapStores_xml_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: sitemapStores_xml_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const image_post = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const ctx = await getStoreContext(event, id, { requireActive: false });
+  const formData = await readMultipartFormData(event);
+  if (!formData) throw createError({ statusCode: 400, statusMessage: "Form data kosong" });
+  let kind = "";
+  let filePart = null;
+  for (const part of formData) {
+    if (part.name === "kind") kind = part.data.toString();
+    else if (part.name === "image" && part.filename) {
+      filePart = { data: part.data, filename: part.filename, type: part.type || "image/jpeg" };
+    }
+  }
+  if (kind !== "logo" && kind !== "banner") {
+    throw createError({ statusCode: 400, statusMessage: 'kind harus "logo" atau "banner"' });
+  }
+  if (!filePart) throw createError({ statusCode: 400, statusMessage: "File gambar wajib diupload" });
+  const url = await uploadToS3(filePart.data, filePart.filename, filePart.type, `stores/${kind}s`);
+  const store = await prisma.store.update({
+    where: { id: ctx.store.id },
+    data: kind === "logo" ? { logoUrl: url } : { bannerUrl: url },
+    include: { plan: true }
+  });
+  return store;
+});
+
+const image_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: image_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get$8 = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const ctx = await getStoreContext(event, id, { requireActive: false });
+  const subscriptions = await prisma.subscription.findMany({
+    where: { storeId: ctx.store.id },
+    include: { plan: { select: { name: true } } },
+    orderBy: { createdAt: "desc" },
+    take: 20
+  });
+  return { ...ctx.store, subscriptions, quota: buildQuotaSummary(ctx) };
+});
+
+const index_get$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$8
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_patch = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const ctx = await getStoreContext(event, id, { requireActive: false });
+  const body = await readBody(event);
+  const data = {};
+  if ((body == null ? void 0 : body.name) !== void 0) {
+    const name = String(body.name).trim();
+    if (!name || name.length < 3 || name.length > 80) {
+      throw createError({ statusCode: 400, statusMessage: "Nama toko wajib diisi (3\u201380 karakter)" });
+    }
+    data.name = name;
+  }
+  if ((body == null ? void 0 : body.phone) !== void 0) {
+    const phone = String(body.phone).trim();
+    if (!/^(08|628|\+628)\d{8,12}$/.test(phone)) {
+      throw createError({ statusCode: 400, statusMessage: "Format nomor HP toko tidak valid" });
+    }
+    data.phone = phone;
+  }
+  if ((body == null ? void 0 : body.description) !== void 0) {
+    data.description = body.description ? String(body.description).trim().slice(0, 500) : null;
+  }
+  if ((body == null ? void 0 : body.address) !== void 0) data.address = body.address ? String(body.address).trim() : null;
+  if ((body == null ? void 0 : body.cityId) !== void 0) data.cityId = body.cityId ? String(body.cityId) : null;
+  if ((body == null ? void 0 : body.cityName) !== void 0) data.cityName = body.cityName ? String(body.cityName) : null;
+  if ((body == null ? void 0 : body.logoUrl) !== void 0) data.logoUrl = body.logoUrl ? String(body.logoUrl) : null;
+  if ((body == null ? void 0 : body.bannerUrl) !== void 0) data.bannerUrl = body.bannerUrl ? String(body.bannerUrl) : null;
+  const store = await prisma.store.update({
+    where: { id: ctx.store.id },
+    data,
+    include: { plan: true }
+  });
+  return store;
+});
+
+const index_patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_patch
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _mid__delete = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const mid = getRouterParam(event, "mid");
+  const ctx = await getStoreContext(event, id, { requireActive: false });
+  const media = await prisma.storeMedia.findUnique({ where: { id: mid } });
+  if (!media || media.storeId !== ctx.store.id) {
+    throw createError({ statusCode: 404, statusMessage: "Media tidak ditemukan" });
+  }
+  await prisma.$transaction(async (tx) => {
+    await tx.storeMedia.delete({ where: { id: mid } });
+    if (media.productId) {
+      await tx.product.updateMany({ where: { id: media.productId, videoUrl: media.url }, data: { videoUrl: null } });
+    }
+    await tx.store.update({ where: { id: ctx.store.id }, data: { storageUsedKb: { decrement: media.sizeKb } } });
+  });
+  await deleteS3Object(media.s3Key);
+  return { success: true };
+});
+
+const _mid__delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _mid__delete
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const confirm_post = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const ctx = await getStoreContext(event, id);
+  const body = await readBody(event);
+  const s3Key = String((body == null ? void 0 : body.s3Key) || "");
+  const productId = String((body == null ? void 0 : body.productId) || "");
+  const durationSec = (body == null ? void 0 : body.durationSec) ? Number(body.durationSec) : null;
+  if (!s3Key || !productId) {
+    throw createError({ statusCode: 400, statusMessage: "s3Key dan productId wajib diisi" });
+  }
+  if (!s3Key.startsWith(`stores/${ctx.store.id}/`)) {
+    throw createError({ statusCode: 403, statusMessage: "Kunci S3 tidak valid untuk toko ini" });
+  }
+  const product = await prisma.product.findUnique({ where: { id: productId } });
+  if (!product || product.storeId !== ctx.store.id) {
+    throw createError({ statusCode: 404, statusMessage: "Produk tidak ditemukan" });
+  }
+  const head = await headS3Object(s3Key);
+  if (!head.exists) {
+    throw createError({ statusCode: 400, statusMessage: "Objek tidak ditemukan di S3 \u2014 upload mungkin belum selesai" });
+  }
+  const sizeKb = Math.ceil(head.sizeBytes / 1024);
+  const plan = ctx.store.plan;
+  if (plan.maxVideoSizeMb !== null && sizeKb > plan.maxVideoSizeMb * 1024) {
+    await deleteS3Object(s3Key);
+    throw createError({ statusCode: 400, statusMessage: `Ukuran video melebihi batas paket ${plan.name} (maks. ${plan.maxVideoSizeMb} MB)` });
+  }
+  if (plan.maxVideoDurationSec !== null && durationSec !== null && durationSec > plan.maxVideoDurationSec) {
+    await deleteS3Object(s3Key);
+    throw createError({ statusCode: 400, statusMessage: `Durasi video melebihi batas paket ${plan.name} (maks. ${plan.maxVideoDurationSec} detik)` });
+  }
+  if (plan.maxStorageMb !== null && ctx.store.storageUsedKb + sizeKb > plan.maxStorageMb * 1024) {
+    await deleteS3Object(s3Key);
+    throw createError({ statusCode: 403, statusMessage: "Kuota penyimpanan toko tidak cukup" });
+  }
+  const url = `/api/s3-image/${s3Key}`;
+  const media = await prisma.$transaction(async (tx) => {
+    const created = await tx.storeMedia.create({
+      data: {
+        storeId: ctx.store.id,
+        productId,
+        kind: "VIDEO",
+        s3Key,
+        url,
+        sizeKb,
+        durationSec,
+        mimeType: head.contentType || "video/mp4"
+      }
+    });
+    await tx.product.update({ where: { id: productId }, data: { videoUrl: url } });
+    await tx.store.update({ where: { id: ctx.store.id }, data: { storageUsedKb: { increment: sizeKb } } });
+    return created;
+  });
+  return media;
+});
+
+const confirm_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: confirm_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const presign_post = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const ctx = await getStoreContext(event, id);
+  const body = await readBody(event);
+  const productId = String((body == null ? void 0 : body.productId) || "");
+  const mimeType = String((body == null ? void 0 : body.mimeType) || "");
+  const estimatedSizeKb = Number((body == null ? void 0 : body.estimatedSizeKb) || 0);
+  const durationSec = (body == null ? void 0 : body.durationSec) ? Number(body.durationSec) : void 0;
+  if (!productId || !mimeType) {
+    throw createError({ statusCode: 400, statusMessage: "productId dan mimeType wajib diisi" });
+  }
+  const product = await prisma.product.findUnique({ where: { id: productId } });
+  if (!product || product.storeId !== ctx.store.id) {
+    throw createError({ statusCode: 404, statusMessage: "Produk tidak ditemukan" });
+  }
+  const existingVideos = await prisma.storeMedia.count({ where: { productId, kind: "VIDEO" } });
+  assertMediaAllowed(
+    ctx,
+    [{ kind: "VIDEO", sizeKb: estimatedSizeKb, durationSec }],
+    { images: 0, videos: existingVideos }
+  );
+  const { uploadUrl, s3Key, expiresIn } = await presignVideoUpload(ctx.store.id, productId, mimeType);
+  return { uploadUrl, s3Key, expiresIn, productId, mimeType };
+});
+
+const presign_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: presign_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const shipment_post = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const oid = getRouterParam(event, "oid");
+  const ctx = await getStoreContext(event, id);
+  const order = await prisma.order.findUnique({ where: { id: oid } });
+  if (!order || order.storeId !== ctx.store.id) {
+    throw createError({ statusCode: 404, statusMessage: "Pesanan tidak ditemukan" });
+  }
+  const body = await readBody(event);
+  const courier = String((body == null ? void 0 : body.courier) || "").trim();
+  const trackingNo = String((body == null ? void 0 : body.trackingNo) || "").trim();
+  if (!courier || !trackingNo) {
+    throw createError({ statusCode: 400, statusMessage: "courier dan trackingNo wajib diisi" });
+  }
+  const shipment = await prisma.shipment.upsert({
+    where: { orderId: oid },
+    create: { orderId: oid, courier, trackingNo, status: "WAITING_PICKUP" },
+    update: { courier, trackingNo, status: "WAITING_PICKUP", lastChecked: null }
+  });
+  await prisma.order.update({ where: { id: oid }, data: { status: "READY_TO_SHIP", courierCode: courier } });
+  const config = useRuntimeConfig();
+  const fonnteKey = config.fonnteApiKey;
+  if (fonnteKey && order.buyerPhone) {
+    const waTemplate = await prisma.waTemplate.findUnique({ where: { key: "shipped" } });
+    const msg = (waTemplate == null ? void 0 : waTemplate.template) ? waTemplate.template.replace("{name}", order.buyerName).replace("{courier}", courier.toUpperCase()).replace("{trackingNo}", trackingNo).replace("{trackUrl}", `${config.appUrl}/track?no=${trackingNo}&courier=${courier}`) : `Halo ${order.buyerName}! Pesanan kamu sudah dikirim! \u{1F4E6}
+
+Kurir: ${courier.toUpperCase()}
+No. Resi: ${trackingNo}
+
+Cek status pengiriman: ${config.appUrl}/track?no=${trackingNo}&courier=${courier}`;
+    await $fetch("https://api.fonnte.com/send", {
+      method: "POST",
+      headers: { Authorization: fonnteKey },
+      body: { target: order.buyerPhone, message: msg }
+    }).catch(() => {
+    });
+  }
+  return shipment;
+});
+
+const shipment_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: shipment_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const SELLER_ALLOWED = ["IN_PRODUCTION", "READY_TO_SHIP", "DELIVERED"];
+const status_patch = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const oid = getRouterParam(event, "oid");
+  const ctx = await getStoreContext(event, id);
+  const order = await prisma.order.findUnique({ where: { id: oid } });
+  if (!order || order.storeId !== ctx.store.id) {
+    throw createError({ statusCode: 404, statusMessage: "Pesanan tidak ditemukan" });
+  }
+  const body = await readBody(event);
+  const status = String((body == null ? void 0 : body.status) || "");
+  if (!SELLER_ALLOWED.includes(status)) {
+    throw createError({ statusCode: 400, statusMessage: `Status harus salah satu dari: ${SELLER_ALLOWED.join(", ")}` });
+  }
+  return prisma.order.update({ where: { id: oid }, data: { status } });
+});
+
+const status_patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: status_patch
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get$6 = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const ctx = await getStoreContext(event, id, { requireActive: false });
+  const orders = await prisma.order.findMany({
+    where: { storeId: ctx.store.id },
+    orderBy: { createdAt: "desc" },
+    include: {
+      product: { select: { title: true, imageUrl: true } },
+      payment: { select: { status: true, paidAt: true } },
+      shipment: { select: { courier: true, trackingNo: true, status: true } }
+    }
+  });
+  return orders;
+});
+
+const index_get$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$6
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const S3_PROXY_PREFIX = "/api/s3-image/";
+function keyFromProxyUrl(url) {
+  return url.startsWith(S3_PROXY_PREFIX) ? url.slice(S3_PROXY_PREFIX.length) : null;
+}
+const _pid__delete = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const pid = getRouterParam(event, "pid");
+  const ctx = await getStoreContext(event, id, { requireActive: false });
+  const existing = await prisma.product.findUnique({ where: { id: pid } });
+  if (!existing || existing.storeId !== ctx.store.id) {
+    throw createError({ statusCode: 404, statusMessage: "Produk tidak ditemukan" });
+  }
+  const videoMedia = await prisma.storeMedia.findMany({ where: { productId: pid } });
+  const imageKeys = [existing.imageUrl, ...existing.images].map(keyFromProxyUrl).filter((k) => !!k);
+  const imageSizes = await Promise.all(imageKeys.map((k) => headS3Object(k)));
+  const imageSizeKb = imageSizes.reduce((sum, h) => sum + Math.ceil(h.sizeBytes / 1024), 0);
+  const videoSizeKb = videoMedia.reduce((sum, m) => sum + m.sizeKb, 0);
+  const totalSizeKb = imageSizeKb + videoSizeKb;
+  await prisma.$transaction(async (tx) => {
+    await tx.product.delete({ where: { id: pid } });
+    await tx.store.update({
+      where: { id: ctx.store.id },
+      data: {
+        productCount: { decrement: 1 },
+        storageUsedKb: { decrement: totalSizeKb }
+      }
+    });
+  });
+  await Promise.all([
+    ...imageKeys.map((k) => deleteS3Object(k)),
+    ...videoMedia.map((m) => deleteS3Object(m.s3Key))
+  ]);
+  return { success: true };
+});
+
+const _pid__delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _pid__delete
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _pid__patch = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const pid = getRouterParam(event, "pid");
+  const ctx = await getStoreContext(event, id);
+  const existing = await prisma.product.findUnique({ where: { id: pid } });
+  if (!existing || existing.storeId !== ctx.store.id) {
+    throw createError({ statusCode: 404, statusMessage: "Produk tidak ditemukan" });
+  }
+  const formData = await readMultipartFormData(event);
+  const fields = {};
+  const imageParts = [];
+  if (formData) {
+    for (const part of formData) {
+      if (part.name === "images" && part.filename) {
+        imageParts.push({ data: part.data, filename: part.filename, type: part.type || "image/jpeg" });
+      } else if (part.name) {
+        fields[part.name] = part.data.toString();
+      }
+    }
+  }
+  if (imageParts.length) {
+    assertMediaAllowed(
+      ctx,
+      imageParts.map((p) => ({ kind: "IMAGE", sizeKb: p.data.length / 1024 })),
+      { images: 1 + existing.images.length, videos: 0 }
+    );
+  }
+  const data = {};
+  if (fields.title !== void 0) data.title = fields.title;
+  if (fields.price !== void 0) data.price = parseFloat(fields.price);
+  if (fields.originalPrice !== void 0) data.originalPrice = fields.originalPrice ? parseFloat(fields.originalPrice) : null;
+  if (fields.description !== void 0) data.description = fields.description || null;
+  if (fields.categoryId !== void 0) data.categoryId = fields.categoryId || null;
+  if (fields.weight !== void 0) data.weight = fields.weight ? parseInt(fields.weight) : null;
+  if (fields.material !== void 0) data.material = fields.material || null;
+  if (fields.status !== void 0) data.status = fields.status;
+  let variants = null;
+  if (fields.variants) {
+    try {
+      variants = JSON.parse(fields.variants);
+    } catch {
+    }
+    if (variants) assertVariantCount(ctx, variants.length);
+  }
+  const uploadedUrls = [];
+  for (const part of imageParts) {
+    uploadedUrls.push(await uploadToS3(part.data, part.filename, part.type));
+  }
+  const addedSizeKb = Math.round(imageParts.reduce((sum, p) => sum + p.data.length, 0) / 1024);
+  const product = await prisma.$transaction(async (tx) => {
+    const updated = await tx.product.update({
+      where: { id: pid },
+      data: {
+        ...data,
+        images: uploadedUrls.length ? [...existing.images, ...uploadedUrls] : void 0
+      }
+    });
+    if (variants) {
+      await tx.productVariant.deleteMany({ where: { productId: pid } });
+      await tx.productVariant.createMany({
+        data: variants.map((v) => ({ productId: pid, size: v.size, stock: v.stock }))
+      });
+    }
+    if (addedSizeKb > 0) {
+      await tx.store.update({ where: { id: ctx.store.id }, data: { storageUsedKb: { increment: addedSizeKb } } });
+    }
+    return updated;
+  });
+  return product;
+});
+
+const _pid__patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _pid__patch
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get$4 = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const ctx = await getStoreContext(event, id, { requireActive: false });
+  const products = await prisma.product.findMany({
+    where: { storeId: ctx.store.id },
+    include: { variants: true },
+    orderBy: { createdAt: "desc" }
+  });
+  return products;
+});
+
+const index_get$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$4
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_post$2 = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const ctx = await getStoreContext(event, id);
+  assertCanAddProduct(ctx);
+  const formData = await readMultipartFormData(event);
+  if (!formData) throw createError({ statusCode: 400, statusMessage: "Form data kosong" });
+  const fields = {};
+  const imageParts = [];
+  for (const part of formData) {
+    if (part.name === "images" && part.filename) {
+      imageParts.push({ data: part.data, filename: part.filename, type: part.type || "image/jpeg" });
+    } else if (part.name) {
+      fields[part.name] = part.data.toString();
+    }
+  }
+  const title = fields.title;
+  const price = fields.price;
+  if (!title || !price) {
+    throw createError({ statusCode: 400, statusMessage: "title dan price wajib diisi" });
+  }
+  if (!imageParts.length) {
+    throw createError({ statusCode: 400, statusMessage: "Minimal satu foto produk wajib diupload" });
+  }
+  assertMediaAllowed(
+    ctx,
+    imageParts.map((p) => ({ kind: "IMAGE", sizeKb: p.data.length / 1024 })),
+    { images: 0, videos: 0 }
+  );
+  let variants = [];
+  if (fields.variants) {
+    try {
+      variants = JSON.parse(fields.variants);
+    } catch {
+    }
+  }
+  if (variants.length) assertVariantCount(ctx, variants.length);
+  const uploadedUrls = [];
+  for (const part of imageParts) {
+    uploadedUrls.push(await uploadToS3(part.data, part.filename, part.type));
+  }
+  const totalSizeKb = Math.round(imageParts.reduce((sum, p) => sum + p.data.length, 0) / 1024);
+  const product = await prisma.$transaction(async (tx) => {
+    const created = await tx.product.create({
+      data: {
+        storeId: ctx.store.id,
+        title,
+        price: parseFloat(price),
+        originalPrice: fields.originalPrice ? parseFloat(fields.originalPrice) : null,
+        description: fields.description || null,
+        categoryId: fields.categoryId || null,
+        weight: fields.weight ? parseInt(fields.weight) : null,
+        material: fields.material || null,
+        productType: fields.productType || "REGULAR",
+        estimatedReadyDate: fields.estimatedReadyDate ? new Date(fields.estimatedReadyDate) : null,
+        imageUrl: uploadedUrls[0],
+        images: uploadedUrls.slice(1)
+      }
+    });
+    if (variants.length) {
+      await tx.productVariant.createMany({
+        data: variants.map((v) => ({ productId: created.id, size: v.size, stock: v.stock }))
+      });
+    }
+    await tx.store.update({
+      where: { id: ctx.store.id },
+      data: {
+        productCount: { increment: 1 },
+        storageUsedKb: { increment: totalSizeKb }
+      }
+    });
+    return created;
+  });
+  return product;
+});
+
+const index_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_post$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const quota_get = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const ctx = await getStoreContext(event, id, { requireActive: false });
+  return buildQuotaSummary(ctx);
+});
+
+const quota_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: quota_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const subscribe_post = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const ctx = await getStoreContext(event, id, { requireActive: false });
+  const body = await readBody(event);
+  const planId = String((body == null ? void 0 : body.planId) || "");
+  if (!planId) throw createError({ statusCode: 400, statusMessage: "planId wajib diisi" });
+  const plan = await prisma.plan.findUnique({ where: { id: planId } });
+  if (!plan || !plan.isActive) throw createError({ statusCode: 400, statusMessage: "Paket tidak valid" });
+  if (plan.priceMonthly <= 0) throw createError({ statusCode: 400, statusMessage: "Paket ini gratis, tidak perlu pembayaran" });
+  if (plan.tier !== ctx.store.plan.tier) {
+    assertPlanChangeAllowed(ctx, plan);
+  }
+  const pendingCount = await prisma.subscription.count({
+    where: { storeId: ctx.store.id, status: "PENDING_PAYMENT" }
+  });
+  if (pendingCount > 0) {
+    throw createError({ statusCode: 409, statusMessage: "Sudah ada langganan menunggu pembayaran. Selesaikan atau tunggu kedaluwarsa terlebih dahulu." });
+  }
+  const now = /* @__PURE__ */ new Date();
+  const periodStart = ctx.store.expiresAt > now ? ctx.store.expiresAt : now;
+  const periodEnd = new Date(periodStart.getTime() + plan.durationDays * 24 * 60 * 60 * 1e3);
+  const config = useRuntimeConfig();
+  const isProduction = config.duitkuIsProduction === "true";
+  const merchantCode = config.duitkuMerchantCode;
+  const apiKey = config.duitkuApiKey;
+  if (!merchantCode || !apiKey) {
+    throw createError({ statusCode: 503, statusMessage: "Payment gateway belum dikonfigurasi. Hubungi admin." });
+  }
+  const merchantOrderId = `MINTS-SUB-${ctx.store.id.slice(0, 8)}-${Date.now()}`;
+  const amount = String(plan.priceMonthly);
+  const signature = duitkuSignature(merchantCode, merchantOrderId, amount, apiKey);
+  const baseUrl = getDuitkuBaseUrl(isProduction);
+  const payload = {
+    merchantCode,
+    paymentAmount: Number(amount),
+    paymentMethod: String((body == null ? void 0 : body.paymentMethod) || "VC"),
+    merchantOrderId,
+    productDetails: `Langganan ${plan.name} \u2014 ${ctx.store.name}`,
+    customerVaName: ctx.store.name,
+    email: `store-${ctx.store.id.slice(0, 8)}@mints.id`,
+    phoneNumber: ctx.store.phone,
+    additionalParam: "",
+    merchantUserInfo: "",
+    callbackUrl: config.duitkuCallbackUrl,
+    returnUrl: config.duitkuReturnUrl || `${config.appUrl || "https://mints.id"}/toko/langganan`,
+    signature,
+    expiryPeriod: 1440
+  };
+  const duitkuRes = await $fetch(`${baseUrl}/v2/inquiry`, {
+    method: "POST",
+    body: payload,
+    headers: { "content-type": "application/json" }
+  });
+  if (duitkuRes.statusCode !== "00") {
+    throw createError({ statusCode: 400, statusMessage: duitkuRes.statusMessage || "Gagal membuat transaksi Duitku" });
+  }
+  const subscription = await prisma.subscription.create({
+    data: {
+      storeId: ctx.store.id,
+      planId: plan.id,
+      status: "PENDING_PAYMENT",
+      amount: plan.priceMonthly,
+      periodStart,
+      periodEnd,
+      duitkuReference: merchantOrderId,
+      paymentUrl: duitkuRes.paymentUrl
+    }
+  });
+  return { paymentUrl: subscription.paymentUrl, subscriptionId: subscription.id };
+});
+
+const subscribe_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: subscribe_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const categories_post = defineEventHandler(async (event) => {
+  await requireBuyerSession(event);
+  const { name } = await readBody(event);
+  if (!(name == null ? void 0 : name.trim())) throw createError({ statusCode: 400, statusMessage: "Nama kategori wajib diisi" });
+  const slug = name.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  const existing = await prisma.category.findFirst({ where: { OR: [{ name: name.trim() }, { slug }] } });
+  if (existing) return existing;
+  return await prisma.category.create({ data: { name: name.trim(), slug } });
+});
+
+const categories_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: categories_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_post = defineEventHandler(async (event) => {
+  const buyer = await requireBuyerSession(event);
+  const body = await readBody(event);
+  const name = String((body == null ? void 0 : body.name) || "").trim();
+  const phone = String((body == null ? void 0 : body.phone) || "").trim();
+  let slug = String((body == null ? void 0 : body.slug) || "").trim().toLowerCase();
+  const description = (body == null ? void 0 : body.description) ? String(body.description).trim().slice(0, 500) : null;
+  const address = (body == null ? void 0 : body.address) ? String(body.address).trim() : null;
+  const cityId = (body == null ? void 0 : body.cityId) ? String(body.cityId) : null;
+  const cityName = (body == null ? void 0 : body.cityName) ? String(body.cityName) : null;
+  const tier = String((body == null ? void 0 : body.tier) || "FREE").toUpperCase();
+  if (!name || name.length < 3 || name.length > 80) {
+    throw createError({ statusCode: 400, statusMessage: "Nama toko wajib diisi (3\u201380 karakter)" });
+  }
+  const phoneRegex = /^(08|628|\+628)\d{8,12}$/;
+  if (!phoneRegex.test(phone)) {
+    throw createError({ statusCode: 400, statusMessage: "Format nomor HP toko tidak valid" });
+  }
+  if (!slug) slug = slugify(name);
+  const slugCheck = validateStoreSlug(slug);
+  if (!slugCheck.ok) {
+    throw createError({ statusCode: 400, statusMessage: slugCheck.message });
+  }
+  if (tier !== "FREE") {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Paket berbayar belum tersedia untuk aktivasi langsung. Aktivasi dengan paket Free terlebih dahulu, lalu upgrade setelah fitur langganan tersedia."
+    });
+  }
+  const plan = await assertCanCreateStore(buyer.id, (await prisma.plan.findUnique({ where: { tier: "FREE" } })).id);
+  const existingSlug = await prisma.store.findUnique({ where: { slug } });
+  if (existingSlug) {
+    throw createError({ statusCode: 409, statusMessage: "Slug toko sudah dipakai, coba yang lain" });
+  }
+  const setting = await prisma.storeSettings.findUnique({ where: { key: "store.auto_approve" } });
+  const autoApprove = setting ? setting.value === "true" : true;
+  const expiresAt = /* @__PURE__ */ new Date();
+  expiresAt.setDate(expiresAt.getDate() + plan.durationDays);
+  const store = await prisma.store.create({
+    data: {
+      ownerId: buyer.id,
+      name,
+      slug,
+      description,
+      phone,
+      address,
+      cityId,
+      cityName,
+      planId: plan.id,
+      status: autoApprove ? "ACTIVE" : "PENDING_REVIEW",
+      expiresAt
+    },
+    include: { plan: true }
+  });
+  return store;
+});
+
+const index_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const mine_get = defineEventHandler(async (event) => {
+  const buyer = await requireBuyerSession(event);
+  const stores = await prisma.store.findMany({
+    where: { ownerId: buyer.id, status: { not: "ARCHIVED" } },
+    include: { plan: true },
+    orderBy: { createdAt: "desc" }
+  });
+  return stores.map((store) => buildQuotaSummary({ store }));
+});
+
+const mine_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: mine_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const categories_get = defineEventHandler(async (event) => {
+  const slug = getRouterParam(event, "slug");
+  const store = await prisma.store.findUnique({ where: { slug }, select: { id: true, status: true } });
+  if (!store || store.status !== "ACTIVE") {
+    throw createError({ statusCode: 404, statusMessage: "Toko tidak ditemukan" });
+  }
+  const categories = await prisma.category.findMany({
+    where: { products: { some: { storeId: store.id } } },
+    orderBy: { name: "asc" }
+  });
+  setResponseHeader(event, "Cache-Control", "s-maxage=60, stale-while-revalidate=300");
+  return categories;
+});
+
+const categories_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: categories_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get$2 = defineEventHandler(async (event) => {
+  const slug = getRouterParam(event, "slug");
+  const store = await prisma.store.findUnique({
+    where: { slug },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      logoUrl: true,
+      bannerUrl: true,
+      cityName: true,
+      status: true,
+      createdAt: true,
+      plan: { select: { tier: true, hasVerifiedBadge: true } }
+    }
+  });
+  if (!store || store.status !== "ACTIVE") {
+    throw createError({ statusCode: 404, statusMessage: "Toko tidak ditemukan" });
+  }
+  setResponseHeader(event, "Cache-Control", "s-maxage=60, stale-while-revalidate=300");
+  return store;
+});
+
+const index_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const products_get = defineEventHandler(async (event) => {
+  const slug = getRouterParam(event, "slug");
+  const { page = "1", pageSize = "20", categoryId, search, sort = "terbaru" } = getQuery$1(event);
+  const store = await prisma.store.findUnique({ where: { slug }, select: { id: true, status: true } });
+  if (!store || store.status !== "ACTIVE") {
+    throw createError({ statusCode: 404, statusMessage: "Toko tidak ditemukan" });
+  }
+  const take = Math.min(Math.max(parseInt(String(pageSize)) || 20, 1), 50);
+  const skip = (Math.max(parseInt(String(page)) || 1, 1) - 1) * take;
+  const where = { storeId: store.id };
+  if (categoryId) where.categoryId = String(categoryId);
+  if (search) where.title = { contains: String(search), mode: "insensitive" };
+  let products, total;
+  if (sort === "terlaris") {
+    const allIds = await prisma.product.findMany({ where, select: { id: true } });
+    const sold = await prisma.order.groupBy({
+      by: ["productId"],
+      where: { productId: { in: allIds.map((p) => p.id) }, status: { notIn: ["CANCELLED", "REFUNDED"] } },
+      _sum: { qty: true }
+    });
+    const soldMap = new Map(sold.map((s) => [s.productId, s._sum.qty || 0]));
+    const sortedIds = allIds.map((p) => p.id).sort((a, b) => (soldMap.get(b) || 0) - (soldMap.get(a) || 0));
+    total = sortedIds.length;
+    const pageIds = sortedIds.slice(skip, skip + take);
+    const rows = await prisma.product.findMany({
+      where: { id: { in: pageIds } },
+      include: { category: { select: { id: true, name: true, slug: true } }, variants: { orderBy: { size: "asc" } } }
+    });
+    const rowMap = new Map(rows.map((r) => [r.id, r]));
+    products = pageIds.map((id) => rowMap.get(id)).filter(Boolean);
+  } else {
+    const orderBy = sort === "harga_asc" ? { price: "asc" } : sort === "harga_desc" ? { price: "desc" } : { createdAt: "desc" };
+    [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        orderBy,
+        include: { category: { select: { id: true, name: true, slug: true } }, variants: { orderBy: { size: "asc" } } },
+        skip,
+        take
+      }),
+      prisma.product.count({ where })
+    ]);
+  }
+  setResponseHeader(event, "Cache-Control", "s-maxage=60, stale-while-revalidate=300");
+  return { products, total, page: Number(page), pageSize: take };
+});
+
+const products_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: products_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get = defineEventHandler(async (event) => {
+  const { page = "1", pageSize = "20", search } = getQuery$1(event);
+  const take = Math.min(Math.max(parseInt(String(pageSize)) || 20, 1), 50);
+  const skip = (Math.max(parseInt(String(page)) || 1, 1) - 1) * take;
+  const where = { status: "ACTIVE" };
+  if (search) where.name = { contains: String(search), mode: "insensitive" };
+  const [stores, total] = await Promise.all([
+    prisma.store.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        logoUrl: true,
+        cityName: true,
+        plan: { select: { tier: true, hasVerifiedBadge: true, searchPriority: true } }
+      },
+      orderBy: [{ plan: { searchPriority: "desc" } }, { createdAt: "desc" }],
+      skip,
+      take
+    }),
+    prisma.store.count({ where })
+  ]);
+  setResponseHeader(event, "Cache-Control", "s-maxage=120, stale-while-revalidate=600");
+  return { stores, total, page: Number(page), pageSize: take };
+});
+
+const index_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const callback_post = defineEventHandler(async (event) => {
+  const body = await readBody(event);
+  const config = useRuntimeConfig();
+  const merchantCode = config.duitkuMerchantCode;
+  const apiKey = config.duitkuApiKey;
+  const { merchantCode: mc, amount, merchantOrderId, resultCode, signature } = body;
+  const expectedSignature = duitkuCallbackSignature(merchantCode, String(amount), merchantOrderId, apiKey);
+  if (signature !== expectedSignature) {
+    throw createError({ statusCode: 401, statusMessage: "Invalid signature" });
+  }
+  const subscription = await prisma.subscription.findUnique({
+    where: { duitkuReference: merchantOrderId },
+    include: { store: true, plan: true }
+  });
+  if (!subscription) {
+    throw createError({ statusCode: 404, statusMessage: "Subscription not found" });
+  }
+  if (resultCode === "00") {
+    if (subscription.status !== "ACTIVE") {
+      await prisma.$transaction([
+        prisma.subscription.update({
+          where: { id: subscription.id },
+          data: { status: "ACTIVE", paidAt: /* @__PURE__ */ new Date(), rawCallback: body }
+        }),
+        prisma.store.update({
+          where: { id: subscription.storeId },
+          data: {
+            planId: subscription.planId,
+            expiresAt: subscription.periodEnd,
+            status: "ACTIVE"
+          }
+        })
+      ]);
+      const store = subscription.store;
+      const fonnteKey = config.fonnteApiKey;
+      if (fonnteKey && store.phone) {
+        const waTemplate = await prisma.waTemplate.findUnique({ where: { key: "subscription_active" } });
+        const tanggal = subscription.periodEnd.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+        const msg = (waTemplate == null ? void 0 : waTemplate.template) ? waTemplate.template.replace("{name}", store.name).replace("{plan}", subscription.plan.name).replace("{date}", tanggal) : `Halo ${store.name}! Langganan paket ${subscription.plan.name} kamu aktif sampai ${tanggal}. Terima kasih sudah berjualan di MINTS! \u{1F389}`;
+        await $fetch("https://api.fonnte.com/send", {
+          method: "POST",
+          headers: { Authorization: fonnteKey },
+          body: { target: store.phone, message: msg }
+        }).catch(() => {
+        });
+      }
+    }
+  } else if (resultCode === "01") ; else {
+    await prisma.subscription.update({
+      where: { id: subscription.id },
+      data: { status: "CANCELLED", rawCallback: body }
+    });
+  }
+  return { success: true };
+});
+
+const callback_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: callback_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const track_get = defineEventHandler(async (event) => {

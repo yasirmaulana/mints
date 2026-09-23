@@ -49,6 +49,8 @@ import { NuxtModule, ModuleDependencyMeta } from '@nuxt/schema'
 
    appUrl: string,
 
+   cronSecret: string,
+
    smtpUser: string,
 
    smtpPass: string,

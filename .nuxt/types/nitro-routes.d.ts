@@ -63,6 +63,12 @@ declare module "nitropack/types" {
     '/api/admin/orders/offline': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/orders/offline.post').default>>>>
     }
+    '/api/admin/plans/:id': {
+      'patch': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/plans/[id].patch').default>>>>
+    }
+    '/api/admin/plans': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/plans/index.get').default>>>>
+    }
     '/api/admin/products/:id': {
       'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/products/[id].delete').default>>>>
     }
@@ -76,6 +82,15 @@ declare module "nitropack/types" {
     '/api/admin/settings': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/settings.get').default>>>>
       'put': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/settings.put').default>>>>
+    }
+    '/api/admin/stores/:id/status': {
+      'patch': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/stores/[id]/status.patch').default>>>>
+    }
+    '/api/admin/stores': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/stores/index.get').default>>>>
+    }
+    '/api/admin/subscriptions': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/subscriptions/index.get').default>>>>
     }
     '/api/admin/wa-template': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/wa-template.get').default>>>>
@@ -118,6 +133,15 @@ declare module "nitropack/types" {
     '/api/checkout/regular': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/checkout/regular.post').default>>>>
     }
+    '/api/cron/cleanup-media': {
+      'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/cron/cleanup-media').default>>>>
+    }
+    '/api/cron/reconcile-counters': {
+      'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/cron/reconcile-counters').default>>>>
+    }
+    '/api/cron/store-expiry': {
+      'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/cron/store-expiry').default>>>>
+    }
     '/api/flash-sale/config': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/flash-sale/config.get').default>>>>
     }
@@ -135,6 +159,9 @@ declare module "nitropack/types" {
     }
     '/api/payment/settings': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/payment/settings.get').default>>>>
+    }
+    '/api/plans': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/plans.get').default>>>>
     }
     '/api/products/:id': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/products/[id].get').default>>>>
@@ -156,6 +183,72 @@ declare module "nitropack/types" {
     }
     '/api/shipping/cost': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/shipping/cost.get').default>>>>
+    }
+    '/api/sitemap-stores.xml': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/sitemap-stores.xml.get').default>>>>
+    }
+    '/api/store/:id/image': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/image.post').default>>>>
+    }
+    '/api/store/:id': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/index.get').default>>>>
+      'patch': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/index.patch').default>>>>
+    }
+    '/api/store/:id/media/:mid': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/media/[mid].delete').default>>>>
+    }
+    '/api/store/:id/media/confirm': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/media/confirm.post').default>>>>
+    }
+    '/api/store/:id/media/presign': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/media/presign.post').default>>>>
+    }
+    '/api/store/:id/orders/:oid/shipment': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/orders/[oid]/shipment.post').default>>>>
+    }
+    '/api/store/:id/orders/:oid/status': {
+      'patch': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/orders/[oid]/status.patch').default>>>>
+    }
+    '/api/store/:id/orders': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/orders/index.get').default>>>>
+    }
+    '/api/store/:id/products/:pid': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/products/[pid].delete').default>>>>
+      'patch': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/products/[pid].patch').default>>>>
+    }
+    '/api/store/:id/products': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/products/index.get').default>>>>
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/products/index.post').default>>>>
+    }
+    '/api/store/:id/quota': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/quota.get').default>>>>
+    }
+    '/api/store/:id/subscribe': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/subscribe.post').default>>>>
+    }
+    '/api/store/categories': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/categories.post').default>>>>
+    }
+    '/api/store': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/index.post').default>>>>
+    }
+    '/api/store/mine': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/mine.get').default>>>>
+    }
+    '/api/stores/:slug/categories': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/stores/[slug]/categories.get').default>>>>
+    }
+    '/api/stores/:slug': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/stores/[slug]/index.get').default>>>>
+    }
+    '/api/stores/:slug/products': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/stores/[slug]/products.get').default>>>>
+    }
+    '/api/stores': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/stores/index.get').default>>>>
+    }
+    '/api/subscription/callback': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/subscription/callback.post').default>>>>
     }
     '/api/track': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/track.get').default>>>>
