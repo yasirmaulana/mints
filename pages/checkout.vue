@@ -139,44 +139,58 @@
             <p class="text-sm" style="color:rgba(9,11,12,0.4)">Memuat ongkos kirim…</p>
           </div>
           <template v-else>
-            <!-- Free shipping notice -->
-            <div v-if="subtotal >= freeShippingMin" class="rounded-2xl p-4" style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25)">
-              <p class="text-sm font-normal" style="color:rgb(22,163,74)">Selamat! Kamu mendapat gratis ongkir ke seluruh Indonesia.</p>
-            </div>
-
             <!-- Satu blok per toko — keranjang lintas toko, ongkir dihitung dari kota asal masing-masing (PRD §11 Fase 5) -->
-            <template v-else>
-              <div v-for="g in groupedByStore" :key="g.storeId || 'null'" class="rounded-3xl p-4 space-y-3" style="background:white">
-                <p class="text-sm font-normal" style="color:rgba(9,11,12,0.6)">{{ g.storeName || 'MINTS' }}</p>
+            <div v-for="g in groupedByStore" :key="g.storeId || 'null'" class="rounded-3xl p-4 space-y-3" style="background:white">
+              <p class="text-sm font-normal" style="color:rgba(9,11,12,0.6)">{{ g.storeName || 'MINTS' }}</p>
 
-                <div class="flex flex-wrap gap-2">
-                  <button
-                    v-for="c in couriers"
-                    :key="c"
-                    class="px-4 py-2 rounded-full text-sm font-normal transition-all"
-                    :style="shippingState[g.storeId || 'null']?.courierCode === c ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.05);color:#090b0c'"
-                    @click="selectCourier(g.storeId, c)"
-                  >{{ c.toUpperCase() }}</button>
-                </div>
-
-                <div class="space-y-2">
-                  <div
-                    v-for="svc in shippingState[g.storeId || 'null']?.services || []"
-                    :key="svc.service"
-                    class="flex items-center justify-between rounded-2xl p-3 cursor-pointer transition-all"
-                    :style="shippingState[g.storeId || 'null']?.selected?.service === svc.service ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.03);color:#090b0c'"
-                    @click="shippingState[g.storeId || 'null'].selected = svc"
-                  >
-                    <div>
-                      <p class="text-sm font-normal">{{ shippingState[g.storeId || 'null']?.courierCode.toUpperCase() }} {{ svc.service }}</p>
-                      <p class="text-xs mt-0.5" :style="shippingState[g.storeId || 'null']?.selected?.service === svc.service ? 'color:rgba(255,255,255,0.55)' : 'color:rgba(9,11,12,0.4)'">{{ svc.description }} · Est. {{ svc.cost[0]?.etd || '?' }} hari</p>
-                    </div>
-                    <p class="text-sm font-normal tabular-nums shrink-0">{{ formatPrice(svc.cost[0]?.value || 0) }}</p>
-                  </div>
-                  <div v-if="!(shippingState[g.storeId || 'null']?.services || []).length" class="text-center py-6 text-sm" style="color:rgba(9,11,12,0.4)">Tidak ada layanan tersedia untuk rute ini</div>
-                </div>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="c in couriers"
+                  :key="c"
+                  class="px-4 py-2 rounded-full text-sm font-normal transition-all"
+                  :style="shippingState[g.storeId || 'null']?.courierCode === c ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.05);color:#090b0c'"
+                  @click="selectCourier(g.storeId, c)"
+                >{{ c.toUpperCase() }}</button>
               </div>
-            </template>
+
+              <div class="space-y-2">
+                <div
+                  v-for="svc in shippingState[g.storeId || 'null']?.services || []"
+                  :key="svc.service"
+                  class="flex items-center justify-between rounded-2xl p-3 cursor-pointer transition-all"
+                  :style="shippingState[g.storeId || 'null']?.selected?.service === svc.service ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.03);color:#090b0c'"
+                  @click="shippingState[g.storeId || 'null'].selected = svc"
+                >
+                  <div>
+                    <p class="text-sm font-normal">{{ shippingState[g.storeId || 'null']?.courierCode.toUpperCase() }} {{ svc.service }}</p>
+                    <p class="text-xs mt-0.5" :style="shippingState[g.storeId || 'null']?.selected?.service === svc.service ? 'color:rgba(255,255,255,0.55)' : 'color:rgba(9,11,12,0.4)'">{{ svc.description }} · Est. {{ svc.cost[0]?.etd || '?' }} hari</p>
+                  </div>
+                  <p class="text-sm font-normal tabular-nums shrink-0">{{ formatPrice(svc.cost[0]?.value || 0) }}</p>
+                </div>
+                <div v-if="!(shippingState[g.storeId || 'null']?.services || []).length" class="text-center py-6 text-sm" style="color:rgba(9,11,12,0.4)">Tidak ada layanan tersedia untuk rute ini</div>
+              </div>
+
+              <!-- Voucher toko -->
+              <div class="flex items-center gap-2 pt-2 border-t" style="border-color:rgba(9,11,12,0.06)">
+                <input
+                  v-model="voucherState[g.storeId || 'null'].input"
+                  type="text"
+                  placeholder="Kode voucher toko ini"
+                  class="flex-1 rounded-full px-4 py-2 text-sm outline-none"
+                  style="background:rgba(9,11,12,0.04)"
+                  @keyup.enter="applyVoucher(g.storeId)"
+                >
+                <button
+                  class="px-4 py-2 rounded-full text-sm font-normal shrink-0"
+                  style="background:#090b0c;color:white"
+                  :disabled="voucherState[g.storeId || 'null'].loading"
+                  @click="applyVoucher(g.storeId)"
+                >Terapkan</button>
+              </div>
+              <p v-if="voucherState[g.storeId || 'null'].message" class="text-xs" :style="voucherState[g.storeId || 'null'].discount > 0 ? 'color:rgb(22,163,74)' : 'color:rgb(185,28,28)'">
+                {{ voucherState[g.storeId || 'null'].message }}
+              </p>
+            </div>
 
             <button
               class="w-full rounded-full py-3.5 text-sm font-normal transition-opacity"
@@ -303,11 +317,15 @@
             </div>
             <div class="flex justify-between text-sm">
               <span style="color:rgba(9,11,12,0.5)">Ongkos kirim</span>
-              <span class="tabular-nums" :style="finalShippingCost === 0 ? 'color:rgb(22,163,74)' : ''">{{ finalShippingCost === 0 ? 'GRATIS' : formatPrice(finalShippingCost) }}</span>
+              <span class="tabular-nums">{{ formatPrice(finalShippingCost) }}</span>
+            </div>
+            <div v-if="totalDiscount > 0" class="flex justify-between text-sm">
+              <span style="color:rgba(9,11,12,0.5)">Diskon voucher</span>
+              <span class="tabular-nums" style="color:rgb(22,163,74)">-{{ formatPrice(totalDiscount) }}</span>
             </div>
             <div class="flex justify-between pt-3 border-t" style="border-color:rgba(9,11,12,0.08)">
               <span class="text-sm font-normal">Total</span>
-              <span class="text-lg font-normal tabular-nums tracking-tight">{{ formatPrice(subtotal + finalShippingCost) }}</span>
+              <span class="text-lg font-normal tabular-nums tracking-tight">{{ formatPrice(subtotal + finalShippingCost - totalDiscount) }}</span>
             </div>
           </div>
 
@@ -363,7 +381,7 @@
 definePageMeta({ middleware: 'buyer' })
 useSeoMeta({ title: 'Checkout — MINTS' })
 
-const { cartItems, itemCount, subtotal, freeShippingMin, groupedByStore, clearCart, removeItem } = useCart()
+const { cartItems, itemCount, subtotal, groupedByStore, clearCart, removeItem } = useCart()
 const { user, fetchMe } = useAuth()
 const router = useRouter()
 
@@ -390,6 +408,37 @@ const cities = ref<any[]>([])
 const showCityDropdown = ref(false)
 // Satu entri per toko (storeId | 'null'): pengiriman dipilih per toko, PRD §11 Fase 5
 const shippingState = reactive<Record<string, { courierCode: string; services: any[]; selected: any }>>({})
+// Satu entri per toko: kode voucher diinput manual, divalidasi via /api/vouchers/validate
+const voucherState = reactive<Record<string, { input: string; code: string; discount: number; message: string; loading: boolean }>>({})
+watchEffect(() => {
+  for (const g of groupedByStore.value) {
+    const key = g.storeId || 'null'
+    if (!voucherState[key]) voucherState[key] = { input: '', code: '', discount: 0, message: '', loading: false }
+  }
+})
+const totalDiscount = computed(() => Object.values(voucherState).reduce((sum, v) => sum + v.discount, 0))
+async function applyVoucher(storeId: string | null) {
+  const key = storeId || 'null'
+  const state = voucherState[key]
+  if (!storeId || !state.input.trim()) return
+  state.loading = true
+  try {
+    const g = groupedByStore.value.find(g => (g.storeId || 'null') === key)
+    const res = await $fetch<{ valid: boolean; discountAmount: number; message: string }>('/api/vouchers/validate', {
+      method: 'POST',
+      body: { storeId, code: state.input.trim(), subtotal: g?.subtotal || 0 }
+    })
+    state.message = res.message
+    state.discount = res.valid ? res.discountAmount : 0
+    state.code = res.valid ? state.input.trim().toUpperCase() : ''
+  } catch {
+    state.message = 'Gagal memvalidasi voucher'
+    state.discount = 0
+    state.code = ''
+  } finally {
+    state.loading = false
+  }
+}
 const loadingShipping = ref(false)
 const placing = ref(false)
 const orderError = ref('')
@@ -429,16 +478,11 @@ const paymentMethods = computed(() => {
 
 const canStep0 = computed(() => form.buyerName.trim().length >= 3 && /^(08|628|\+628)\d{8,12}$/.test(form.buyerPhone))
 const canStep1 = computed(() => form.address.trim().length >= 10 && !!form.cityId)
-// Semua toko harus punya layanan terpilih, kecuali seluruh keranjang sudah gratis ongkir
-const canStep2 = computed(() => {
-  if (subtotal.value >= freeShippingMin.value) return true
-  return groupedByStore.value.every(g => !!shippingState[g.storeId || 'null']?.selected)
-})
+// Semua toko harus punya layanan terpilih
+const canStep2 = computed(() => groupedByStore.value.every(g => !!shippingState[g.storeId || 'null']?.selected))
 
-// Total ongkir dijumlah dari semua toko (masing-masing gratis bila subtotal keranjang total >= freeShippingMin,
-// konsisten dengan backend yang mengecek subtotal per toko — di sini subtotal keranjang dipakai sebagai gate global)
+// Total ongkir dijumlah dari semua toko
 const finalShippingCost = computed(() => {
-  if (subtotal.value >= freeShippingMin.value) return 0
   return groupedByStore.value.reduce((sum, g) => {
     const sel = shippingState[g.storeId || 'null']?.selected
     return sum + (sel?.cost?.[0]?.value || 0)
@@ -446,12 +490,11 @@ const finalShippingCost = computed(() => {
 })
 
 const shippingLabel = computed(() => {
-  if (subtotal.value >= freeShippingMin.value) return 'Gratis Ongkir'
   const n = groupedByStore.value.length
   return n > 1 ? `${n} toko` : (shippingState[groupedByStore.value[0]?.storeId || 'null']?.selected ? 'Dipilih' : '-')
 })
 
-const shippingCostDisplay = computed(() => finalShippingCost.value === 0 ? 'GRATIS' : formatPrice(finalShippingCost.value))
+const shippingCostDisplay = computed(() => formatPrice(finalShippingCost.value))
 const selectedPaymentMethodLabel = computed(() => paymentMethods.value.find((p: any) => p.code === form.paymentMethod)?.name || '-')
 
 function storeWeight(storeId: string | null) {
@@ -480,14 +523,12 @@ async function loadShipping() {
   loadingShipping.value = true
   step.value = 2
   try {
-    if (subtotal.value < freeShippingMin.value) {
-      for (const g of groupedByStore.value) {
-        const key = g.storeId || 'null'
-        if (!shippingState[key]) shippingState[key] = { courierCode: 'jne', services: [], selected: null }
-        else shippingState[key].selected = null
-      }
-      await Promise.all(groupedByStore.value.map(g => fetchShippingCosts(g.storeId)))
+    for (const g of groupedByStore.value) {
+      const key = g.storeId || 'null'
+      if (!shippingState[key]) shippingState[key] = { courierCode: 'jne', services: [], selected: null }
+      else shippingState[key].selected = null
     }
+    await Promise.all(groupedByStore.value.map(g => fetchShippingCosts(g.storeId)))
   } finally {
     loadingShipping.value = false
   }
@@ -520,6 +561,7 @@ async function placeOrder() {
   soldOutError.value = ''
   try {
     const shippingByStore: Record<string, { courierCode?: string; courierService?: string; cost?: number }> = {}
+    const voucherByStore: Record<string, string> = {}
     for (const g of groupedByStore.value) {
       const key = g.storeId || 'null'
       const state = shippingState[key]
@@ -528,6 +570,7 @@ async function placeOrder() {
         courierService: state?.selected?.service,
         cost: state?.selected?.cost?.[0]?.value || 0
       }
+      if (voucherState[key]?.code) voucherByStore[key] = voucherState[key].code
     }
 
     const res = await $fetch<any>('/api/checkout/regular', {
@@ -539,6 +582,7 @@ async function placeOrder() {
         cityId: form.cityId,
         cityName: form.cityName,
         shippingByStore,
+        voucherByStore,
         totalSubtotal: subtotal.value,
         items: cartItems.value.map(i => ({
           productId: i.productId,
@@ -557,7 +601,20 @@ async function placeOrder() {
         body: { orderIds, paymentMethod: form.paymentMethod }
       })
       clearCart()
-      if (payRes.paymentUrl) {
+      const NO_REDIRECT_METHODS = ['VC', 'M2', 'BT', 'B1', 'I1', 'SP']
+      if (NO_REDIRECT_METHODS.includes(payRes.paymentMethod) && (payRes.vaNumber || payRes.qrString)) {
+        router.push({
+          path: '/account/pembayaran',
+          query: {
+            ref: payRes.merchantOrderId,
+            method: payRes.paymentMethod,
+            va: payRes.vaNumber || '',
+            qr: payRes.qrString || '',
+            amount: String(payRes.amount || ''),
+            expiredAt: payRes.expiredAt || ''
+          }
+        })
+      } else if (payRes.paymentUrl) {
         window.location.href = payRes.paymentUrl
       } else {
         router.push('/account/orders')

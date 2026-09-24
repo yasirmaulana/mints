@@ -6,7 +6,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const config = useRuntimeConfig()
-  const freeShippingMin = Number(config.public.freeShippingMin || 500000)
 
   // Origin per toko (checkout lintas toko, PRD §11 Fase 5) bila storeId diberikan,
   // jika tidak fallback ke pengaturan lama: DB > env > default Surabaya (501).
@@ -46,5 +45,5 @@ export default defineEventHandler(async (event) => {
     cost: [{ value: s.cost, etd: s.etd, note: '' }]
   }))
 
-  return { services, freeShippingMin }
+  return { services }
 })

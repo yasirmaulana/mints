@@ -364,11 +364,8 @@ const mobileMenuOpen = ref(false)
 const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
 
-const freeShippingMin = useRuntimeConfig().public.freeShippingMin
-const freeShippingLabel = `Min. Rp ${parseInt(String(freeShippingMin)).toLocaleString('id-ID')}`
-
 const stats = computed(() => [
-  { label: 'Gratis Ongkir ' + freeShippingLabel, sub: 'Berlaku untuk pengiriman seluruh Indonesia' },
+  { label: 'Voucher Diskon', sub: 'Tersedia untuk berbagai produk pilihan' },
   { label: 'Kualitas Premium', sub: "Bahan eksklusif yang nyaman & syar'i" },
   { label: 'Pembayaran Aman', sub: 'Transaksi aman didukung Duitku' }
 ])

@@ -160,6 +160,9 @@ declare module "nitropack/types" {
     '/api/payment/settings': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/payment/settings.get').default>>>>
     }
+    '/api/payment/status': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/payment/status.get').default>>>>
+    }
     '/api/plans': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/plans.get').default>>>>
     }
@@ -226,6 +229,14 @@ declare module "nitropack/types" {
     '/api/store/:id/subscribe': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/subscribe.post').default>>>>
     }
+    '/api/store/:id/vouchers/:voucherId': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/vouchers/[voucherId].delete').default>>>>
+      'patch': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/vouchers/[voucherId].patch').default>>>>
+    }
+    '/api/store/:id/vouchers': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/vouchers/index.get').default>>>>
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/[id]/vouchers/index.post').default>>>>
+    }
     '/api/store/categories': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/store/categories.post').default>>>>
     }
@@ -252,6 +263,9 @@ declare module "nitropack/types" {
     }
     '/api/track': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/track.get').default>>>>
+    }
+    '/api/vouchers/validate': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/vouchers/validate.post').default>>>>
     }
     '/auth/google': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/routes/auth/google.get').default>>>>

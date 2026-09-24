@@ -943,7 +943,6 @@ const _inlineRuntimeConfig = {
   },
   "public": {
     "recaptchaSiteKey": "6Ld99cEtAAAAALE-xeCRGVdQyTE7xjzqEcTbXnik",
-    "freeShippingMin": "500000",
     "duitkuIsProduction": "false",
     "auth": {
       "loadStrategy": "server-first"
@@ -2820,22 +2819,7 @@ _5jxvmWaDQawAxCYeFtukVo2_l4z46c5n9k8XiaC5ua4,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"46bd9-rZ7BbXAAxODymWcYJrzOcMpwrso\"",
-    "mtime": "2026-09-23T13:51:32.351Z",
-    "size": 289753,
-    "path": "index.mjs"
-  },
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"f7e61-F6N46045wRAI4Um5Gm2IO9J+Z3s\"",
-    "mtime": "2026-09-23T13:51:32.351Z",
-    "size": 1015393,
-    "path": "index.mjs.map"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -4369,14 +4353,14 @@ const _lazy_BQIed_ = () => Promise.resolve().then(function () { return admins_ge
 const _lazy_RfaPM3 = () => Promise.resolve().then(function () { return admins_post$1; });
 const _lazy_3jgDDX = () => Promise.resolve().then(function () { return _id__delete$7; });
 const _lazy__yqt0J = () => Promise.resolve().then(function () { return _id__delete$5; });
-const _lazy_l5fHzD = () => Promise.resolve().then(function () { return index_get$v; });
-const _lazy_XBZAfQ = () => Promise.resolve().then(function () { return index_post$7; });
+const _lazy_l5fHzD = () => Promise.resolve().then(function () { return index_get$x; });
+const _lazy_XBZAfQ = () => Promise.resolve().then(function () { return index_post$9; });
 const _lazy_aoy1P6 = () => Promise.resolve().then(function () { return reply_post$1; });
-const _lazy_LS5sYQ = () => Promise.resolve().then(function () { return index_get$t; });
+const _lazy_LS5sYQ = () => Promise.resolve().then(function () { return index_get$v; });
 const _lazy_YXUhDR = () => Promise.resolve().then(function () { return config_post$1; });
 const _lazy_zgHEQk = () => Promise.resolve().then(function () { return _id__delete$3; });
 const _lazy_D71gOl = () => Promise.resolve().then(function () { return _id__patch$3; });
-const _lazy_Fci4SR = () => Promise.resolve().then(function () { return index_get$r; });
+const _lazy_Fci4SR = () => Promise.resolve().then(function () { return index_get$t; });
 const _lazy_XCmZOw = () => Promise.resolve().then(function () { return login_post$1; });
 const _lazy_DsPwBN = () => Promise.resolve().then(function () { return logout_post$3; });
 const _lazy_oPWSth = () => Promise.resolve().then(function () { return cancel_patch$1; });
@@ -4385,19 +4369,19 @@ const _lazy_2itD4b = () => Promise.resolve().then(function () { return shipment_
 const _lazy_g7cb36 = () => Promise.resolve().then(function () { return status_patch$5; });
 const _lazy_9y_LEw = () => Promise.resolve().then(function () { return uploadProof_post$1; });
 const _lazy_NDO_ct = () => Promise.resolve().then(function () { return bulkNotify_post$1; });
-const _lazy_C9JkIR = () => Promise.resolve().then(function () { return index_get$p; });
+const _lazy_C9JkIR = () => Promise.resolve().then(function () { return index_get$r; });
 const _lazy_xJIDzk = () => Promise.resolve().then(function () { return offline_post$1; });
 const _lazy_gtV6CQ = () => Promise.resolve().then(function () { return _id__patch$1; });
-const _lazy_aPzN_q = () => Promise.resolve().then(function () { return index_get$n; });
+const _lazy_aPzN_q = () => Promise.resolve().then(function () { return index_get$p; });
 const _lazy_KqdiYd = () => Promise.resolve().then(function () { return _id__delete$1; });
 const _lazy_qI6aAn = () => Promise.resolve().then(function () { return stock_patch$1; });
-const _lazy_XbxiBR = () => Promise.resolve().then(function () { return index_get$l; });
-const _lazy_P75Guf = () => Promise.resolve().then(function () { return index_post$5; });
+const _lazy_XbxiBR = () => Promise.resolve().then(function () { return index_get$n; });
+const _lazy_P75Guf = () => Promise.resolve().then(function () { return index_post$7; });
 const _lazy_sXCsut = () => Promise.resolve().then(function () { return settings_get$3; });
 const _lazy_CwyZ4k = () => Promise.resolve().then(function () { return settings_put$1; });
 const _lazy_VUHKbd = () => Promise.resolve().then(function () { return status_patch$3; });
-const _lazy_thdJ8f = () => Promise.resolve().then(function () { return index_get$j; });
-const _lazy_aVyrbb = () => Promise.resolve().then(function () { return index_get$h; });
+const _lazy_thdJ8f = () => Promise.resolve().then(function () { return index_get$l; });
+const _lazy_aVyrbb = () => Promise.resolve().then(function () { return index_get$j; });
 const _lazy_Jb2wQx = () => Promise.resolve().then(function () { return waTemplate_get$1; });
 const _lazy_SSy4Pw = () => Promise.resolve().then(function () { return waTemplate_put$1; });
 const _lazy_cctNiS = () => Promise.resolve().then(function () { return analyticsConfig_get$1; });
@@ -4408,7 +4392,7 @@ const _lazy_Db6jMY = () => Promise.resolve().then(function () { return verifyOtp
 const _lazy_hi3qtl = () => Promise.resolve().then(function () { return orders_get$1; });
 const _lazy_q7T3uz = () => Promise.resolve().then(function () { return password_patch$1; });
 const _lazy__URDNX = () => Promise.resolve().then(function () { return profile_patch$1; });
-const _lazy_PwUBuS = () => Promise.resolve().then(function () { return index_get$f; });
+const _lazy_PwUBuS = () => Promise.resolve().then(function () { return index_get$h; });
 const _lazy_IqasZS = () => Promise.resolve().then(function () { return messages_get$1; });
 const _lazy_VkZORE = () => Promise.resolve().then(function () { return messages_post$1; });
 const _lazy_bwpPh8 = () => Promise.resolve().then(function () { return start_post$1; });
@@ -4418,13 +4402,14 @@ const _lazy_uBC7Kr = () => Promise.resolve().then(function () { return reconcile
 const _lazy_c0O6xB = () => Promise.resolve().then(function () { return storeExpiry$1; });
 const _lazy_QIpR3S = () => Promise.resolve().then(function () { return config_get$1; });
 const _lazy_ll6SVl = () => Promise.resolve().then(function () { return track_get$3; });
-const _lazy_6vuowY = () => Promise.resolve().then(function () { return index_get$d; });
+const _lazy_6vuowY = () => Promise.resolve().then(function () { return index_get$f; });
 const _lazy_nsd8A_ = () => Promise.resolve().then(function () { return callback_post$3; });
 const _lazy_IVHrPt = () => Promise.resolve().then(function () { return createTransaction_post$1; });
 const _lazy_GNRQjq = () => Promise.resolve().then(function () { return settings_get$1; });
+const _lazy_i25TVw = () => Promise.resolve().then(function () { return status_get$3; });
 const _lazy_0Xf_Lg = () => Promise.resolve().then(function () { return plans_get$1; });
 const _lazy_hz5WvZ = () => Promise.resolve().then(function () { return _id__get$1; });
-const _lazy_zWM6F4 = () => Promise.resolve().then(function () { return index_get$b; });
+const _lazy_zWM6F4 = () => Promise.resolve().then(function () { return index_get$d; });
 const _lazy_N0zask = () => Promise.resolve().then(function () { return status_get$1; });
 const _lazy_xHEEaV = () => Promise.resolve().then(function () { return stock_get$1; });
 const _lazy_7aiXuF = () => Promise.resolve().then(function () { return ____path__get$1; });
@@ -4432,20 +4417,24 @@ const _lazy_vGN5Zf = () => Promise.resolve().then(function () { return cities_ge
 const _lazy_Ntvqfy = () => Promise.resolve().then(function () { return cost_get$1; });
 const _lazy_5qxP5V = () => Promise.resolve().then(function () { return sitemapStores_xml_get$1; });
 const _lazy_C4L2UB = () => Promise.resolve().then(function () { return image_post$1; });
-const _lazy_rHSE0_ = () => Promise.resolve().then(function () { return index_get$9; });
+const _lazy_rHSE0_ = () => Promise.resolve().then(function () { return index_get$b; });
 const _lazy_Wr4Mz0 = () => Promise.resolve().then(function () { return index_patch$1; });
 const _lazy_hs0FrR = () => Promise.resolve().then(function () { return _mid__delete$1; });
 const _lazy_erlTYQ = () => Promise.resolve().then(function () { return confirm_post$1; });
 const _lazy_UARddR = () => Promise.resolve().then(function () { return presign_post$1; });
 const _lazy_V3xXtX = () => Promise.resolve().then(function () { return shipment_post$1; });
 const _lazy_wl0dWm = () => Promise.resolve().then(function () { return status_patch$1; });
-const _lazy_rMYbo2 = () => Promise.resolve().then(function () { return index_get$7; });
+const _lazy_rMYbo2 = () => Promise.resolve().then(function () { return index_get$9; });
 const _lazy_D07a7K = () => Promise.resolve().then(function () { return _pid__delete$1; });
 const _lazy_jyT_0E = () => Promise.resolve().then(function () { return _pid__patch$1; });
-const _lazy_e7YjGe = () => Promise.resolve().then(function () { return index_get$5; });
-const _lazy_V1fRmS = () => Promise.resolve().then(function () { return index_post$3; });
+const _lazy_e7YjGe = () => Promise.resolve().then(function () { return index_get$7; });
+const _lazy_V1fRmS = () => Promise.resolve().then(function () { return index_post$5; });
 const _lazy_xd_MC3 = () => Promise.resolve().then(function () { return quota_get$1; });
 const _lazy_9ttCrY = () => Promise.resolve().then(function () { return subscribe_post$1; });
+const _lazy_5rv6Ah = () => Promise.resolve().then(function () { return _voucherId__delete$1; });
+const _lazy_A5SIWJ = () => Promise.resolve().then(function () { return _voucherId__patch$1; });
+const _lazy_dWuKVX = () => Promise.resolve().then(function () { return index_get$5; });
+const _lazy_jYVFak = () => Promise.resolve().then(function () { return index_post$3; });
 const _lazy_eicob6 = () => Promise.resolve().then(function () { return categories_post$1; });
 const _lazy_0JILps = () => Promise.resolve().then(function () { return index_post$1; });
 const _lazy_ApRl2W = () => Promise.resolve().then(function () { return mine_get$1; });
@@ -4455,6 +4444,7 @@ const _lazy_vyJR9W = () => Promise.resolve().then(function () { return products_
 const _lazy_lcUXU7 = () => Promise.resolve().then(function () { return index_get$1; });
 const _lazy_ocWjn5 = () => Promise.resolve().then(function () { return callback_post$1; });
 const _lazy_KvZJ3d = () => Promise.resolve().then(function () { return track_get$1; });
+const _lazy_5bScRf = () => Promise.resolve().then(function () { return validate_post$1; });
 const _lazy_ZjTvV3 = () => Promise.resolve().then(function () { return google_get$1; });
 const _lazy_CW5HzW = () => Promise.resolve().then(function () { return renderer; });
 
@@ -4519,6 +4509,7 @@ const handlers = [
   { route: '/api/payment/callback', handler: _lazy_nsd8A_, lazy: true, middleware: false, method: "post" },
   { route: '/api/payment/create-transaction', handler: _lazy_IVHrPt, lazy: true, middleware: false, method: "post" },
   { route: '/api/payment/settings', handler: _lazy_GNRQjq, lazy: true, middleware: false, method: "get" },
+  { route: '/api/payment/status', handler: _lazy_i25TVw, lazy: true, middleware: false, method: "get" },
   { route: '/api/plans', handler: _lazy_0Xf_Lg, lazy: true, middleware: false, method: "get" },
   { route: '/api/products/:id', handler: _lazy_hz5WvZ, lazy: true, middleware: false, method: "get" },
   { route: '/api/products', handler: _lazy_zWM6F4, lazy: true, middleware: false, method: "get" },
@@ -4543,6 +4534,10 @@ const handlers = [
   { route: '/api/store/:id/products', handler: _lazy_V1fRmS, lazy: true, middleware: false, method: "post" },
   { route: '/api/store/:id/quota', handler: _lazy_xd_MC3, lazy: true, middleware: false, method: "get" },
   { route: '/api/store/:id/subscribe', handler: _lazy_9ttCrY, lazy: true, middleware: false, method: "post" },
+  { route: '/api/store/:id/vouchers/:voucherId', handler: _lazy_5rv6Ah, lazy: true, middleware: false, method: "delete" },
+  { route: '/api/store/:id/vouchers/:voucherId', handler: _lazy_A5SIWJ, lazy: true, middleware: false, method: "patch" },
+  { route: '/api/store/:id/vouchers', handler: _lazy_dWuKVX, lazy: true, middleware: false, method: "get" },
+  { route: '/api/store/:id/vouchers', handler: _lazy_jYVFak, lazy: true, middleware: false, method: "post" },
   { route: '/api/store/categories', handler: _lazy_eicob6, lazy: true, middleware: false, method: "post" },
   { route: '/api/store', handler: _lazy_0JILps, lazy: true, middleware: false, method: "post" },
   { route: '/api/store/mine', handler: _lazy_ApRl2W, lazy: true, middleware: false, method: "get" },
@@ -4552,6 +4547,7 @@ const handlers = [
   { route: '/api/stores', handler: _lazy_lcUXU7, lazy: true, middleware: false, method: "get" },
   { route: '/api/subscription/callback', handler: _lazy_ocWjn5, lazy: true, middleware: false, method: "post" },
   { route: '/api/track', handler: _lazy_KvZJ3d, lazy: true, middleware: false, method: "get" },
+  { route: '/api/vouchers/validate', handler: _lazy_5bScRf, lazy: true, middleware: false, method: "post" },
   { route: '/auth/google', handler: _lazy_ZjTvV3, lazy: true, middleware: false, method: "get" },
   { route: '/__nuxt_error', handler: _lazy_CW5HzW, lazy: true, middleware: false, method: undefined },
   { route: '/api/_nuxt_icon/:collection', handler: _lcD18D, lazy: false, middleware: false, method: undefined },
@@ -4900,7 +4896,7 @@ const _id__delete$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   default: _id__delete$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$u = defineEventHandler(async (event) => {
+const index_get$w = defineEventHandler(async (event) => {
   requireAdminSession(event);
   return await prisma.category.findMany({
     orderBy: { name: "asc" },
@@ -4908,12 +4904,12 @@ const index_get$u = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$v = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$x = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$u
+  default: index_get$w
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_post$6 = defineEventHandler(async (event) => {
+const index_post$8 = defineEventHandler(async (event) => {
   requireAdminSession(event);
   const { name } = await readBody(event);
   if (!(name == null ? void 0 : name.trim())) throw createError({ statusCode: 400, statusMessage: "Nama kategori wajib diisi" });
@@ -4921,9 +4917,9 @@ const index_post$6 = defineEventHandler(async (event) => {
   return await prisma.category.create({ data: { name: name.trim(), slug } });
 });
 
-const index_post$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_post$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_post$6
+  default: index_post$8
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const reply_post = defineEventHandler(async (event) => {
@@ -4961,7 +4957,7 @@ const reply_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   default: reply_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$s = defineEventHandler(async (event) => {
+const index_get$u = defineEventHandler(async (event) => {
   await requireAdminSession(event);
   const sessions = await prisma.chatSession.findMany({
     orderBy: { updatedAt: "desc" },
@@ -4972,9 +4968,9 @@ const index_get$s = defineEventHandler(async (event) => {
   return sessions;
 });
 
-const index_get$t = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$v = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$s
+  default: index_get$u
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const config_post = defineEventHandler(async (event) => {
@@ -5030,7 +5026,7 @@ const _id__patch$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   default: _id__patch$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$q = defineEventHandler(async (event) => {
+const index_get$s = defineEventHandler(async (event) => {
   requireAdminSession(event);
   return await prisma.flashSaleConfig.findMany({
     orderBy: { startTime: "asc" },
@@ -5040,9 +5036,9 @@ const index_get$q = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$r = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$t = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$q
+  default: index_get$s
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const login_post = defineEventHandler(async (event) => {
@@ -5320,7 +5316,7 @@ const bulkNotify_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineP
   default: bulkNotify_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$o = defineEventHandler(async (event) => {
+const index_get$q = defineEventHandler(async (event) => {
   requireAdminSession(event);
   return await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
@@ -5340,9 +5336,9 @@ const index_get$o = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$p = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$r = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$o
+  default: index_get$q
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const offline_post = defineEventHandler(async (event) => {
@@ -5416,14 +5412,14 @@ const _id__patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   default: _id__patch
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$m = defineEventHandler(async (event) => {
+const index_get$o = defineEventHandler(async (event) => {
   await requireAdminSession(event);
   return prisma.plan.findMany({ orderBy: { searchPriority: "asc" } });
 });
 
-const index_get$n = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$p = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$m
+  default: index_get$o
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const _id__delete = defineEventHandler(async (event) => {
@@ -5470,7 +5466,7 @@ const stock_patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   default: stock_patch
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$k = defineEventHandler(async (event) => {
+const index_get$m = defineEventHandler(async (event) => {
   const { categoryId, productType, status, search } = getQuery$1(event);
   const where = {};
   if (categoryId) where.categoryId = String(categoryId);
@@ -5487,12 +5483,12 @@ const index_get$k = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$l = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$n = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$k
+  default: index_get$m
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_post$4 = defineEventHandler(async (event) => {
+const index_post$6 = defineEventHandler(async (event) => {
   var _a;
   requireAdminSession(event);
   const formData = await readMultipartFormData(event);
@@ -5575,9 +5571,9 @@ const index_post$4 = defineEventHandler(async (event) => {
   return product;
 });
 
-const index_post$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_post$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_post$4
+  default: index_post$6
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const ALLOWED_KEYS$2 = /* @__PURE__ */ new Set([
@@ -5672,7 +5668,7 @@ const status_patch$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProp
   default: status_patch$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$i = defineEventHandler(async (event) => {
+const index_get$k = defineEventHandler(async (event) => {
   await requireAdminSession(event);
   const { status, search } = getQuery$1(event);
   const where = {};
@@ -5688,12 +5684,12 @@ const index_get$i = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$j = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$l = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$i
+  default: index_get$k
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$g = defineEventHandler(async (event) => {
+const index_get$i = defineEventHandler(async (event) => {
   await requireAdminSession(event);
   const { status } = getQuery$1(event);
   const where = {};
@@ -5715,9 +5711,9 @@ const index_get$g = defineEventHandler(async (event) => {
   return { subscriptions, report: { totalRevenue, paidCount: paid.length, revenueByPlan } };
 });
 
-const index_get$h = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$j = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$g
+  default: index_get$i
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const DEFAULTS = {
@@ -6005,7 +6001,7 @@ const profile_patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePro
   default: profile_patch
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$e = defineEventHandler(async (event) => {
+const index_get$g = defineEventHandler(async (event) => {
   setResponseHeader(event, "Cache-Control", "s-maxage=300, stale-while-revalidate=600");
   return await prisma.category.findMany({
     orderBy: { name: "asc" },
@@ -6013,9 +6009,9 @@ const index_get$e = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$f = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$h = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$e
+  default: index_get$g
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const messages_get = defineEventHandler(async (event) => {
@@ -6118,10 +6114,9 @@ const regular_post = defineEventHandler(async (event) => {
   if (!Array.isArray(body.items) || !body.items.length) {
     throw createError({ statusCode: 400, statusMessage: "Keranjang kosong" });
   }
-  const config = useRuntimeConfig();
-  const freeShippingMin = Number(config.public.freeShippingMin || 5e5);
   const items = body.items;
   const shippingByStore = body.shippingByStore || {};
+  const voucherByStore = body.voucherByStore || {};
   const orders = await prisma.$transaction(async (tx) => {
     var _a;
     const createdOrders = [];
@@ -6177,13 +6172,28 @@ const regular_post = defineEventHandler(async (event) => {
     for (const [storeKey, firstOrderId] of storeFirstOrder) {
       const subtotal = storeSubtotals.get(storeKey) || 0;
       const shipping = shippingByStore[storeKey] || {};
-      const shippingCost = subtotal >= freeShippingMin ? 0 : Number(shipping.cost || 0);
+      const shippingCost = Number(shipping.cost || 0);
+      let voucherCode = null;
+      let discountAmount = 0;
+      const inputCode = voucherByStore[storeKey];
+      if (inputCode && storeKey !== "null") {
+        const code = inputCode.trim().toUpperCase();
+        const voucher = await tx.voucher.findUnique({ where: { storeId_code: { storeId: storeKey, code } } });
+        const valid = voucher && voucher.isActive && (!voucher.expiresAt || voucher.expiresAt >= /* @__PURE__ */ new Date()) && (voucher.quota === null || voucher.usedCount < voucher.quota) && subtotal >= voucher.minPurchase;
+        if (valid) {
+          voucherCode = voucher.code;
+          discountAmount = Math.min(voucher.discountAmount, subtotal);
+          await tx.voucher.update({ where: { id: voucher.id }, data: { usedCount: { increment: 1 } } });
+        }
+      }
       await tx.order.update({
         where: { id: firstOrderId },
         data: {
           courierCode: shipping.courierCode || null,
           courierService: shipping.courierService || null,
-          shippingCost
+          shippingCost,
+          voucherCode,
+          discountAmount: discountAmount || null
         }
       });
     }
@@ -6370,7 +6380,7 @@ const track_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePropert
   default: track_get$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$c = defineEventHandler(async (event) => {
+const index_get$e = defineEventHandler(async (event) => {
   const { phone } = getQuery$1(event);
   if (!phone) throw createError({ statusCode: 400, statusMessage: "phone wajib diisi" });
   const phoneStr = String(phone).replace(/\s/g, "");
@@ -6393,9 +6403,9 @@ const index_get$c = defineEventHandler(async (event) => {
   return orders;
 });
 
-const index_get$d = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$f = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$c
+  default: index_get$e
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const callback_post$2 = defineEventHandler(async (event) => {
@@ -6509,7 +6519,7 @@ const createTransaction_post = defineEventHandler(async (event) => {
         expiredAt
       }))
     });
-    return { paymentUrl: null, merchantOrderId };
+    return { paymentUrl: null, merchantOrderId, paymentMethod: "FT" };
   }
   const config = useRuntimeConfig();
   const isProduction = config.duitkuIsProduction === "true";
@@ -6554,11 +6564,20 @@ const createTransaction_post = defineEventHandler(async (event) => {
       paymentUrl: duitkuRes.paymentUrl,
       paymentMethod,
       vaNumber: duitkuRes.vaNumber || null,
+      qrString: duitkuRes.qrString || null,
       status: "pending",
       expiredAt
     }))
   });
-  return { paymentUrl: duitkuRes.paymentUrl, merchantOrderId };
+  return {
+    paymentUrl: duitkuRes.paymentUrl,
+    vaNumber: duitkuRes.vaNumber || null,
+    qrString: duitkuRes.qrString || null,
+    merchantOrderId,
+    paymentMethod,
+    amount: totalAmount,
+    expiredAt
+  };
 });
 
 const createTransaction_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
@@ -6580,6 +6599,19 @@ const settings_get = defineEventHandler(async () => {
 const settings_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: settings_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const status_get$2 = defineEventHandler(async (event) => {
+  const merchantOrderId = getQuery$1(event).merchantOrderId;
+  if (!merchantOrderId) throw createError({ statusCode: 400, statusMessage: "merchantOrderId wajib diisi" });
+  const payment = await prisma.payment.findFirst({ where: { duitkuReference: merchantOrderId } });
+  if (!payment) throw createError({ statusCode: 404, statusMessage: "Pembayaran tidak ditemukan" });
+  return { status: payment.status, paidAt: payment.paidAt };
+});
+
+const status_get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: status_get$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const plans_get = defineEventHandler(async (event) => {
@@ -6622,7 +6654,7 @@ const _id__get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty
 function maskPhone(phone) {
   return phone.length > 3 ? phone.slice(0, -3) + "xxx" : "xxx";
 }
-const index_get$a = defineEventHandler(async (event) => {
+const index_get$c = defineEventHandler(async (event) => {
   const { sessionId, categoryId, productType, status, search } = getQuery$1(event);
   const where = { store: { status: "ACTIVE" } };
   if (sessionId) where.sessionId = String(sessionId);
@@ -6655,9 +6687,9 @@ const index_get$a = defineEventHandler(async (event) => {
   });
 });
 
-const index_get$b = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$d = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$a
+  default: index_get$c
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const status_get = defineEventHandler(async (event) => {
@@ -6763,7 +6795,6 @@ const cost_get = defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "destination, weight, courier wajib diisi" });
   }
   const config = useRuntimeConfig();
-  const freeShippingMin = Number(config.public.freeShippingMin || 5e5);
   let origin = null;
   if (storeId) {
     const store = await prisma.store.findUnique({ where: { id: String(storeId) }, select: { cityId: true } });
@@ -6793,7 +6824,7 @@ const cost_get = defineEventHandler(async (event) => {
     description: s.description,
     cost: [{ value: s.cost, etd: s.etd, note: "" }]
   }));
-  return { services, freeShippingMin };
+  return { services };
 });
 
 const cost_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
@@ -6851,7 +6882,7 @@ const image_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
   default: image_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$8 = defineEventHandler(async (event) => {
+const index_get$a = defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
   const ctx = await getStoreContext(event, id, { requireActive: false });
   const subscriptions = await prisma.subscription.findMany({
@@ -6863,9 +6894,9 @@ const index_get$8 = defineEventHandler(async (event) => {
   return { ...ctx.store, subscriptions, quota: buildQuotaSummary(ctx) };
 });
 
-const index_get$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$b = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$8
+  default: index_get$a
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const index_patch = defineEventHandler(async (event) => {
@@ -7090,7 +7121,7 @@ const status_patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProp
   default: status_patch
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$6 = defineEventHandler(async (event) => {
+const index_get$8 = defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
   const ctx = await getStoreContext(event, id, { requireActive: false });
   const orders = await prisma.order.findMany({
@@ -7105,9 +7136,9 @@ const index_get$6 = defineEventHandler(async (event) => {
   return orders;
 });
 
-const index_get$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$9 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$6
+  default: index_get$8
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const S3_PROXY_PREFIX = "/api/s3-image/";
@@ -7226,7 +7257,7 @@ const _pid__patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.definePrope
   default: _pid__patch
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_get$4 = defineEventHandler(async (event) => {
+const index_get$6 = defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
   const ctx = await getStoreContext(event, id, { requireActive: false });
   const products = await prisma.product.findMany({
@@ -7237,12 +7268,12 @@ const index_get$4 = defineEventHandler(async (event) => {
   return products;
 });
 
-const index_get$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_get$7 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_get$4
+  default: index_get$6
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const index_post$2 = defineEventHandler(async (event) => {
+const index_post$4 = defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
   const ctx = await getStoreContext(event, id);
   assertCanAddProduct(ctx);
@@ -7317,9 +7348,9 @@ const index_post$2 = defineEventHandler(async (event) => {
   return product;
 });
 
-const index_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+const index_post$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
-  default: index_post$2
+  default: index_post$4
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const quota_get = defineEventHandler(async (event) => {
@@ -7407,6 +7438,89 @@ const subscribe_post = defineEventHandler(async (event) => {
 const subscribe_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: subscribe_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _voucherId__delete = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const voucherId = getRouterParam(event, "voucherId");
+  const ctx = await getStoreContext(event, id, { requireActive: false });
+  const existing = await prisma.voucher.findUnique({ where: { id: voucherId } });
+  if (!existing || existing.storeId !== ctx.store.id) {
+    throw createError({ statusCode: 404, statusMessage: "Voucher tidak ditemukan" });
+  }
+  await prisma.voucher.delete({ where: { id: voucherId } });
+  return { success: true };
+});
+
+const _voucherId__delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _voucherId__delete
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _voucherId__patch = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const voucherId = getRouterParam(event, "voucherId");
+  const ctx = await getStoreContext(event, id, { requireActive: false });
+  const existing = await prisma.voucher.findUnique({ where: { id: voucherId } });
+  if (!existing || existing.storeId !== ctx.store.id) {
+    throw createError({ statusCode: 404, statusMessage: "Voucher tidak ditemukan" });
+  }
+  const body = await readBody(event);
+  const data = {};
+  if (body.discountAmount !== void 0) data.discountAmount = parseInt(body.discountAmount);
+  if (body.minPurchase !== void 0) data.minPurchase = parseInt(body.minPurchase);
+  if (body.quota !== void 0) data.quota = body.quota ? parseInt(body.quota) : null;
+  if (body.isActive !== void 0) data.isActive = !!body.isActive;
+  if (body.expiresAt !== void 0) data.expiresAt = body.expiresAt ? new Date(body.expiresAt) : null;
+  return prisma.voucher.update({ where: { id: voucherId }, data });
+});
+
+const _voucherId__patch$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _voucherId__patch
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_get$4 = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const ctx = await getStoreContext(event, id, { requireActive: false });
+  return prisma.voucher.findMany({
+    where: { storeId: ctx.store.id },
+    orderBy: { createdAt: "desc" }
+  });
+});
+
+const index_get$5 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_get$4
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const index_post$2 = defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const ctx = await getStoreContext(event, id);
+  const body = await readBody(event);
+  const code = String(body.code || "").trim().toUpperCase();
+  const discountAmount = parseInt(body.discountAmount);
+  if (!code) throw createError({ statusCode: 400, statusMessage: "Kode voucher wajib diisi" });
+  if (!discountAmount || discountAmount <= 0) {
+    throw createError({ statusCode: 400, statusMessage: "Potongan voucher wajib diisi" });
+  }
+  const existing = await prisma.voucher.findUnique({ where: { storeId_code: { storeId: ctx.store.id, code } } });
+  if (existing) throw createError({ statusCode: 400, statusMessage: "Kode voucher sudah dipakai" });
+  return prisma.voucher.create({
+    data: {
+      storeId: ctx.store.id,
+      code,
+      discountAmount,
+      minPurchase: body.minPurchase ? parseInt(body.minPurchase) : 0,
+      quota: body.quota ? parseInt(body.quota) : null,
+      expiresAt: body.expiresAt ? new Date(body.expiresAt) : null
+    }
+  });
+});
+
+const index_post$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: index_post$2
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const categories_post = defineEventHandler(async (event) => {
@@ -7719,6 +7833,33 @@ const track_get = defineEventHandler(async (event) => {
 const track_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: track_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const validate_post = defineEventHandler(async (event) => {
+  const body = await readBody(event);
+  const storeId = body.storeId;
+  const code = String(body.code || "").trim().toUpperCase();
+  const subtotal = Number(body.subtotal || 0);
+  if (!storeId || !code) throw createError({ statusCode: 400, statusMessage: "storeId dan code wajib diisi" });
+  const voucher = await prisma.voucher.findUnique({ where: { storeId_code: { storeId, code } } });
+  if (!voucher || !voucher.isActive) {
+    return { valid: false, discountAmount: 0, message: "Kode voucher tidak ditemukan" };
+  }
+  if (voucher.expiresAt && voucher.expiresAt < /* @__PURE__ */ new Date()) {
+    return { valid: false, discountAmount: 0, message: "Voucher sudah kedaluwarsa" };
+  }
+  if (voucher.quota !== null && voucher.usedCount >= voucher.quota) {
+    return { valid: false, discountAmount: 0, message: "Kuota voucher sudah habis" };
+  }
+  if (subtotal < voucher.minPurchase) {
+    return { valid: false, discountAmount: 0, message: `Minimal pembelian Rp ${voucher.minPurchase.toLocaleString("id-ID")}` };
+  }
+  return { valid: true, discountAmount: voucher.discountAmount, message: "Voucher berhasil diterapkan" };
+});
+
+const validate_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: validate_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const google_get = defineOAuthGoogleEventHandler({

@@ -588,8 +588,6 @@ import { NuxtModule, ModuleDependencyMeta } from '@nuxt/schema'
   interface SharedPublicRuntimeConfig {
    recaptchaSiteKey: string,
 
-   freeShippingMin: string,
-
    duitkuIsProduction: string,
 
    auth: {

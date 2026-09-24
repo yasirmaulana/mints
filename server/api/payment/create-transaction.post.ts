@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
         expiredAt
       }))
     })
-    return { paymentUrl: null, merchantOrderId }
+    return { paymentUrl: null, merchantOrderId, paymentMethod: 'FT' }
   }
 
   const config = useRuntimeConfig()
@@ -96,10 +96,19 @@ export default defineEventHandler(async (event) => {
       paymentUrl: duitkuRes.paymentUrl,
       paymentMethod,
       vaNumber: duitkuRes.vaNumber || null,
+      qrString: duitkuRes.qrString || null,
       status: 'pending',
       expiredAt
     }))
   })
 
-  return { paymentUrl: duitkuRes.paymentUrl, merchantOrderId }
+  return {
+    paymentUrl: duitkuRes.paymentUrl,
+    vaNumber: duitkuRes.vaNumber || null,
+    qrString: duitkuRes.qrString || null,
+    merchantOrderId,
+    paymentMethod,
+    amount: totalAmount,
+    expiredAt
+  }
 })
