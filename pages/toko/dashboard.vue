@@ -104,6 +104,7 @@
           <h2 class="text-lg font-normal">Produk Toko</h2>
           <div class="flex gap-2">
             <NuxtLink :to="`/toko/pesanan?store=${activeId}`" class="rounded-full px-5 py-2.5 text-sm font-normal" style="background:white;color:#090b0c">Pesanan</NuxtLink>
+            <NuxtLink :to="`/toko/voucher?store=${activeId}`" class="rounded-full px-5 py-2.5 text-sm font-normal" style="background:white;color:#090b0c">Voucher</NuxtLink>
             <NuxtLink :to="`/toko/produk?store=${activeId}`" class="rounded-full px-5 py-2.5 text-sm font-normal" style="background:#090b0c;color:white">Kelola Produk</NuxtLink>
           </div>
         </div>

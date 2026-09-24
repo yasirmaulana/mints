@@ -21,12 +21,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Keranjang kosong' })
   }
 
-  const config = useRuntimeConfig()
-  const freeShippingMin = Number(config.public.freeShippingMin || 500000)
-
   const items: { productId: string; variantId: string | null; qty: number; size: string | null; source?: string }[] = body.items
   // shippingByStore: { [storeId | 'null']: { courierCode, courierService, cost } } — dipilih per toko di step pengiriman.
   const shippingByStore: Record<string, { courierCode?: string; courierService?: string; cost?: number }> = body.shippingByStore || {}
+  // voucherByStore: { [storeId | 'null']: code } — kode voucher diinput per toko di step checkout.
+  const voucherByStore: Record<string, string> = body.voucherByStore || {}
 
   const orders = await prisma.$transaction(async (tx) => {
     const createdOrders: { orderId: string; title: string; storeId: string | null; amount: number }[] = []
@@ -86,17 +85,39 @@ export default defineEventHandler(async (event) => {
       createdOrders.push({ orderId: order.id, title: product.title, storeId: product.storeId, amount: lineSubtotal })
     }
 
-    // Pass 2: tempel ongkir (di order pertama tiap toko saja, agar tidak dobel saat dijumlah).
+    // Pass 2: tempel ongkir + voucher (di order pertama tiap toko saja, agar tidak dobel saat dijumlah).
     for (const [storeKey, firstOrderId] of storeFirstOrder) {
       const subtotal = storeSubtotals.get(storeKey) || 0
       const shipping = shippingByStore[storeKey] || {}
-      const shippingCost = subtotal >= freeShippingMin ? 0 : Number(shipping.cost || 0)
+      const shippingCost = Number(shipping.cost || 0)
+
+      // Voucher divalidasi ulang di sini (bukan percaya nilai dari client) sebelum dipakai memotong harga.
+      let voucherCode: string | null = null
+      let discountAmount = 0
+      const inputCode = voucherByStore[storeKey]
+      if (inputCode && storeKey !== 'null') {
+        const code = inputCode.trim().toUpperCase()
+        const voucher = await tx.voucher.findUnique({ where: { storeId_code: { storeId: storeKey, code } } })
+        const valid = voucher
+          && voucher.isActive
+          && (!voucher.expiresAt || voucher.expiresAt >= new Date())
+          && (voucher.quota === null || voucher.usedCount < voucher.quota)
+          && subtotal >= voucher.minPurchase
+        if (valid) {
+          voucherCode = voucher!.code
+          discountAmount = Math.min(voucher!.discountAmount, subtotal)
+          await tx.voucher.update({ where: { id: voucher!.id }, data: { usedCount: { increment: 1 } } })
+        }
+      }
+
       await tx.order.update({
         where: { id: firstOrderId },
         data: {
           courierCode: shipping.courierCode || null,
           courierService: shipping.courierService || null,
-          shippingCost
+          shippingCost,
+          voucherCode,
+          discountAmount: discountAmount || null
         }
       })
     }

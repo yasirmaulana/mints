@@ -39,16 +39,15 @@ const cartItems = ref<CartItem[]>([])
 let hydrated = false
 
 export function useCart() {
+  // Baca localStorage setelah mount (bukan saat setup) — mencegah hydration mismatch,
+  // karena render SSR pertama selalu menganggap cart kosong.
   if (process.client && !hydrated) {
-    cartItems.value = readStorage()
     hydrated = true
+    onMounted(() => { cartItems.value = readStorage() })
   }
 
   const itemCount = computed(() => cartItems.value.reduce((s, i) => s + i.qty, 0))
   const subtotal = computed(() => cartItems.value.reduce((s, i) => s + i.price * i.qty, 0))
-  const freeShippingMin = 500_000
-  const freeShippingProgress = computed(() => Math.min(subtotal.value / freeShippingMin, 1))
-  const freeShippingRemaining = computed(() => Math.max(freeShippingMin - subtotal.value, 0))
 
   function addItem(item: Omit<CartItem, 'qty'>) {
     const existing = cartItems.value.find(
@@ -98,5 +97,5 @@ export function useCart() {
     return Array.from(groups.values())
   })
 
-  return { cartItems, itemCount, subtotal, freeShippingMin, freeShippingProgress, freeShippingRemaining, groupedByStore, addItem, removeItem, updateQty, clearCart }
+  return { cartItems, itemCount, subtotal, groupedByStore, addItem, removeItem, updateQty, clearCart }
 }

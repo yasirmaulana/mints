@@ -50,7 +50,6 @@ export default defineNuxtConfig({
     recaptchaSecretKey: process.env.RECAPTCHA_SECRET_KEY || '',
     public: {
       recaptchaSiteKey: process.env.RECAPTCHA_SITE_KEY || '',
-      freeShippingMin: process.env.FREE_SHIPPING_MIN || '500000',
       duitkuIsProduction: process.env.DUITKU_IS_PRODUCTION || 'false',
     }
   },

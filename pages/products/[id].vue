@@ -163,10 +163,10 @@
               >Lihat Keranjang</NuxtLink>
             </div>
 
-            <!-- Free shipping badge -->
+            <!-- Voucher badge -->
             <div class="flex items-center gap-2 rounded-2xl px-4 py-3" style="background:rgba(9,11,12,0.04)">
               <svg class="w-4 h-4 shrink-0" style="color:rgba(9,11,12,0.5)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8l1 10a2 2 0 002 2h8a2 2 0 002-2L19 8"/></svg>
-              <p class="text-xs" style="color:rgba(9,11,12,0.5)">Gratis ongkir untuk pembelian min. <strong style="color:#090b0c">Rp&nbsp;500.000</strong></p>
+              <p class="text-xs" style="color:rgba(9,11,12,0.5)">Punya kode voucher? Masukkan saat checkout untuk mendapat potongan harga.</p>
             </div>
           </div>
         </div>

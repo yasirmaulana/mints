@@ -186,6 +186,8 @@ model Order {
   courierCode      String?
   courierService   String?
   shippingCost     Int?
+  voucherCode      String?
+  discountAmount   Int?
   // storeId sementara nullable selama migrasi backfill — lihat catatan migrasi PRD §5.3
   storeId          String?
   store            Store?      @relation(fields: [storeId], references: [id], onDelete: SetNull)
@@ -211,6 +213,7 @@ model Payment {
   paymentUrl      String?
   paymentMethod   String?
   vaNumber        String?
+  qrString        String?
   status          String    @default("pending")
   paidAt          DateTime?
   expiredAt       DateTime?
@@ -319,11 +322,30 @@ model Store {
   flashSales    FlashSaleConfig[]
   media         StoreMedia[]
   subscriptions Subscription[]
+  vouchers      Voucher[]
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
   @@index([ownerId])
   @@index([status, expiresAt])
+}
+
+model Voucher {
+  id             String    @id @default(uuid())
+  storeId        String
+  store          Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  code           String
+  discountAmount Int
+  minPurchase    Int       @default(0)
+  quota          Int?
+  usedCount      Int       @default(0)
+  isActive       Boolean   @default(true)
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([storeId, code])
+  @@index([storeId])
 }
 
 /// Catatan setiap file yang diunggah penjual — dipakai untuk menghitung kuota storage

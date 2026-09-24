@@ -100,32 +100,14 @@
             </div>
 
             <div class="rounded-3xl p-6 space-y-5" style="background:white">
-              <!-- Free shipping progress -->
-              <div class="space-y-2">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs" style="color:rgba(9,11,12,0.5)">Gratis ongkir</span>
-                  <span class="text-xs font-normal" :style="freeShippingRemaining === 0 ? 'color:rgb(22,163,74)' : 'color:rgba(9,11,12,0.5)'">
-                    {{ freeShippingRemaining === 0 ? 'Kamu dapat gratis ongkir!' : `kurang Rp ${formatPrice(freeShippingRemaining)}` }}
-                  </span>
-                </div>
-                <div class="h-1.5 rounded-full overflow-hidden" style="background:rgba(9,11,12,0.08)">
-                  <div
-                    class="h-full rounded-full transition-all duration-500"
-                    :style="`width:${Math.min(freeShippingProgress * 100, 100)}%;background:${freeShippingRemaining === 0 ? 'rgb(22,163,74)' : '#090b0c'}`"
-                  />
-                </div>
-              </div>
-
-              <div class="border-t pt-4 space-y-3" style="border-color:rgba(9,11,12,0.08)">
+              <div class="space-y-3">
                 <div class="flex justify-between text-sm">
                   <span style="color:rgba(9,11,12,0.5)">Subtotal ({{ itemCount }} item)</span>
                   <span class="tabular-nums font-normal">Rp&nbsp;{{ formatPrice(subtotal) }}</span>
                 </div>
                 <div class="flex justify-between text-sm">
                   <span style="color:rgba(9,11,12,0.5)">Ongkir</span>
-                  <span :style="freeShippingRemaining === 0 ? 'color:rgb(22,163,74)' : 'color:rgba(9,11,12,0.35)'">
-                    {{ freeShippingRemaining === 0 ? 'GRATIS' : 'dihitung saat checkout' }}
-                  </span>
+                  <span style="color:rgba(9,11,12,0.35)">dihitung saat checkout</span>
                 </div>
               </div>
 
@@ -147,7 +129,7 @@
             <!-- Promo note -->
             <div class="flex items-start gap-3 rounded-2xl px-4 py-3" style="background:rgba(250,188,63,0.12)">
               <svg class="w-4 h-4 shrink-0 mt-0.5" style="color:#090b0c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <p class="text-xs leading-5" style="color:rgba(9,11,12,0.65)">Gratis ongkir ke seluruh Indonesia untuk pembelian min. <strong style="color:#090b0c">Rp&nbsp;500.000</strong></p>
+              <p class="text-xs leading-5" style="color:rgba(9,11,12,0.65)">Punya kode voucher? Masukkan saat checkout untuk mendapat potongan harga.</p>
             </div>
           </div>
 
@@ -164,7 +146,7 @@
 
 <script setup lang="ts">
 useSeoMeta({ title: 'Keranjang — MINTS' })
-const { cartItems, itemCount, subtotal, freeShippingProgress, freeShippingRemaining, groupedByStore, removeItem, updateQty } = useCart()
+const { cartItems, itemCount, subtotal, groupedByStore, removeItem, updateQty } = useCart()
 function formatPrice(n: number) { return n.toLocaleString('id-ID') }
 
 const stockMap = ref<Record<string, number>>({})
