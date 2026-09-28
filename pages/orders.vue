@@ -23,7 +23,7 @@
 
       <!-- Phone lookup -->
       <div v-if="!phoneVerified" class="max-w-md space-y-5">
-        <p class="text-sm leading-6" style="color:rgba(9,11,12,0.55)">Masukkan nomor HP yang kamu gunakan saat checkout untuk melihat status pesanan.</p>
+        <p class="text-sm leading-6" style="color:rgba(9,11,12,0.55)">Masukkan nomor HP yang kamu gunakan saat checkout dan kode pesanan (8 karakter setelah tanda # di notifikasi WhatsApp, mis. ABCD1234) untuk melihat status pesanan. Atau <NuxtLink to="/login?redirect=/orders" class="underline underline-offset-4">masuk</NuxtLink> untuk melihat semua pesanan.</p>
         <div class="space-y-3">
           <input
             v-model="phoneInput"
@@ -33,10 +33,20 @@
             style="background:white;border:1px solid rgba(9,11,12,0.12);color:#090b0c"
             @keydown.enter="lookupOrders"
           />
+          <input
+            v-model="codeInput"
+            type="text"
+            maxlength="9"
+            placeholder="Kode pesanan, mis. ABCD1234"
+            class="w-full rounded-2xl px-4 py-3 text-sm uppercase focus:outline-none"
+            style="background:white;border:1px solid rgba(9,11,12,0.12);color:#090b0c"
+            @keydown.enter="lookupOrders"
+          />
+          <p v-if="lookupError" class="text-xs" style="color:#991b1b">{{ lookupError }}</p>
           <button
             class="w-full rounded-full py-3.5 text-sm font-normal transition-opacity"
-            :style="phoneInput.trim() ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.08);color:rgba(9,11,12,0.35);cursor:not-allowed'"
-            :disabled="!phoneInput.trim() || loading"
+            :style="phoneInput.trim() && codeInput.trim() ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.08);color:rgba(9,11,12,0.35);cursor:not-allowed'"
+            :disabled="!phoneInput.trim() || !codeInput.trim() || loading"
             @click="lookupOrders"
           >{{ loading ? 'Mencari…' : 'Cari Pesanan' }}</button>
         </div>
@@ -102,23 +112,42 @@
 useSeoMeta({ title: 'Pesanan Saya — MINTS' })
 
 const phoneInput = ref('')
+const codeInput = ref('')
+const lookupError = ref('')
 const phoneVerified = ref(false)
 const loading = ref(false)
 const orders = ref<any[]>([])
 
 async function lookupOrders() {
-  if (!phoneInput.value.trim()) return
+  if (!phoneInput.value.trim() || !codeInput.value.trim()) return
   loading.value = true
+  lookupError.value = ''
   try {
-    orders.value = await $fetch<any[]>('/api/orders', { query: { phone: phoneInput.value.trim() } })
+    orders.value = await $fetch<any[]>('/api/orders', {
+      query: { phone: phoneInput.value.trim(), code: codeInput.value.trim() }
+    })
     phoneVerified.value = true
-  } catch {
-    orders.value = []
-    phoneVerified.value = true
+  } catch (err: any) {
+    // Input salah/kena batas percobaan: tampilkan pesannya, jangan pura-pura "tidak ada pesanan".
+    lookupError.value = err?.data?.statusMessage || 'Gagal mencari pesanan'
   } finally {
     loading.value = false
   }
 }
+
+// Pembeli yang sudah login langsung melihat semua pesanannya tanpa nomor HP/kode.
+onMounted(async () => {
+  if (!useCookie('buyer_auth').value) return
+  loading.value = true
+  try {
+    orders.value = await $fetch<any[]>('/api/orders')
+    phoneVerified.value = true
+  } catch {
+    // sesi tidak valid: biarkan form pencarian tamu tampil
+  } finally {
+    loading.value = false
+  }
+})
 
 function statusLabel(status: string) {
   const map: Record<string, string> = {
