@@ -48,13 +48,19 @@ export default defineEventHandler(async (event) => {
   // dan interactive transaction Prisma punya timeout pendek).
   const products = await prisma.product.findMany({
     where: { id: { in: [...new Set(items.map(i => i.productId))] } },
-    select: { id: true, storeId: true }
+    select: { id: true, title: true, storeId: true, store: { select: { status: true } } }
   })
-  const storeByProduct = new Map(products.map(p => [p.id, p.storeId]))
+  const productById = new Map(products.map(p => [p.id, p]))
   const weightByStore = new Map<string, number>()
   for (const item of items) {
-    if (!storeByProduct.has(item.productId)) throw createError({ statusCode: 404, statusMessage: 'Produk tidak ditemukan' })
-    const key = storeByProduct.get(item.productId) || 'null'
+    const product = productById.get(item.productId)
+    if (!product) throw createError({ statusCode: 404, statusMessage: 'Produk tidak ditemukan' })
+    // Katalog publik hanya menampilkan toko ACTIVE (PRD §6.4); checkout harus konsisten,
+    // kalau tidak toko EXPIRED/SUSPENDED/DRAFT masih bisa dibeli lewat productId langsung.
+    if (product.storeId && product.store?.status !== 'ACTIVE') {
+      throw createError({ statusCode: 400, statusMessage: `${product.title} tidak dapat dibeli: toko sedang tidak aktif` })
+    }
+    const key = product.storeId || 'null'
     weightByStore.set(key, (weightByStore.get(key) || 0) + item.qty * UNIT_WEIGHT_GRAMS)
   }
 
@@ -90,12 +96,23 @@ export default defineEventHandler(async (event) => {
 
     // Pass 1: validasi stok, buat Order, kumpulkan subtotal per toko.
     for (const item of items) {
+      const product = await tx.product.findUnique({
+        where: { id: item.productId },
+        select: { id: true, title: true, price: true, productType: true, status: true, storeId: true }
+      })
+      if (!product) throw createError({ statusCode: 404, statusMessage: 'Produk tidak ditemukan' })
+
       if (item.variantId) {
-        const variant = await tx.productVariant.findUnique({ where: { id: item.variantId } })
-        if (!variant || variant.stock < item.qty) {
+        // Varian harus milik produk yang dibeli (harga diambil dari produk, stok dari varian — tanpa
+        // syarat ini stok produk lain bisa "dipinjam"). Pengurangan stok atomik dalam satu statement:
+        // cek-lalu-update terpisah bisa oversell saat dua checkout membaca stok yang sama bersamaan.
+        const { count } = await tx.productVariant.updateMany({
+          where: { id: item.variantId, productId: item.productId, stock: { gte: item.qty } },
+          data: { stock: { decrement: item.qty } }
+        })
+        if (count === 0) {
           throw createError({ statusCode: 400, statusMessage: `Stok ${item.size || item.variantId} tidak cukup` })
         }
-        await tx.productVariant.update({ where: { id: item.variantId }, data: { stock: { decrement: item.qty } } })
         const remainingStock = await tx.productVariant.aggregate({
           where: { productId: item.productId },
           _sum: { stock: true }
@@ -103,15 +120,14 @@ export default defineEventHandler(async (event) => {
         if ((remainingStock._sum.stock ?? 0) === 0) {
           await tx.product.update({ where: { id: item.productId }, data: { status: 'SOLD_OUT' } })
         }
-      }
-
-      const product = await tx.product.findUnique({
-        where: { id: item.productId },
-        select: { id: true, title: true, price: true, productType: true, status: true, storeId: true }
-      })
-      if (!product) throw createError({ statusCode: 404, statusMessage: 'Produk tidak ditemukan' })
-      if (!item.variantId && product.status === 'SOLD_OUT') {
-        throw createError({ statusCode: 400, statusMessage: `${product.title} sudah habis terjual` })
+      } else {
+        // Produk berukuran wajib memilih varian; tanpa ini stok tidak pernah berkurang (pesan tanpa batas).
+        if (await tx.productVariant.count({ where: { productId: product.id } }) > 0) {
+          throw createError({ statusCode: 400, statusMessage: `Pilih ukuran untuk ${product.title}` })
+        }
+        if (product.status === 'SOLD_OUT') {
+          throw createError({ statusCode: 400, statusMessage: `${product.title} sudah habis terjual` })
+        }
       }
 
       const storeKey = product.storeId || 'null'
