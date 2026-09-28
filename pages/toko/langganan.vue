@@ -26,7 +26,6 @@
           <ul class="text-xs mt-4 space-y-1" style="color:rgba(9,11,12,0.6)">
             <li>{{ p.maxProducts ?? 'Tanpa batas' }} produk</li>
             <li>{{ p.maxStorageMb ? `${p.maxStorageMb} MB` : 'Tanpa batas' }} penyimpanan</li>
-            <li>Komisi {{ p.commissionPercent }}%</li>
           </ul>
 
           <button
