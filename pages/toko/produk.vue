@@ -110,17 +110,47 @@
 
           <div>
             <label class="block text-sm font-normal mb-2" style="color:rgba(9,11,12,0.6)">Stok per Ukuran</label>
+            <div class="flex flex-wrap gap-2 mb-3">
+              <button
+                v-for="p in SIZE_PRESETS"
+                :key="p.key"
+                type="button"
+                class="rounded-full px-3 py-1.5 text-xs font-normal"
+                :style="presetKey === p.key ? 'background:#090b0c;color:white' : 'background:#f5f5f2;color:rgba(9,11,12,0.6)'"
+                @click="selectPreset(p.key)"
+              >{{ p.label }}</button>
+              <button
+                type="button"
+                class="rounded-full px-3 py-1.5 text-xs font-normal"
+                :style="presetKey === CUSTOM_PRESET_KEY ? 'background:#090b0c;color:white' : 'background:#f5f5f2;color:rgba(9,11,12,0.6)'"
+                @click="selectPreset(CUSTOM_PRESET_KEY)"
+              >Kustom</button>
+            </div>
             <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
               <div
                 v-for="v in productForm.variants"
                 :key="v.size"
-                class="rounded-xl p-2.5 text-center"
+                class="relative rounded-xl p-2.5 text-center"
                 :style="v.stock > 0 ? 'border:1px solid #090b0c;background:#f5f5f2' : 'border:1px solid rgba(9,11,12,0.12)'"
               >
+                <button type="button" class="absolute top-1 right-1.5 text-xs leading-none" style="color:rgba(9,11,12,0.35)" :aria-label="`Hapus ukuran ${v.size}`" @click="removeSize(v.size)">×</button>
                 <p class="text-xs font-normal mb-1">{{ v.size }}</p>
                 <input v-model.number="v.stock" type="number" min="0" class="w-full text-center text-sm rounded-lg px-1 py-1 focus:outline-none" style="background:white;border:1px solid rgba(9,11,12,0.12)" />
               </div>
             </div>
+            <div class="flex gap-2 mt-3">
+              <input
+                v-model="newSizeInput"
+                type="text"
+                :maxlength="MAX_SIZE_LENGTH"
+                placeholder="Tambah ukuran, mis. 16,5 atau 3XL"
+                class="flex-1 rounded-2xl px-4 py-2 text-sm focus:outline-none"
+                style="background:#f5f5f2;border:1px solid rgba(9,11,12,0.12)"
+                @keydown.enter.prevent="addCustomSize"
+              />
+              <button type="button" class="rounded-full px-4 py-2 text-sm font-normal" style="background:#090b0c;color:white" @click="addCustomSize">+ Tambah</button>
+            </div>
+            <p v-if="sizeError" class="text-xs mt-1.5" style="color:#991b1b">{{ sizeError }}</p>
             <p class="text-xs mt-1.5" style="color:rgba(9,11,12,0.4)">Pre-Order: semua ukuran otomatis tersedia tanpa stok minimum.</p>
           </div>
 
@@ -147,6 +177,10 @@
 </template>
 
 <script setup lang="ts">
+import {
+  SIZE_PRESETS, CUSTOM_PRESET_KEY, MAX_SIZE_LENGTH, normalizeSize, sortVariants, detectPresetKey
+} from '~~/shared/utils/product-sizes'
+
 definePageMeta({ middleware: 'buyer' })
 useSeoMeta({ title: 'Kelola Produk Toko — MINTS' })
 
@@ -191,13 +225,45 @@ const savingProduct = ref(false)
 const editingProduct = ref<any>(null)
 const productFile = ref<File | null>(null)
 const extraFiles = ref<File[]>([])
-const PRODUCT_SIZES = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'Free Size']
 const productForm = reactive({
   title: '', price: '', originalPrice: '', description: '',
   productType: 'REGULAR', material: '', weight: '',
   estimatedReadyDate: '',
-  variants: PRODUCT_SIZES.map(size => ({ size, stock: 0 }))
+  variants: SIZE_PRESETS[0].sizes.map(size => ({ size, stock: 0 })) as { size: string; stock: number }[]
 })
+
+// ── Ukuran: pilih preset (huruf/angka/dst) lalu tambah/hapus ukuran sesuai kebutuhan ──
+const presetKey = ref(SIZE_PRESETS[0].key)
+const newSizeInput = ref('')
+const sizeError = ref('')
+
+function selectPreset(key: string) {
+  sizeError.value = ''
+  if (key === presetKey.value) return
+  const target = key === CUSTOM_PRESET_KEY ? [] : (SIZE_PRESETS.find(p => p.key === key)?.sizes ?? [])
+  const current = productForm.variants
+  // Ukuran yang sudah terisi stok dan tidak ada di preset baru akan hilang — konfirmasi dulu.
+  const willDrop = current.filter(v => v.stock > 0 && !target.includes(v.size))
+  if (willDrop.length && !confirm(`Ukuran ${willDrop.map(v => v.size).join(', ')} sudah berisi stok dan akan dihapus. Lanjutkan?`)) return
+  presetKey.value = key
+  const stockBySize = new Map(current.map(v => [v.size, v.stock]))
+  productForm.variants = target.map(size => ({ size, stock: stockBySize.get(size) ?? 0 }))
+}
+
+function addCustomSize() {
+  const size = normalizeSize(newSizeInput.value)
+  if (!size) return
+  if (size.length > MAX_SIZE_LENGTH) { sizeError.value = `Ukuran maksimal ${MAX_SIZE_LENGTH} karakter`; return }
+  if (productForm.variants.some(v => v.size === size)) { sizeError.value = `Ukuran ${size} sudah ada`; return }
+  sizeError.value = ''
+  productForm.variants = sortVariants([...productForm.variants, { size, stock: 0 }])
+  newSizeInput.value = ''
+}
+
+function removeSize(size: string) {
+  sizeError.value = ''
+  productForm.variants = productForm.variants.filter(v => v.size !== size)
+}
 
 function openProductForm(product?: any) {
   errorMsg.value = ''
@@ -213,10 +279,17 @@ function openProductForm(product?: any) {
   productForm.estimatedReadyDate = product?.estimatedReadyDate
     ? new Date(product.estimatedReadyDate).toISOString().slice(0, 10)
     : ''
-  productForm.variants = PRODUCT_SIZES.map(size => {
-    const existing = product?.variants?.find((v: any) => v.size === size)
-    return { size, stock: existing?.stock ?? 0 }
-  })
+  sizeError.value = ''
+  newSizeInput.value = ''
+  if (product?.variants?.length) {
+    // Edit: tampilkan ukuran yang tersimpan (apa adanya, termasuk ukuran kustom).
+    const saved = sortVariants(product.variants.map((v: any) => ({ size: v.size, stock: v.stock })))
+    presetKey.value = detectPresetKey(saved.map(v => v.size))
+    productForm.variants = saved
+  } else {
+    presetKey.value = SIZE_PRESETS[0].key
+    productForm.variants = SIZE_PRESETS[0].sizes.map(size => ({ size, stock: 0 }))
+  }
   productFile.value = null
   extraFiles.value = []
   showProductModal.value = true

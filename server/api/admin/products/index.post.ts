@@ -34,9 +34,7 @@ export default defineEventHandler(async (event) => {
 
   // Parse variants: JSON array [{size, stock}]
   let variants: { size: string; stock: number }[] = []
-  if (fields.variants) {
-    try { variants = JSON.parse(fields.variants) } catch {}
-  }
+  if (fields.variants) variants = parseVariantsInput(fields.variants)
 
   const sharedData = {
     title: fields.title,

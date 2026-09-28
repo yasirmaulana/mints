@@ -1,3 +1,5 @@
+import { sortVariants } from '~~/shared/utils/product-sizes'
+
 function maskPhone(phone: string) {
   return phone.length > 3 ? phone.slice(0, -3) + 'xxx' : 'xxx'
 }
@@ -20,7 +22,7 @@ export default defineEventHandler(async (event) => {
     orderBy: [{ store: { plan: { searchPriority: 'desc' } } }, { createdAt: 'desc' }],
     include: {
       category: { select: { id: true, name: true, slug: true } },
-      variants: { orderBy: { size: 'asc' } },
+      variants: true,
       orders: { select: { buyerPhone: true }, take: 1 },
       store: { select: { id: true, name: true, cityId: true, cityName: true, plan: { select: { hasVerifiedBadge: true } } } }
     }
@@ -35,6 +37,7 @@ export default defineEventHandler(async (event) => {
 
   return products.map(({ orders, ...p }) => ({
     ...p,
+    variants: sortVariants(p.variants),
     maskedPhone: p.status === 'SOLD_OUT' && orders[0]?.buyerPhone ? maskPhone(orders[0].buyerPhone) : null
   }))
 })

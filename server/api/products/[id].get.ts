@@ -1,3 +1,5 @@
+import { sortVariants } from '~~/shared/utils/product-sizes'
+
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')!
 
@@ -5,7 +7,7 @@ export default defineEventHandler(async (event) => {
     where: { id },
     include: {
       category: { select: { id: true, name: true, slug: true } },
-      variants: { orderBy: { size: 'asc' } },
+      variants: true,
       store: { select: { id: true, name: true, status: true, cityId: true, cityName: true } }
     }
   })
@@ -16,5 +18,5 @@ export default defineEventHandler(async (event) => {
   }
   const { store, ...result } = product
 
-  return { ...result, store: { id: store.id, name: store.name, cityId: store.cityId, cityName: store.cityName } }
+  return { ...result, variants: sortVariants(result.variants), store: { id: store.id, name: store.name, cityId: store.cityId, cityName: store.cityName } }
 })

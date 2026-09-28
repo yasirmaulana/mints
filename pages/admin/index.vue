@@ -1267,13 +1267,30 @@
           <!-- Varian Ukuran + Stok -->
           <div>
             <label class="label-text mb-2 block">Stok per Ukuran</label>
+            <div class="flex flex-wrap gap-2 mb-3">
+              <button
+                v-for="p in SIZE_PRESETS"
+                :key="p.key"
+                type="button"
+                class="px-3 py-1.5 rounded-full text-xs font-semibold border"
+                :class="presetKey === p.key ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200'"
+                @click="selectPreset(p.key)"
+              >{{ p.label }}</button>
+              <button
+                type="button"
+                class="px-3 py-1.5 rounded-full text-xs font-semibold border"
+                :class="presetKey === CUSTOM_PRESET_KEY ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200'"
+                @click="selectPreset(CUSTOM_PRESET_KEY)"
+              >Kustom</button>
+            </div>
             <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
               <div
                 v-for="v in productForm.variants"
                 :key="v.size"
-                class="border rounded-xl p-2.5 text-center"
+                class="relative border rounded-xl p-2.5 text-center"
                 :class="v.stock > 0 ? 'border-brand-400 bg-brand-50' : 'border-gray-200'"
               >
+                <button type="button" class="absolute top-1 right-1.5 text-xs leading-none text-gray-400 hover:text-gray-700" :aria-label="`Hapus ukuran ${v.size}`" @click="removeSize(v.size)">×</button>
                 <p class="text-xs font-bold text-gray-700 mb-1">{{ v.size }}</p>
                 <input
                   v-model.number="v.stock"
@@ -1284,6 +1301,18 @@
                 />
               </div>
             </div>
+            <div class="flex gap-2 mt-3">
+              <input
+                v-model="newSizeInput"
+                type="text"
+                :maxlength="MAX_SIZE_LENGTH"
+                placeholder="Tambah ukuran, mis. 16,5 atau 3XL"
+                class="input-field flex-1"
+                @keydown.enter.prevent="addCustomSize"
+              />
+              <button type="button" class="btn-secondary-full !w-auto px-4" @click="addCustomSize">+ Tambah</button>
+            </div>
+            <p v-if="sizeError" class="text-xs text-red-600 mt-1.5">{{ sizeError }}</p>
             <p class="text-xs text-gray-400 mt-1.5">Pre-Order: semua ukuran otomatis tersedia tanpa stok minimum.</p>
           </div>
 
@@ -1412,6 +1441,10 @@
 </template>
 
 <script setup lang="ts">
+import {
+  SIZE_PRESETS, CUSTOM_PRESET_KEY, MAX_SIZE_LENGTH, normalizeSize, sortVariants, detectPresetKey
+} from '~~/shared/utils/product-sizes'
+
 definePageMeta({ middleware: 'admin' })
 
 const { public: { duitkuIsProduction } } = useRuntimeConfig()
@@ -1760,13 +1793,45 @@ const deletingProduct = ref<string | null>(null)
 const editingProduct = ref<any>(null)
 const productFile = ref<File | null>(null)
 const extraFiles = ref<File[]>([])
-const PRODUCT_SIZES = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'Free Size']
 const productForm = reactive({
   title: '', price: '', originalPrice: '', sessionId: '', description: '',
   categoryId: '', productType: 'REGULAR', material: '', weight: '',
   estimatedReadyDate: '',
-  variants: PRODUCT_SIZES.map(size => ({ size, stock: 0 }))
+  variants: SIZE_PRESETS[0].sizes.map(size => ({ size, stock: 0 })) as { size: string; stock: number }[]
 })
+
+// ── Ukuran: pilih preset (huruf/angka/dst) lalu tambah/hapus ukuran sesuai kebutuhan ──
+const presetKey = ref(SIZE_PRESETS[0].key)
+const newSizeInput = ref('')
+const sizeError = ref('')
+
+function selectPreset(key: string) {
+  sizeError.value = ''
+  if (key === presetKey.value) return
+  const target = key === CUSTOM_PRESET_KEY ? [] : (SIZE_PRESETS.find(p => p.key === key)?.sizes ?? [])
+  const current = productForm.variants
+  // Ukuran yang sudah terisi stok dan tidak ada di preset baru akan hilang — konfirmasi dulu.
+  const willDrop = current.filter(v => v.stock > 0 && !target.includes(v.size))
+  if (willDrop.length && !confirm(`Ukuran ${willDrop.map(v => v.size).join(', ')} sudah berisi stok dan akan dihapus. Lanjutkan?`)) return
+  presetKey.value = key
+  const stockBySize = new Map(current.map(v => [v.size, v.stock]))
+  productForm.variants = target.map(size => ({ size, stock: stockBySize.get(size) ?? 0 }))
+}
+
+function addCustomSize() {
+  const size = normalizeSize(newSizeInput.value)
+  if (!size) return
+  if (size.length > MAX_SIZE_LENGTH) { sizeError.value = `Ukuran maksimal ${MAX_SIZE_LENGTH} karakter`; return }
+  if (productForm.variants.some(v => v.size === size)) { sizeError.value = `Ukuran ${size} sudah ada`; return }
+  sizeError.value = ''
+  productForm.variants = sortVariants([...productForm.variants, { size, stock: 0 }])
+  newSizeInput.value = ''
+}
+
+function removeSize(size: string) {
+  sizeError.value = ''
+  productForm.variants = productForm.variants.filter(v => v.size !== size)
+}
 
 function openProductForm(product?: any) {
   editingProduct.value = product || null
@@ -1782,11 +1847,17 @@ function openProductForm(product?: any) {
   productForm.estimatedReadyDate = product?.estimatedReadyDate
     ? new Date(product.estimatedReadyDate).toISOString().slice(0, 10)
     : ''
-  // Pre-fill variants from existing product
-  productForm.variants = PRODUCT_SIZES.map(size => {
-    const existing = product?.variants?.find((v: any) => v.size === size)
-    return { size, stock: existing?.stock ?? 0 }
-  })
+  // Pre-fill variants from existing product (apa adanya, termasuk ukuran kustom)
+  sizeError.value = ''
+  newSizeInput.value = ''
+  if (product?.variants?.length) {
+    const saved = sortVariants(product.variants.map((v: any) => ({ size: v.size, stock: v.stock })))
+    presetKey.value = detectPresetKey(saved.map(v => v.size))
+    productForm.variants = saved
+  } else {
+    presetKey.value = SIZE_PRESETS[0].key
+    productForm.variants = SIZE_PRESETS[0].sizes.map(size => ({ size, stock: 0 }))
+  }
   productFile.value = null
   extraFiles.value = []
   showProductModal.value = true

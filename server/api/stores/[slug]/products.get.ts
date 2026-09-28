@@ -1,3 +1,5 @@
+import { sortVariants } from '~~/shared/utils/product-sizes'
+
 // Katalog produk toko publik, dipaginasi — PRD §6.4.
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')!
@@ -30,7 +32,7 @@ export default defineEventHandler(async (event) => {
     const pageIds = sortedIds.slice(skip, skip + take)
     const rows = await prisma.product.findMany({
       where: { id: { in: pageIds } },
-      include: { category: { select: { id: true, name: true, slug: true } }, variants: { orderBy: { size: 'asc' } } }
+      include: { category: { select: { id: true, name: true, slug: true } }, variants: true }
     })
     const rowMap = new Map(rows.map((r: { id: string }) => [r.id, r]))
     products = pageIds.map((id: string) => rowMap.get(id)).filter(Boolean)
@@ -43,7 +45,7 @@ export default defineEventHandler(async (event) => {
       prisma.product.findMany({
         where,
         orderBy,
-        include: { category: { select: { id: true, name: true, slug: true } }, variants: { orderBy: { size: 'asc' } } },
+        include: { category: { select: { id: true, name: true, slug: true } }, variants: true },
         skip,
         take
       }),
@@ -52,6 +54,8 @@ export default defineEventHandler(async (event) => {
   }
 
   setResponseHeader(event, 'Cache-Control', 's-maxage=60, stale-while-revalidate=300')
+
+  products = products.map((p: any) => ({ ...p, variants: sortVariants(p.variants) }))
 
   return { products, total, page: Number(page), pageSize: take }
 })

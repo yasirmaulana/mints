@@ -36,9 +36,7 @@ export default defineEventHandler(async (event) => {
   )
 
   let variants: { size: string; stock: number }[] = []
-  if (fields.variants) {
-    try { variants = JSON.parse(fields.variants) } catch {}
-  }
+  if (fields.variants) variants = parseVariantsInput(fields.variants)
   if (variants.length) assertVariantCount(ctx, variants.length)
 
   const uploadedUrls: string[] = []

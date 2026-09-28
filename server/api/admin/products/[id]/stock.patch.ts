@@ -4,11 +4,10 @@ export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')!
   const body = await readBody(event) ?? {}
   // body.variants: [{ size: string, stock: number }]
-  const variants: { size: string; stock: number }[] = body.variants ?? []
-
-  if (!Array.isArray(variants) || variants.length === 0) {
+  if (!Array.isArray(body.variants) || body.variants.length === 0) {
     throw createError({ statusCode: 400, statusMessage: 'variants wajib diisi' })
   }
+  const variants = parseVariantsInput(body.variants)
 
   const product = await prisma.product.findUnique({ where: { id } })
   if (!product) throw createError({ statusCode: 404, statusMessage: 'Produk tidak ditemukan' })

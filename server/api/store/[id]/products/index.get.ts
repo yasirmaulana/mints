@@ -1,3 +1,5 @@
+import { sortVariants } from '~~/shared/utils/product-sizes'
+
 // Daftar produk milik toko (dashboard penjual) — PRD §6.2.
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')!
@@ -9,5 +11,5 @@ export default defineEventHandler(async (event) => {
     orderBy: { createdAt: 'desc' }
   })
 
-  return products
+  return products.map(p => ({ ...p, variants: sortVariants(p.variants) }))
 })
