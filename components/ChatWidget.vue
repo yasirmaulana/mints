@@ -22,6 +22,7 @@
           <input v-model="nameInput" type="text" placeholder="Nama kamu" class="w-full rounded-lg border px-3 py-2 text-sm outline-none" style="background:#f5f5f2;border-color:rgba(9,11,12,0.15);color:#090b0c" @keydown.enter="phoneInput && startChat()" />
           <input v-model="phoneInput" type="tel" placeholder="Nomor WhatsApp" class="w-full rounded-lg border px-3 py-2 text-sm outline-none" style="background:#f5f5f2;border-color:rgba(9,11,12,0.15);color:#090b0c" @keydown.enter="nameInput && startChat()" />
           <input v-model="firstMessage" type="text" placeholder="Pesan pertama..." class="w-full rounded-lg border px-3 py-2 text-sm outline-none" style="background:#f5f5f2;border-color:rgba(9,11,12,0.15);color:#090b0c" @keydown.enter="startChat()" />
+          <p v-if="startError" class="text-xs text-center" style="color:#991b1b">{{ startError }}</p>
           <button
             class="w-full py-2 rounded-lg text-sm font-semibold transition-opacity"
             :class="canStart ? 'opacity-100' : 'opacity-40'"
@@ -89,13 +90,31 @@
 const props = defineProps<{ productId?: string; orderId?: string }>()
 
 const open = ref(false)
-const sessionId = ref(typeof localStorage !== 'undefined' ? localStorage.getItem(`chat-session-${props.productId || 'global'}`) || '' : '')
+const storageKey = props.productId || 'global'
+// Sesi butuh token akses dari server. Sesi lama (tersimpan tanpa token) tidak bisa dipakai lagi,
+// jadi diperlakukan sebagai belum ada sesi dan pembeli memulai chat baru.
+const storedSession = typeof localStorage !== 'undefined' ? localStorage.getItem(`chat-session-${storageKey}`) || '' : ''
+const storedToken = typeof localStorage !== 'undefined' ? localStorage.getItem(`chat-token-${storageKey}`) || '' : ''
+const sessionId = ref(storedSession && storedToken ? storedSession : '')
+const chatToken = ref(sessionId.value ? storedToken : '')
+const chatHeaders = () => ({ 'x-chat-token': chatToken.value })
+
+function resetSession() {
+  stopPolling()
+  sessionId.value = ''
+  chatToken.value = ''
+  messages.value = []
+  lastCreatedAt = ''
+  localStorage.removeItem(`chat-session-${storageKey}`)
+  localStorage.removeItem(`chat-token-${storageKey}`)
+}
 const messages = ref<any[]>([])
 const newMessage = ref('')
 const nameInput = ref('')
 const phoneInput = ref('')
 const firstMessage = ref('')
 const starting = ref(false)
+const startError = ref('')
 const unread = ref(0)
 const messagesEl = ref<HTMLElement>()
 
@@ -107,6 +126,7 @@ let lastCreatedAt = ''
 async function startChat() {
   if (!canStart.value || starting.value) return
   starting.value = true
+  startError.value = ''
   try {
     const res = await $fetch<any>('/api/chat/start', {
       method: 'POST',
@@ -119,9 +139,13 @@ async function startChat() {
       }
     })
     sessionId.value = res.sessionId
-    localStorage.setItem(`chat-session-${props.productId || 'global'}`, res.sessionId)
+    chatToken.value = res.token
+    localStorage.setItem(`chat-session-${storageKey}`, res.sessionId)
+    localStorage.setItem(`chat-token-${storageKey}`, res.token)
     await loadMessages()
     startPolling()
+  } catch (err: any) {
+    startError.value = err?.data?.statusMessage || 'Gagal memulai chat, coba lagi'
   } finally {
     starting.value = false
   }
@@ -136,12 +160,24 @@ async function sendMessage() {
   nextTick(() => {
     if (messagesEl.value) messagesEl.value.scrollTop = messagesEl.value.scrollHeight
   })
-  await $fetch(`/api/chat/${sessionId.value}/messages`, { method: 'POST', body: { message: body } })
+  try {
+    await $fetch(`/api/chat/${sessionId.value}/messages`, { method: 'POST', body: { message: body }, headers: chatHeaders() })
+  } catch (err: any) {
+    // Token/sesi tidak valid lagi: mulai dari awal supaya pesan tidak terlihat terkirim padahal gagal.
+    if ([403, 404].includes(err?.statusCode ?? err?.status)) resetSession()
+    else messages.value = messages.value.filter((m: any) => !m.id.startsWith('tmp-'))
+  }
 }
 
 async function loadMessages() {
   if (!sessionId.value) return
-  const res = await $fetch<{ messages: any[] }>(`/api/chat/${sessionId.value}/messages`)
+  let res: { messages: any[] }
+  try {
+    res = await $fetch<{ messages: any[] }>(`/api/chat/${sessionId.value}/messages`, { headers: chatHeaders() })
+  } catch (err: any) {
+    if ([403, 404].includes(err?.statusCode ?? err?.status)) resetSession()
+    return
+  }
   messages.value = res.messages
   if (res.messages.length) lastCreatedAt = res.messages[res.messages.length - 1].createdAt
   nextTick(() => {
@@ -155,7 +191,7 @@ async function pollMessages() {
     const url = lastCreatedAt
       ? `/api/chat/${sessionId.value}/messages?after=${encodeURIComponent(lastCreatedAt)}`
       : `/api/chat/${sessionId.value}/messages`
-    const res = await $fetch<{ messages: any[] }>(url)
+    const res = await $fetch<{ messages: any[] }>(url, { headers: chatHeaders() })
     if (res.messages.length) {
       const existingIds = new Set(messages.value.filter((m: any) => !m.id.startsWith('tmp-')).map((m: any) => m.id))
       const incoming = res.messages.filter((m: any) => !existingIds.has(m.id))
@@ -169,7 +205,10 @@ async function pollMessages() {
         })
       }
     }
-  } catch {}
+  } catch (err: any) {
+    // Token ditolak / sesi hilang: berhenti polling, jangan mengulang request yang pasti gagal.
+    if ([403, 404].includes(err?.statusCode ?? err?.status)) { resetSession(); return }
+  }
   pollTimer = setTimeout(pollMessages, 3000)
 }
 

@@ -1,5 +1,7 @@
 export default defineEventHandler(async (event) => {
   const sessionId = getRouterParam(event, 'sessionId')!
+  // Token diperiksa sebelum query DB, supaya keberadaan sessionId tidak bisa ditebak dari respons.
+  await assertChatAccess(event, sessionId, { allowAdmin: true })
   const { after } = getQuery(event)
 
   const session = await prisma.chatSession.findUnique({ where: { id: sessionId } })
