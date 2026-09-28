@@ -65,7 +65,17 @@
           </div>
           <div>
             <label class="block text-sm font-normal mb-2" style="color:rgba(9,11,12,0.6)">Email</label>
-            <input v-model="profile.email" type="email" placeholder="Opsional" class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none" style="background:#f5f5f2;border:1px solid rgba(9,11,12,0.12);color:#090b0c" />
+            <input :value="profile.email" type="email" readonly placeholder="Belum ada email" class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none" style="background:#f5f5f2;border:1px solid rgba(9,11,12,0.12);color:rgba(9,11,12,0.6)" />
+            <button type="button" class="text-xs mt-2 underline underline-offset-4" style="color:rgba(9,11,12,0.55)" @click="emailPanel = !emailPanel">{{ profile.email ? 'Ubah email' : 'Tambah email' }}</button>
+            <div v-if="emailPanel" class="mt-3 space-y-2">
+              <input v-model="emailForm.email" type="email" placeholder="Email baru" :disabled="emailForm.sent" class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none disabled:opacity-60" style="background:#f5f5f2;border:1px solid rgba(9,11,12,0.12);color:#090b0c" />
+              <div v-if="emailForm.sent" class="flex gap-2">
+                <input v-model="emailForm.code" type="text" inputmode="numeric" maxlength="6" placeholder="Kode 6 digit" class="flex-1 min-w-0 rounded-2xl px-4 py-3 text-sm focus:outline-none" style="background:#f5f5f2;border:1px solid rgba(9,11,12,0.12);color:#090b0c" @keydown.enter.prevent="verifyEmailChange" />
+                <button type="button" class="rounded-full px-5 py-2.5 text-sm font-normal disabled:opacity-40" style="background:#090b0c;color:white" :disabled="emailForm.loading || emailForm.code.length < 6" @click="verifyEmailChange">{{ emailForm.loading ? 'Memeriksa…' : 'Verifikasi' }}</button>
+              </div>
+              <button v-else type="button" class="rounded-full px-5 py-2.5 text-sm font-normal disabled:opacity-40" style="background:#090b0c;color:white" :disabled="emailForm.loading || !emailForm.email.trim()" @click="requestEmailChange">{{ emailForm.loading ? 'Mengirim…' : 'Kirim kode' }}</button>
+              <p v-if="emailMessage" class="text-xs" :style="emailMessage.type === 'success' ? 'color:rgb(22,163,74)' : 'color:#991b1b'">{{ emailMessage.text }}</p>
+            </div>
           </div>
           <div>
             <label class="block text-sm font-normal mb-2" style="color:rgba(9,11,12,0.6)">Nomor HP</label>
@@ -149,7 +159,6 @@ const passwordMessage = ref<{ type: string; text: string } | null>(null)
 
 const profileChanged = computed(() => {
   return profile.name !== originalProfile.name ||
-    profile.email !== originalProfile.email ||
     profile.phone !== originalProfile.phone ||
     profile.gender !== originalProfile.gender ||
     profile.birthDate !== originalProfile.birthDate
@@ -172,7 +181,6 @@ async function saveProfile() {
       method: 'PATCH',
       body: {
         name: profile.name,
-        email: profile.email,
         phone: profile.phone,
         gender: profile.gender,
         birthDate: profile.birthDate
@@ -185,6 +193,44 @@ async function saveProfile() {
     profileMessage.value = { type: 'error', text: err?.data?.statusMessage || 'Gagal menyimpan profil' }
   } finally {
     savingProfile.value = false
+  }
+}
+
+// ── Ganti/tambah email: kode dikirim ke email baru, email berubah hanya setelah diverifikasi ──
+const emailPanel = ref(false)
+const emailForm = reactive({ email: '', code: '', sent: false, loading: false })
+const emailMessage = ref<{ type: string; text: string } | null>(null)
+
+async function requestEmailChange() {
+  emailForm.loading = true
+  emailMessage.value = null
+  try {
+    await $fetch('/api/buyer/email/request', { method: 'POST', body: { email: emailForm.email } })
+    emailForm.sent = true
+    emailMessage.value = { type: 'success', text: `Kode dikirim ke ${emailForm.email.trim()}. Berlaku 10 menit.` }
+  } catch (err: any) {
+    emailMessage.value = { type: 'error', text: err?.data?.statusMessage || 'Gagal mengirim kode' }
+  } finally {
+    emailForm.loading = false
+  }
+}
+
+async function verifyEmailChange() {
+  if (emailForm.code.length < 6) return
+  emailForm.loading = true
+  emailMessage.value = null
+  try {
+    const res: any = await $fetch('/api/buyer/email/verify', { method: 'POST', body: { email: emailForm.email, code: emailForm.code } })
+    profile.email = res.email
+    originalProfile.email = res.email
+    await fetchMe()
+    Object.assign(emailForm, { email: '', code: '', sent: false })
+    emailPanel.value = false
+    profileMessage.value = { type: 'success', text: 'Email berhasil diperbarui' }
+  } catch (err: any) {
+    emailMessage.value = { type: 'error', text: err?.data?.statusMessage || 'Gagal memverifikasi kode' }
+  } finally {
+    emailForm.loading = false
   }
 }
 
