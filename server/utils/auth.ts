@@ -1,12 +1,12 @@
 const TOKEN_VERSION = 'v1'
 
-function getSecret(): string {
+export function getSecret(): string {
   const s = useRuntimeConfig().sessionSecret as string
   if (!s) throw createError({ statusCode: 500, statusMessage: 'SESSION_SECRET tidak dikonfigurasi' })
   return s
 }
 
-async function hmacSign(secret: string, data: string): Promise<string> {
+export async function hmacSign(secret: string, data: string): Promise<string> {
   const enc = new TextEncoder()
   const key = await crypto.subtle.importKey(
     'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']
@@ -15,7 +15,7 @@ async function hmacSign(secret: string, data: string): Promise<string> {
   return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
-async function hmacVerify(secret: string, data: string, sig: string): Promise<boolean> {
+export async function hmacVerify(secret: string, data: string, sig: string): Promise<boolean> {
   const expected = await hmacSign(secret, data)
   if (expected.length !== sig.length) return false
   // constant-time compare

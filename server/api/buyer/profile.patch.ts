@@ -20,11 +20,8 @@ export default defineEventHandler(async (event) => {
 
   const updated = await prisma.buyer.update({ where: { id: buyer.id }, data })
 
-  setCookie(event, 'buyer_session', updated.id, {
-    sameSite: 'strict',
-    maxAge: 60 * 60 * 24 * 30,
-    path: '/'
-  })
+  // Cookie sesi tidak perlu di-set ulang di sini: identitas tidak berubah saat profil diedit.
+  // (Kode lama menimpanya tanpa httpOnly/secure sehingga cookie sesi jadi terbaca JavaScript.)
 
   return {
     id: updated.id,

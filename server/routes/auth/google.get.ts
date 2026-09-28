@@ -11,21 +11,8 @@ export default defineOAuthGoogleEventHandler({
       buyer = await prisma.buyer.create({ data: { email, name } })
     }
 
-    const maxAge = 60 * 60 * 24 * 30
-    setCookie(event, 'buyer_session', buyer.id, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      maxAge,
-      path: '/',
-    })
-    setCookie(event, 'buyer_auth', '1', {
-      httpOnly: false,
-      secure: true,
-      sameSite: 'lax',
-      maxAge,
-      path: '/',
-    })
+    // sameSite 'lax': redirect balik dari Google adalah navigasi lintas-situs.
+    await setBuyerSession(event, buyer.id, 'lax')
 
     return sendRedirect(event, '/account')
   },

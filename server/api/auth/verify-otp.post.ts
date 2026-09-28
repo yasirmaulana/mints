@@ -37,21 +37,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const maxAge = 60 * 60 * 24 * 30
-  setCookie(event, 'buyer_session', buyer.id, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'strict',
-    maxAge,
-    path: '/',
-  })
-  setCookie(event, 'buyer_auth', '1', {
-    httpOnly: false,
-    secure: true,
-    sameSite: 'strict',
-    maxAge,
-    path: '/',
-  })
+  await setBuyerSession(event, buyer.id, 'strict')
 
   return { success: true, buyer: { id: buyer.id, name: buyer.name, email: buyer.email } }
 })

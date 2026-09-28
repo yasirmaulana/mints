@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
     shipment: { select: { courier: true, trackingNo: true, status: true } }
   }
 
-  const buyerId = getCookie(event, 'buyer_session')
+  const buyerId = await getBuyerId(event)
   if (buyerId) {
     const buyer = await prisma.buyer.findUnique({ where: { id: buyerId }, select: { id: true } })
     if (buyer) {

@@ -8,7 +8,7 @@ const MAX_ITEM_QTY = 100
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const buyerId = getCookie(event, 'buyer_session')
+  const buyerId = await getBuyerId(event)
 
   const required = ['buyerName', 'buyerPhone', 'address', 'cityId', 'cityName', 'items']
   for (const f of required) {

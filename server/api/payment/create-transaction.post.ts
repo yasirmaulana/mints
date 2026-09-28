@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'orderIds dan paymentMethod wajib diisi' })
   }
 
-  const buyerId = getCookie(event, 'buyer_session')
+  const buyerId = await getBuyerId(event)
 
   const orders = await prisma.order.findMany({
     where: { id: { in: orderIds } },
