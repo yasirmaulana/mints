@@ -19,6 +19,21 @@ export function getS3Client() {
 
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 
+// Prefix yang boleh dilayani publik lewat /api/s3-image (bucket tidak public).
+const PUBLIC_PREFIXES = ['products/', 'payments/', 'uploads/', 'stores/']
+
+/**
+ * Kembalikan key S3 yang aman dilayani publik, atau null bila path tidak sah.
+ * Daftar karakter yang diizinkan (sama dengan yang dihasilkan uploadToS3/presignVideoUpload) plus
+ * penolakan segmen kosong/"."/".." — menghapus "../" dengan regex bisa dilewati dengan "....//".
+ */
+export function safePublicS3Key(rawPath: string | undefined): string | null {
+  if (!rawPath || rawPath.length > 512) return null
+  if (!/^[A-Za-z0-9_\-. /]+$/.test(rawPath)) return null
+  if (rawPath.split('/').some(s => s === '' || s === '.' || s === '..')) return null
+  return PUBLIC_PREFIXES.some(p => rawPath.startsWith(p)) ? rawPath : null
+}
+
 export async function uploadToS3(data: Buffer, filename: string, contentType: string, prefix = 'products'): Promise<string> {
   if (!ALLOWED_MIME.has(contentType)) {
     throw createError({ statusCode: 400, statusMessage: 'Tipe file tidak diizinkan. Gunakan JPG, PNG, WebP, atau GIF' })
