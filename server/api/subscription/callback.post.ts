@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   const { merchantCode: mc, amount, merchantOrderId, resultCode, signature } = body
 
   const expectedSignature = duitkuCallbackSignature(merchantCode, String(amount), merchantOrderId, apiKey)
-  if (signature !== expectedSignature) {
+  if (!safeEqual(signature, expectedSignature)) {
     throw createError({ statusCode: 401, statusMessage: 'Invalid signature' })
   }
 
@@ -57,7 +57,8 @@ export default defineEventHandler(async (event) => {
     }
   } else if (resultCode === '01') {
     // Pending — no state change
-  } else {
+  } else if (subscription.status !== 'ACTIVE') {
+    // Callback gagal yang datang setelah langganan aktif (retry/urutan terbalik) tidak boleh membatalkannya.
     await prisma.subscription.update({
       where: { id: subscription.id },
       data: { status: 'CANCELLED', rawCallback: body }

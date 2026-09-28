@@ -13,6 +13,7 @@
   "crons": [
     { "path": "/api/cron/store-expiry", "schedule": "0 1 * * *" },
     { "path": "/api/cron/cleanup-media", "schedule": "30 1 * * *" },
-    { "path": "/api/cron/reconcile-counters", "schedule": "0 2 * * *" }
+    { "path": "/api/cron/reconcile-counters", "schedule": "0 2 * * *" },
+    { "path": "/api/cron/cancel-unpaid", "schedule": "0 3 * * *" }
   ]
 }

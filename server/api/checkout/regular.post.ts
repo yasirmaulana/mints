@@ -180,7 +180,15 @@ export default defineEventHandler(async (event) => {
         if (valid) {
           voucherCode = voucher!.code
           discountAmount = Math.min(voucher!.discountAmount, subtotal)
-          await tx.voucher.update({ where: { id: voucher!.id }, data: { usedCount: { increment: 1 } } })
+          // Kuota terbatas: compare-and-swap pada usedCount yang barusan dibaca. Cek `usedCount < quota`
+          // lalu increment terpisah bisa dilewati dua checkout bersamaan; di sini yang kalah dapat count 0.
+          const { count } = await tx.voucher.updateMany({
+            where: voucher!.quota === null ? { id: voucher!.id } : { id: voucher!.id, usedCount: voucher!.usedCount },
+            data: { usedCount: { increment: 1 } }
+          })
+          if (count === 0) {
+            throw createError({ statusCode: 409, statusMessage: 'Kuota voucher baru saja habis atau berubah, coba lagi' })
+          }
         }
       }
 

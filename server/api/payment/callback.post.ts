@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
 
   // Verify signature: MD5(merchantCode + amount + merchantOrderId + apiKey)
   const expectedSignature = duitkuCallbackSignature(merchantCode, String(amount), merchantOrderId, apiKey)
-  if (signature !== expectedSignature) {
+  if (!safeEqual(signature, expectedSignature)) {
     throw createError({ statusCode: 401, statusMessage: 'Invalid signature' })
   }
 
@@ -25,17 +25,21 @@ export default defineEventHandler(async (event) => {
   }
 
   if (resultCode === '00') {
-    // Successful payment — update semua Payment/Order yang berbagi transaksi ini
-    await prisma.$transaction([
+    // Successful payment — update semua Payment/Order yang berbagi transaksi ini.
+    // Idempoten: hanya order yang masih PENDING_PAYMENT yang menjadi PAID. Duitku bisa mengirim callback
+    // yang sama berkali-kali (retry); tanpa syarat ini order yang sudah dibatalkan/dikirim ikut ditimpa
+    // dan WA "pembayaran diterima" terkirim berulang.
+    const [, paidOrders] = await prisma.$transaction([
       prisma.payment.updateMany({
-        where: { duitkuReference: merchantOrderId },
+        where: { duitkuReference: merchantOrderId, status: { not: 'paid' } },
         data: { status: 'paid', paidAt: new Date(), rawCallback: body }
       }),
       prisma.order.updateMany({
-        where: { id: { in: payments.map(p => p.orderId) } },
+        where: { id: { in: payments.map(p => p.orderId) }, status: 'PENDING_PAYMENT' },
         data: { status: 'PAID' }
       })
     ])
+    if (paidOrders.count === 0) return { success: true }
 
     // Notifikasi WA sekali per pembeli (buyerPhone sama untuk semua order dalam satu checkout)
     const order = payments[0].order
@@ -60,29 +64,16 @@ export default defineEventHandler(async (event) => {
   } else if (resultCode === '01') {
     // Pending — no state change
   } else {
-    // Failed/cancelled — restore variant stock if applicable, untuk semua order terkait
+    // Failed/cancelled — batalkan order terkait dan kembalikan stok. Hanya order yang masih
+    // PENDING_PAYMENT yang diproses (cancelPendingOrder): callback gagal yang dikirim ulang tidak boleh
+    // menambah stok dua kali, dan callback gagal yang datang setelah order lunas tidak boleh membatalkannya.
     await prisma.$transaction(async (tx) => {
-      await tx.payment.updateMany({ where: { duitkuReference: merchantOrderId }, data: { status: 'failed', rawCallback: body } })
-      await tx.order.updateMany({ where: { id: { in: payments.map(p => p.orderId) } }, data: { status: 'CANCELLED' } })
-
+      await tx.payment.updateMany({
+        where: { duitkuReference: merchantOrderId, status: { notIn: ['paid', 'failed'] } },
+        data: { status: 'failed', rawCallback: body }
+      })
       for (const { order } of payments) {
-        if (!order) continue
-        if (order.variantId) {
-          await tx.productVariant.update({
-            where: { id: order.variantId },
-            data: { stock: { increment: order.qty } }
-          })
-          const totalStock = await tx.productVariant.aggregate({
-            where: { productId: order.productId },
-            _sum: { stock: true }
-          })
-          await tx.product.update({
-            where: { id: order.productId },
-            data: { status: (totalStock._sum.stock ?? 0) > 0 ? 'AVAILABLE' : 'SOLD_OUT' }
-          })
-        } else if (order.productId) {
-          await tx.product.update({ where: { id: order.productId }, data: { status: 'AVAILABLE' } })
-        }
+        if (order) await cancelPendingOrder(tx, order.id)
       }
     })
   }

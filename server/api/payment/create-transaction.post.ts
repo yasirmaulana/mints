@@ -2,13 +2,22 @@
 // PRD §11 Fase 5 "satu pembayaran → beberapa order"). Semua Payment yang dibuat berbagi
 // duitkuReference yang sama — satu transaksi Duitku, dipecah ke Payment per order.
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const body = await readBody(event) ?? {}
   const { paymentMethod } = body
-  const orderIds: string[] = Array.isArray(body.orderIds) ? body.orderIds : (body.orderId ? [body.orderId] : [])
+  const rawOrderIds: unknown[] = Array.isArray(body.orderIds) ? body.orderIds : (body.orderId ? [body.orderId] : [])
 
-  if (!orderIds.length || !paymentMethod) {
+  if (!rawOrderIds.length || !paymentMethod) {
     throw createError({ statusCode: 400, statusMessage: 'orderIds dan paymentMethod wajib diisi' })
   }
+  // Kode metode Duitku berupa 2–4 huruf/angka (mis. BC, M2, SP, OV) atau "FT" (transfer manual);
+  // nilai lain diteruskan mentah ke gateway, jadi format dibatasi di sini.
+  if (typeof paymentMethod !== 'string' || !/^[A-Za-z0-9]{2,10}$/.test(paymentMethod)) {
+    throw createError({ statusCode: 400, statusMessage: 'paymentMethod tidak valid' })
+  }
+  if (rawOrderIds.length > 50 || rawOrderIds.some(id => typeof id !== 'string' || !id)) {
+    throw createError({ statusCode: 400, statusMessage: 'orderIds tidak valid' })
+  }
+  const orderIds = [...new Set(rawOrderIds as string[])]
 
   const buyerId = await getBuyerId(event)
 
@@ -29,7 +38,15 @@ export default defineEventHandler(async (event) => {
 
   const merchantOrderId = `MINTS-${orderIds[0].slice(0, 8)}-${Date.now()}`
   const expiredAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-  const totalAmount = orders.reduce((sum, o) => sum + Number(o.product.price) * o.qty + (o.shippingCost || 0), 0)
+  // Potongan voucher (tersimpan di order pertama tiap toko oleh checkout) harus ikut mengurangi tagihan;
+  // sebelumnya diabaikan sehingga pembeli membayar harga penuh meski voucher sudah "terpakai".
+  const totalAmount = orders.reduce(
+    (sum, o) => sum + Number(o.product.price) * o.qty + (o.shippingCost || 0) - (o.discountAmount || 0),
+    0
+  )
+  if (!(totalAmount > 0)) {
+    throw createError({ statusCode: 400, statusMessage: 'Total pembayaran tidak valid' })
+  }
 
   // Transfer Bank Manual — tidak perlu gateway, simpan Payment record langsung per order
   if (paymentMethod === 'FT') {
