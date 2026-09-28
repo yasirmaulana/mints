@@ -1,6 +1,6 @@
 export default defineEventHandler(async (event) => {
   const ip = getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
-  checkRateLimit(`chat-start:${ip}`, 10, 5 * 60 * 1000)
+  await checkRateLimit(`chat-start:${ip}`, 10, 5 * 60 * 1000)
 
   const body = await readBody(event)
   const { buyerPhone, buyerName, productId, orderId, message } = body

@@ -3,7 +3,7 @@ import { verifyRecaptcha } from '~/server/utils/recaptcha'
 
 export default defineEventHandler(async (event) => {
   const ip = getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
-  checkRateLimit(`admin-login:${ip}`, 10, 15 * 60 * 1000)
+  await checkRateLimit(`admin-login:${ip}`, 10, 15 * 60 * 1000)
 
   const body = await readBody(event)
   const { username, password, recaptchaToken } = body ?? {}
@@ -12,9 +12,11 @@ export default defineEventHandler(async (event) => {
 
   const config = useRuntimeConfig()
 
-  if (!username || !password) {
+  if (typeof username !== 'string' || typeof password !== 'string' || !username || !password) {
     throw createError({ statusCode: 400, statusMessage: 'Username dan password wajib diisi' })
   }
+  // Batas per username: brute force dari banyak IP ke satu akun admin tetap tertahan.
+  await checkRateLimit(`admin-login-user:${username.toLowerCase()}`, 10, 15 * 60 * 1000)
 
   let authenticated = false
 

@@ -1,13 +1,16 @@
 export default defineEventHandler(async (event) => {
   const ip = getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
-  checkRateLimit(`verify-otp:${ip}`, 10, 15 * 60 * 1000)
+  await checkRateLimit(`verify-otp:${ip}`, 10, 15 * 60 * 1000)
 
   const { email, code } = await readBody(event) ?? {}
-  if (!email?.trim() || !code?.trim()) {
+  if (typeof email !== 'string' || typeof code !== 'string' || !email.trim() || !code.trim()) {
     throw createError({ statusCode: 400, statusMessage: 'Email dan kode wajib diisi' })
   }
 
   const normalizedEmail = email.trim().toLowerCase()
+  // Batas per email: kode 6 digit hanya aman kalau percobaan tebak per akun dibatasi,
+  // apa pun IP-nya (IP bisa berganti-ganti atau dipalsukan).
+  await checkRateLimit(`verify-otp-email:${normalizedEmail}`, 5, 15 * 60 * 1000)
 
   const otp = await prisma.emailOtp.findFirst({
     where: {

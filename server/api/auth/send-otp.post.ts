@@ -1,18 +1,21 @@
+import { randomInt } from 'node:crypto'
 import { sendOtpEmail } from '~/server/utils/mailer'
 import { verifyRecaptcha } from '~/server/utils/recaptcha'
 
 export default defineEventHandler(async (event) => {
   const ip = getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
-  checkRateLimit(`send-otp:${ip}`, 5, 10 * 60 * 1000)
+  await checkRateLimit(`send-otp:${ip}`, 5, 10 * 60 * 1000)
 
   const { email, recaptchaToken } = await readBody(event) ?? {}
 
   await verifyRecaptcha(recaptchaToken)
-  if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (typeof email !== 'string' || !email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw createError({ statusCode: 400, statusMessage: 'Email tidak valid' })
   }
 
   const normalizedEmail = email.trim().toLowerCase()
+  // Batas per email (selain per IP): mencegah email-bombing ke satu alamat dari banyak IP.
+  await checkRateLimit(`send-otp-email:${normalizedEmail}`, 3, 10 * 60 * 1000)
 
   // Invalidate OTP lama yang belum dipakai
   await prisma.emailOtp.updateMany({
@@ -20,7 +23,8 @@ export default defineEventHandler(async (event) => {
     data: { used: true },
   })
 
-  const code = String(Math.floor(100000 + Math.random() * 900000))
+  // CSPRNG — Math.random() bisa diprediksi dan tidak layak untuk kode verifikasi.
+  const code = String(randomInt(100000, 1000000))
   await prisma.emailOtp.create({
     data: {
       email: normalizedEmail,
