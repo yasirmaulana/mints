@@ -3,6 +3,9 @@
 // mencakup semua order (lihat server/api/payment/create-transaction.post.ts).
 // Komisi platform (plan.commissionPercent / Order.commissionAmount) untuk sementara tidak
 // dipakai — dihitung ulang bila fitur ini diaktifkan kembali.
+const MAX_CART_ITEMS = 50
+const MAX_ITEM_QTY = 100
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const buyerId = getCookie(event, 'buyer_session')
@@ -23,9 +26,62 @@ export default defineEventHandler(async (event) => {
 
   const items: { productId: string; variantId: string | null; qty: number; size: string | null; source?: string }[] = body.items
   // shippingByStore: { [storeId | 'null']: { courierCode, courierService, cost } } — dipilih per toko di step pengiriman.
+  // Field `cost` dari client DIABAIKAN: ongkir dihitung ulang server dari RajaOngkir (lihat di bawah).
   const shippingByStore: Record<string, { courierCode?: string; courierService?: string; cost?: number }> = body.shippingByStore || {}
   // voucherByStore: { [storeId | 'null']: code } — kode voucher diinput per toko di step checkout.
   const voucherByStore: Record<string, string> = body.voucherByStore || {}
+
+  // Validasi item: qty negatif/pecahan/nol akan menambah stok atau membuat subtotal negatif.
+  if (items.length > MAX_CART_ITEMS) {
+    throw createError({ statusCode: 400, statusMessage: `Maksimal ${MAX_CART_ITEMS} item per checkout` })
+  }
+  for (const item of items) {
+    if (!item || typeof item.productId !== 'string' || !item.productId) {
+      throw createError({ statusCode: 400, statusMessage: 'Data item keranjang tidak valid' })
+    }
+    if (!Number.isInteger(item.qty) || item.qty < 1 || item.qty > MAX_ITEM_QTY) {
+      throw createError({ statusCode: 400, statusMessage: `Jumlah item harus bilangan bulat 1–${MAX_ITEM_QTY}` })
+    }
+  }
+
+  // Hitung ongkir di server per toko (di luar transaksi DB: ada panggilan HTTP eksternal,
+  // dan interactive transaction Prisma punya timeout pendek).
+  const products = await prisma.product.findMany({
+    where: { id: { in: [...new Set(items.map(i => i.productId))] } },
+    select: { id: true, storeId: true }
+  })
+  const storeByProduct = new Map(products.map(p => [p.id, p.storeId]))
+  const weightByStore = new Map<string, number>()
+  for (const item of items) {
+    if (!storeByProduct.has(item.productId)) throw createError({ statusCode: 404, statusMessage: 'Produk tidak ditemukan' })
+    const key = storeByProduct.get(item.productId) || 'null'
+    weightByStore.set(key, (weightByStore.get(key) || 0) + item.qty * UNIT_WEIGHT_GRAMS)
+  }
+
+  const shippingResolved = new Map<string, { courierCode: string; courierService: string; cost: number }>()
+  await Promise.all([...weightByStore].map(async ([storeKey, weight]) => {
+    const selected = shippingByStore[storeKey]
+    if (!selected?.courierCode || !selected?.courierService) {
+      throw createError({ statusCode: 400, statusMessage: 'Pilih layanan pengiriman untuk semua toko' })
+    }
+    let services
+    try {
+      services = await fetchShippingServices({
+        storeId: storeKey === 'null' ? null : storeKey,
+        destination: String(body.cityId),
+        weight,
+        courier: String(selected.courierCode)
+      })
+    } catch {
+      throw createError({ statusCode: 502, statusMessage: 'Gagal menghitung ongkos kirim, coba lagi' })
+    }
+    const match = services.find(s => s.service === selected.courierService)
+    const cost = Math.round(Number(match?.cost))
+    if (!match || !Number.isFinite(cost) || cost < 0) {
+      throw createError({ statusCode: 400, statusMessage: 'Layanan pengiriman tidak tersedia, pilih ulang' })
+    }
+    shippingResolved.set(storeKey, { courierCode: String(selected.courierCode), courierService: match.service, cost })
+  }))
 
   const orders = await prisma.$transaction(async (tx) => {
     const createdOrders: { orderId: string; title: string; storeId: string | null; amount: number }[] = []
@@ -59,11 +115,12 @@ export default defineEventHandler(async (event) => {
       }
 
       const storeKey = product.storeId || 'null'
-      const qty = item.qty || 1
+      const qty = item.qty
       const lineSubtotal = Number(product.price) * qty
       storeSubtotals.set(storeKey, (storeSubtotals.get(storeKey) || 0) + lineSubtotal)
 
-      const orderSource = (item.source as 'REGULAR' | 'FLASH_SALE' | 'OFFLINE') || 'REGULAR'
+      // OFFLINE hanya dibuat admin lewat endpoint sendiri, bukan dari checkout publik.
+      const orderSource = item.source === 'FLASH_SALE' ? 'FLASH_SALE' : 'REGULAR'
       const order = await tx.order.create({
         data: {
           productId: item.productId,
@@ -88,8 +145,9 @@ export default defineEventHandler(async (event) => {
     // Pass 2: tempel ongkir + voucher (di order pertama tiap toko saja, agar tidak dobel saat dijumlah).
     for (const [storeKey, firstOrderId] of storeFirstOrder) {
       const subtotal = storeSubtotals.get(storeKey) || 0
-      const shipping = shippingByStore[storeKey] || {}
-      const shippingCost = Number(shipping.cost || 0)
+      const shipping = shippingResolved.get(storeKey)
+      if (!shipping) throw createError({ statusCode: 400, statusMessage: 'Ongkos kirim tidak dapat dihitung' })
+      const shippingCost = shipping.cost
 
       // Voucher divalidasi ulang di sini (bukan percaya nilai dari client) sebelum dipakai memotong harga.
       let voucherCode: string | null = null
@@ -113,8 +171,8 @@ export default defineEventHandler(async (event) => {
       await tx.order.update({
         where: { id: firstOrderId },
         data: {
-          courierCode: shipping.courierCode || null,
-          courierService: shipping.courierService || null,
+          courierCode: shipping.courierCode,
+          courierService: shipping.courierService,
           shippingCost,
           voucherCode,
           discountAmount: discountAmount || null
