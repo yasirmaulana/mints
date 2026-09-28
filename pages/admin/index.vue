@@ -1428,7 +1428,7 @@
     </div>
 
     <!-- Toast -->
-    <div v-if="toast.visible" class="fixed bottom-6 left-1/2 -translate-x-0.5 z-[60] w-full max-w-sm px-4">
+    <div v-if="toast.visible" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-full max-w-sm px-4">
       <div
         class="rounded-xl px-4 py-3 shadow-lg flex items-center gap-3 text-sm font-medium"
         :class="toast.type === 'success' ? 'bg-success-50 border border-success-500/30 text-success-700' : 'bg-error-50 border border-error-100 text-error-600'"
@@ -1702,7 +1702,7 @@ async function cancelOrder(id: string) {
   cancelling.value = id
   try {
     await $fetch(`/api/admin/orders/${id}/cancel`, { method: 'PATCH' })
-    showToast('success', 'Pesanan dibatalkan', 'Produk kembali tersedia')
+    showToast('success', 'Pesanan dibatalkan, produk kembali tersedia')
     await refreshOrders()
     selectedOrder.value = null
   } catch (err: any) {
