@@ -134,7 +134,12 @@
 useSeoMeta({ title: 'Masuk — MINTS' })
 
 const route = useRoute()
-const redirect = computed(() => String(route.query.redirect || '/account'))
+// Hanya path internal yang boleh jadi tujuan setelah login. Tolak URL absolut, `//host`, `/\host`,
+// `javascript:` dan karakter kontrol (tab/newline dibuang browser sehingga `/\t/host` jadi `//host`).
+const redirect = computed(() => {
+  const r = String(route.query.redirect || '')
+  return /^\/(?![\/\\])[^\u0000-\u001f\\]*$/.test(r) ? r : '/account'
+})
 
 const step = ref<'email' | 'otp'>('email')
 const email = ref('')
