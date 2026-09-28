@@ -1,3 +1,5 @@
+import { isAllowedGatewayMethod } from '~~/shared/utils/payment-methods'
+
 // Buat transaksi pembayaran untuk satu atau beberapa Order sekaligus (checkout lintas toko,
 // PRD §11 Fase 5 "satu pembayaran → beberapa order"). Semua Payment yang dibuat berbagi
 // duitkuReference yang sama — satu transaksi Duitku, dipecah ke Payment per order.
@@ -9,10 +11,11 @@ export default defineEventHandler(async (event) => {
   if (!rawOrderIds.length || !paymentMethod) {
     throw createError({ statusCode: 400, statusMessage: 'orderIds dan paymentMethod wajib diisi' })
   }
-  // Kode metode Duitku berupa 2–4 huruf/angka (mis. BC, M2, SP, OV) atau "FT" (transfer manual);
-  // nilai lain diteruskan mentah ke gateway, jadi format dibatasi di sini.
-  if (typeof paymentMethod !== 'string' || !/^[A-Za-z0-9]{2,10}$/.test(paymentMethod)) {
-    throw createError({ statusCode: 400, statusMessage: 'paymentMethod tidak valid' })
+  // Hanya metode di daftar resmi (shared/utils/payment-methods.ts) atau "FT" (transfer manual) yang
+  // diterima. Kode lain — termasuk kartu kredit "VC" — ditolak; menyembunyikannya di UI saja tidak cukup
+  // karena klien bisa mengirim kode apa pun langsung ke endpoint ini.
+  if (paymentMethod !== 'FT' && !isAllowedGatewayMethod(paymentMethod)) {
+    throw createError({ statusCode: 400, statusMessage: 'Metode pembayaran tidak tersedia' })
   }
   if (rawOrderIds.length > 50 || rawOrderIds.some(id => typeof id !== 'string' || !id)) {
     throw createError({ statusCode: 400, statusMessage: 'orderIds tidak valid' })

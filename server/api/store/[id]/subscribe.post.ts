@@ -1,3 +1,5 @@
+import { isAllowedGatewayMethod } from '~~/shared/utils/payment-methods'
+
 // Mulai langganan berbayar (upgrade/perpanjang) — PRD §6.3, §8.1.
 // planId TIDAK PERNAH datang dari sisi klien untuk aktivasi gratis; di sini klien memilih
 // paket tapi status toko hanya berubah setelah callback Duitku tervalidasi (§10).
@@ -8,6 +10,14 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const planId = String(body?.planId || '')
   if (!planId) throw createError({ statusCode: 400, statusMessage: 'planId wajib diisi' })
+
+  // Metode wajib dipilih dari daftar resmi. Dulu default-nya "VC" (kartu kredit di Duitku) sehingga
+  // semua pembayaran langganan mendarat di halaman kartu kredit; kode lain, termasuk "VC", ditolak.
+  const paymentMethod = body?.paymentMethod
+  if (!paymentMethod) throw createError({ statusCode: 400, statusMessage: 'Pilih metode pembayaran' })
+  if (!isAllowedGatewayMethod(paymentMethod)) {
+    throw createError({ statusCode: 400, statusMessage: 'Metode pembayaran tidak tersedia' })
+  }
 
   const plan = await prisma.plan.findUnique({ where: { id: planId } })
   if (!plan || !plan.isActive) throw createError({ statusCode: 400, statusMessage: 'Paket tidak valid' })
@@ -46,7 +56,7 @@ export default defineEventHandler(async (event) => {
   const payload = {
     merchantCode,
     paymentAmount: Number(amount),
-    paymentMethod: String(body?.paymentMethod || 'VC'),
+    paymentMethod,
     merchantOrderId,
     productDetails: `Langganan ${plan.name} — ${ctx.store.name}`,
     customerVaName: ctx.store.name,

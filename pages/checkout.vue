@@ -378,6 +378,8 @@
 </template>
 
 <script setup lang="ts">
+import { GATEWAY_METHODS, NO_REDIRECT_METHODS } from '~~/shared/utils/payment-methods'
+
 definePageMeta({ middleware: 'buyer' })
 useSeoMeta({ title: 'Checkout — MINTS' })
 
@@ -454,16 +456,7 @@ onMounted(async () => {
   }
 })
 
-const GATEWAY_METHODS = [
-  { code: 'VC', name: 'Virtual Account BCA', description: 'Transfer via Virtual Account BCA' },
-  { code: 'M2', name: 'Virtual Account Mandiri', description: 'Transfer via Virtual Account Mandiri' },
-  { code: 'BT', name: 'Virtual Account BRI', description: 'Transfer via Virtual Account BRI' },
-  { code: 'B1', name: 'Virtual Account BNI', description: 'Transfer via Virtual Account BNI' },
-  { code: 'OV', name: 'OVO', description: 'Bayar dengan OVO' },
-  { code: 'DA', name: 'DANA', description: 'Bayar dengan DANA' },
-  { code: 'SP', name: 'ShopeePay', description: 'Bayar dengan ShopeePay' },
-  { code: 'I1', name: 'BCA KlikPay', description: 'Bayar dengan BCA KlikPay' },
-]
+// Daftar metode gateway ada di shared/utils/payment-methods.ts (dipakai juga oleh server untuk validasi).
 
 interface BankAccount { bank: string; accountName: string; accountNumber: string }
 const { data: paymentConfig } = await useFetch<{ gatewayEnabled: boolean; bankAccounts: BankAccount[] }>('/api/payment/settings')
@@ -601,7 +594,6 @@ async function placeOrder() {
         body: { orderIds, paymentMethod: form.paymentMethod }
       })
       clearCart()
-      const NO_REDIRECT_METHODS = ['VC', 'M2', 'BT', 'B1', 'I1', 'SP']
       if (NO_REDIRECT_METHODS.includes(payRes.paymentMethod) && (payRes.vaNumber || payRes.qrString)) {
         router.push({
           path: '/account/pembayaran',

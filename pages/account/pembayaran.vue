@@ -51,6 +51,7 @@
 
 <script setup lang="ts">
 import QRCode from 'qrcode'
+import { PAYMENT_METHOD_LABELS } from '~~/shared/utils/payment-methods'
 
 definePageMeta({ middleware: 'buyer' })
 useSeoMeta({ title: 'Pembayaran — MINTS' })
@@ -66,10 +67,7 @@ const qr = String(route.query.qr || '')
 const amount = Number(route.query.amount || 0)
 const expiredAt = String(route.query.expiredAt || '')
 
-const BANK_LABELS: Record<string, string> = {
-  VC: 'Virtual Account BCA', M2: 'Virtual Account Mandiri', BT: 'Virtual Account BRI',
-  B1: 'Virtual Account BNI', I1: 'BCA KlikPay', SP: 'ShopeePay QRIS'
-}
+const BANK_LABELS: Record<string, string> = { ...PAYMENT_METHOD_LABELS, SP: 'ShopeePay QRIS' }
 const bankLabel = BANK_LABELS[method] || 'Virtual Account'
 const expiresLabel = expiredAt ? new Date(expiredAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : ''
 

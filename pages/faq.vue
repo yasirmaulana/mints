@@ -185,7 +185,7 @@ const faqs = [
   },
   {
     q: 'Metode pembayaran apa saja yang diterima?',
-    a: 'Kami menerima berbagai metode pembayaran melalui <strong>Duitku</strong>, termasuk: Virtual Account, transfer bank, <strong>QRIS</strong>, dompet digital (e-wallet), dan kartu kredit/debit.',
+    a: 'Kami menerima berbagai metode pembayaran melalui <strong>Duitku</strong>, termasuk: Virtual Account, transfer bank, <strong>QRIS</strong>, dan dompet digital (e-wallet).',
   },
   {
     q: 'Bagaimana cara merawat pakaian Mints?',

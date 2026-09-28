@@ -290,6 +290,8 @@
 </template>
 
 <script setup lang="ts">
+import { PAYMENT_METHOD_LABELS } from '~~/shared/utils/payment-methods'
+
 definePageMeta({ middleware: 'buyer' })
 useSeoMeta({ title: 'Pesanan Saya — MINTS' })
 
@@ -335,18 +337,6 @@ async function copyResi(text: string) {
   await navigator.clipboard.writeText(text).catch(() => {})
   copiedResi.value = true
   setTimeout(() => { copiedResi.value = false }, 2000)
-}
-
-const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  VC: 'Virtual Account BCA',
-  M2: 'Virtual Account Mandiri',
-  BT: 'Virtual Account BRI',
-  B1: 'Virtual Account BNI',
-  OV: 'OVO',
-  DA: 'DANA',
-  SP: 'ShopeePay',
-  I1: 'BCA KlikPay',
-  FT: 'Transfer Bank Manual',
 }
 
 function paymentMethodLabel(code?: string | null) {

@@ -17,6 +17,20 @@
       </p>
 
       <div v-if="errorMsg" class="rounded-2xl px-4 py-3 mb-5 text-sm" style="background:#fde8e8;color:#991b1b">{{ errorMsg }}</div>
+
+      <div v-if="!loading" class="mb-6">
+        <p class="text-xs uppercase tracking-wide mb-2" style="color:rgba(9,11,12,0.45)">Metode Pembayaran</p>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="m in GATEWAY_METHODS"
+            :key="m.code"
+            type="button"
+            class="rounded-full px-4 py-2 text-sm font-normal"
+            :style="paymentMethod === m.code ? 'background:#090b0c;color:white' : 'background:white;color:rgba(9,11,12,0.6)'"
+            @click="paymentMethod = m.code"
+          >{{ m.name }}</button>
+        </div>
+      </div>
       <div v-if="loading" class="py-10 text-center text-sm" style="color:rgba(9,11,12,0.5)">Memuat…</div>
 
       <div v-else class="grid gap-4 sm:grid-cols-2">
@@ -62,6 +76,8 @@
 </template>
 
 <script setup lang="ts">
+import { GATEWAY_METHODS } from '~~/shared/utils/payment-methods'
+
 definePageMeta({ middleware: 'buyer' })
 useSeoMeta({ title: 'Langganan Toko — MINTS' })
 
@@ -75,6 +91,7 @@ const history = ref<any[]>([])
 const loading = ref(true)
 const errorMsg = ref('')
 const subscribing = ref<string | null>(null)
+const paymentMethod = ref(GATEWAY_METHODS[0].code)
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -100,7 +117,7 @@ async function subscribe(planId: string) {
   errorMsg.value = ''
   subscribing.value = planId
   try {
-    const res: any = await $fetch(`/api/store/${storeId}/subscribe`, { method: 'POST', body: { planId } })
+    const res: any = await $fetch(`/api/store/${storeId}/subscribe`, { method: 'POST', body: { planId, paymentMethod: paymentMethod.value } })
     if (res.paymentUrl) window.location.href = res.paymentUrl
   } catch (e: any) {
     errorMsg.value = e?.data?.statusMessage || 'Gagal membuat langganan'
