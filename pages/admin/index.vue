@@ -1300,9 +1300,9 @@
 
           <div class="flex gap-3 pt-2">
             <button type="button" class="btn-secondary-full" @click="showProductModal = false">Batal</button>
-            <button type="submit" class="btn-primary-full" :disabled="savingProduct">
+            <button type="submit" class="btn-primary-full" :disabled="savingProduct || compressingImages">
               <span v-if="savingProduct" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin"></span>
-              <span v-else>Simpan</span>
+              <span v-else>{{ compressingImages ? 'Memproses foto…' : 'Simpan' }}</span>
             </button>
           </div>
         </form>
@@ -1792,27 +1792,41 @@ function openProductForm(product?: any) {
   showProductModal.value = true
 }
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024
+// Foto dikompres ke WebP di browser (batas server 2 MB dicek setelah kompresi, bukan file asli).
+const compressingImages = ref(false)
 
-function onFileChange(e: Event) {
-  const file = (e.target as HTMLInputElement).files?.[0] || null
-  if (file && file.size > MAX_FILE_SIZE) {
-    showToast('error', `Ukuran foto terlalu besar (${(file.size / 1024 / 1024).toFixed(1)} MB). Maksimal 2 MB.`)
-    ;(e.target as HTMLInputElement).value = ''
-    return
+async function onFileChange(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0] || null
+  productFile.value = null
+  if (!file) return
+  compressingImages.value = true
+  try {
+    productFile.value = await compressToWebp(file)
+  } catch (err: any) {
+    showToast('error', `${file.name}: ${err?.message || 'Gagal memproses foto'}`)
+    input.value = ''
+  } finally {
+    compressingImages.value = false
   }
-  productFile.value = file
 }
 
-function onExtraFilesChange(e: Event) {
-  const files = Array.from((e.target as HTMLInputElement).files || [])
-  const oversized = files.filter(f => f.size > MAX_FILE_SIZE)
-  if (oversized.length) {
-    showToast('error', `${oversized.length} foto melebihi batas 2 MB: ${oversized.map(f => f.name).join(', ')}`)
-    ;(e.target as HTMLInputElement).value = ''
-    return
+async function onExtraFilesChange(e: Event) {
+  const input = e.target as HTMLInputElement
+  const files = Array.from(input.files || [])
+  extraFiles.value = []
+  if (!files.length) return
+  compressingImages.value = true
+  try {
+    const compressed: File[] = []
+    for (const f of files) compressed.push(await compressToWebp(f))
+    extraFiles.value = compressed
+  } catch (err: any) {
+    showToast('error', err?.message || 'Gagal memproses foto')
+    input.value = ''
+  } finally {
+    compressingImages.value = false
   }
-  extraFiles.value = files
 }
 
 async function saveProduct() {

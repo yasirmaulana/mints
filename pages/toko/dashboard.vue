@@ -213,13 +213,14 @@ async function uploadImage(kind: 'logo' | 'banner', e: Event) {
   uploadingBanner.value = true
   profileMsg.value = null
   try {
+    const compressed = await compressToWebp(file, { maxWidth: kind === 'banner' ? 1920 : 512 })
     const fd = new FormData()
     fd.append('kind', kind)
-    fd.append('image', file)
+    fd.append('image', compressed)
     await $fetch(`/api/store/${activeId.value}/image`, { method: 'POST', body: fd })
     await loadStoreDetail()
   } catch (err: any) {
-    profileMsg.value = { ok: false, text: err?.data?.statusMessage || 'Gagal mengunggah gambar' }
+    profileMsg.value = { ok: false, text: err?.data?.statusMessage || err?.message || 'Gagal mengunggah gambar' }
   } finally {
     uploadingBanner.value = false
     ;(e.target as HTMLInputElement).value = ''
