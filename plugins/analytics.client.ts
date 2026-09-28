@@ -1,3 +1,5 @@
+import { isPixelType, isValidPixelId } from '~~/shared/utils/analytics-ids'
+
 export default defineNuxtPlugin(async () => {
   type Pixel = {
     id: string
@@ -19,6 +21,8 @@ export default defineNuxtPlugin(async () => {
 
   for (const p of pixels) {
     if (!p.enabled) continue
+    // Pertahanan berlapis: data lama di DB (dari sebelum ada validasi server) tidak boleh ikut disisipkan ke <script>.
+    if (!isPixelType(p.type) || !isValidPixelId(p.type, p.type === 'gtm' ? p.containerId : p.pixelId)) continue
 
     if (p.type === 'meta' && p.pixelId) {
       const script = document.createElement('script')

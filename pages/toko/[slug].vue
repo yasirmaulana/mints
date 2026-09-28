@@ -181,7 +181,9 @@ useHead({
       description: store.value.description || undefined,
       image: store.value.logoUrl || undefined,
       address: store.value.cityName ? { '@type': 'PostalAddress', addressLocality: store.value.cityName } : undefined
-    }) : '{}')
+    // Nama/deskripsi toko diisi penjual: karakter kurung-sudut kiri di-escape (<) agar teks berisi
+    // tag penutup script tidak bisa menutup elemen JSON-LD dan menyisipkan skrip lain ke halaman.
+    }).replace(/</g, '\\u003c') : '{}')
   }]
 })
 </script>
