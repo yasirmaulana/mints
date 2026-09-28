@@ -10,7 +10,7 @@ function startOfDay(d: Date) {
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const auth = getHeader(event, 'authorization')
-  if (!config.cronSecret || auth !== `Bearer ${config.cronSecret}`) {
+  if (!config.cronSecret || !safeEqual(auth, `Bearer ${config.cronSecret}`)) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
   }
 

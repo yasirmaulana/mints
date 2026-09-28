@@ -2,8 +2,18 @@ export async function verifyRecaptcha(token: string) {
   const config = useRuntimeConfig()
   const secret = config.recaptchaSecretKey
   if (!secret) {
-    console.warn('[recaptcha] RECAPTCHA_SECRET_KEY tidak dikonfigurasi — verifikasi dilewati')
+    // Site key terisi berarti reCAPTCHA sengaja diaktifkan (klien mengirim token): secret yang hilang
+    // adalah salah konfigurasi, dan melewati verifikasi diam-diam membuat login/OTP tanpa perlindungan bot.
+    // Keduanya kosong = reCAPTCHA sengaja dimatikan (mis. dev lokal).
+    if (config.public.recaptchaSiteKey) {
+      console.error('[recaptcha] RECAPTCHA_SITE_KEY terisi tetapi RECAPTCHA_SECRET_KEY kosong — permintaan ditolak')
+      throw createError({ statusCode: 500, statusMessage: 'Verifikasi keamanan belum dikonfigurasi' })
+    }
+    console.warn('[recaptcha] reCAPTCHA tidak dikonfigurasi — verifikasi dilewati')
     return
+  }
+  if (typeof token !== 'string' || !token) {
+    throw createError({ statusCode: 400, statusMessage: 'Verifikasi keamanan gagal, coba lagi' })
   }
 
   const res = await $fetch<{ success: boolean; score: number; 'error-codes'?: string[] }>(

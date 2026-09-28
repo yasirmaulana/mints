@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  requireAdminSession(event)
+  await requireAdminSession(event)
   const body = await readBody(event)
 
   if (!body.startTime || !body.endTime) {

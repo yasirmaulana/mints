@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  requireAdminSession(event)
+  await requireAdminSession(event)
   const { name } = await readBody(event)
   if (!name?.trim()) throw createError({ statusCode: 400, statusMessage: 'Nama kategori wajib diisi' })
 

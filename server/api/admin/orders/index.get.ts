@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  requireAdminSession(event)
+  await requireAdminSession(event)
 
   return await prisma.order.findMany({
     orderBy: { createdAt: 'desc' },

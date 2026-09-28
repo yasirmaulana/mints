@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  requireAdminSession(event)
+  await requireAdminSession(event)
 
   const formData = await readMultipartFormData(event)
   if (!formData) throw createError({ statusCode: 400, statusMessage: 'Form data kosong' })

@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  requireAdminSession(event)
+  await requireAdminSession(event)
   return await prisma.flashSaleConfig.findMany({
     orderBy: { startTime: 'asc' },
     include: {

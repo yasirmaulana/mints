@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  requireAdminSession(event)
+  await requireAdminSession(event)
   const { orderIds } = await readBody(event)
 
   if (!Array.isArray(orderIds) || orderIds.length === 0) {

@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
 
 export default defineEventHandler(async (event) => {
-  requireAdminSession(event)
+  await requireAdminSession(event)
   const { username, password } = await readBody(event)
 
   if (!username?.trim() || !password?.trim()) {

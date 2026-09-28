@@ -8,7 +8,7 @@ const ORPHAN_AGE_MS = 24 * 60 * 60 * 1000 // objek lebih tua dari 24 jam & belum
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const auth = getHeader(event, 'authorization')
-  if (!config.cronSecret || auth !== `Bearer ${config.cronSecret}`) {
+  if (!config.cronSecret || !safeEqual(auth, `Bearer ${config.cronSecret}`)) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
   }
 

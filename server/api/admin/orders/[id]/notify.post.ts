@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  requireAdminSession(event)
+  await requireAdminSession(event)
   const id = getRouterParam(event, 'id')!
 
   const order = await prisma.order.findUnique({
