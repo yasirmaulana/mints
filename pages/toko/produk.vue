@@ -18,7 +18,7 @@
         </button>
       </div>
 
-      <div v-if="errorMsg" class="rounded-2xl px-4 py-3 mb-5 text-sm" style="background:#fde8e8;color:#991b1b">{{ errorMsg }}</div>
+      <div v-if="errorMsg && !showProductModal" class="rounded-2xl px-4 py-3 mb-5 text-sm" style="background:#fde8e8;color:#991b1b">{{ errorMsg }}</div>
 
       <div v-if="loading" class="py-10 text-center text-sm" style="color:rgba(9,11,12,0.5)">Memuat…</div>
       <div v-else-if="!products.length" class="py-10 text-center text-sm" style="color:rgba(9,11,12,0.5)">Belum ada produk.</div>
@@ -164,6 +164,8 @@
             <p v-if="extraFiles.length" class="text-xs mt-1" style="color:rgba(9,11,12,0.4)">{{ extraFiles.length }} foto dipilih</p>
           </div>
 
+          <div v-if="errorMsg" ref="modalErrorEl" role="alert" class="rounded-2xl px-4 py-3 text-sm" style="background:#fde8e8;color:#991b1b">{{ errorMsg }}</div>
+
           <div class="flex gap-3 pt-2">
             <button type="button" class="flex-1 rounded-full py-3 text-sm font-normal" style="background:#f5f5f2;color:#090b0c" @click="showProductModal = false">Batal</button>
             <button type="submit" :disabled="savingProduct || compressingImages" class="flex-1 rounded-full py-3 text-sm font-normal transition-opacity hover:opacity-85 disabled:opacity-40" style="background:#090b0c;color:white">
@@ -192,6 +194,14 @@ const products = ref<any[]>([])
 const categories = ref<any[]>([])
 const loading = ref(true)
 const errorMsg = ref('')
+// Modal menutupi banner error di atas halaman, jadi error form ditampilkan di dalam modal
+// (di atas tombol Simpan) dan di-scroll ke tengah supaya pasti terlihat.
+const modalErrorEl = ref<HTMLElement | null>(null)
+watch(errorMsg, async (msg) => {
+  if (!msg || !showProductModal.value) return
+  await nextTick()
+  modalErrorEl.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+})
 
 async function loadProducts() {
   loading.value = true
