@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const ip = getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
+  const ip = getClientIp(event)
   await checkRateLimit(`verify-otp:${ip}`, 10, 15 * 60 * 1000)
 
   const { email, code } = await readBody(event) ?? {}

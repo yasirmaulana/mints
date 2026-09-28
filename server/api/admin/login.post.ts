@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs'
 import { verifyRecaptcha } from '~/server/utils/recaptcha'
 
 export default defineEventHandler(async (event) => {
-  const ip = getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
+  const ip = getClientIp(event)
   await checkRateLimit(`admin-login:${ip}`, 10, 15 * 60 * 1000)
 
   const body = await readBody(event)

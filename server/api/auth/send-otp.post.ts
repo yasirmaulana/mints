@@ -3,7 +3,7 @@ import { sendOtpEmail } from '~/server/utils/mailer'
 import { verifyRecaptcha } from '~/server/utils/recaptcha'
 
 export default defineEventHandler(async (event) => {
-  const ip = getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
+  const ip = getClientIp(event)
   await checkRateLimit(`send-otp:${ip}`, 5, 10 * 60 * 1000)
 
   const { email, recaptchaToken } = await readBody(event) ?? {}

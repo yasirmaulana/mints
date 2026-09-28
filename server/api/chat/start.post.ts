@@ -2,7 +2,7 @@
 // versi lama memakai ulang sesi terbuka berdasarkan buyerPhone yang tidak diverifikasi, sehingga
 // siapa pun yang mengetik nomor HP korban mendapat sessionId sesi korban dan bisa membaca isinya.
 export default defineEventHandler(async (event) => {
-  const ip = getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
+  const ip = getClientIp(event)
   await checkRateLimit(`chat-start:${ip}`, 10, 5 * 60 * 1000)
 
   const body = await readBody(event) ?? {}

@@ -1,3 +1,4 @@
+import { isIP } from 'node:net'
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 
@@ -53,9 +54,47 @@ function checkInMemory(key: string, max: number, windowMs: number) {
   }
 }
 
-/** IP klien dari header proxy (entri pertama x-forwarded-for), fallback ke IP koneksi. */
+// Jumlah proxy tepercaya di depan aplikasi (env TRUSTED_PROXY_COUNT, default 1).
+// - Vercel: 1 (Vercel menimpa x-forwarded-for dengan IP klien, isinya satu entri).
+// - VPS, satu Nginx yang menimpa header dengan $remote_addr (setelah real_ip): 1.
+// - VPS, Cloudflare + Nginx yang menambahkan ($proxy_add_x_forwarded_for): 2.
+// Lihat CATATAN_DEPLOY_VPS.md.
+function trustedProxyCount(): number {
+  const n = Number.parseInt(process.env.TRUSTED_PROXY_COUNT ?? '1', 10)
+  return Number.isInteger(n) && n >= 1 && n <= 5 ? n : 1
+}
+
+let warnedShortChain = false
+
+/**
+ * IP klien yang tidak bisa dipalsukan dari luar: entri ke-N dari KANAN x-forwarded-for, yaitu entri
+ * yang ditambahkan proxy yang kita percaya. Isian dari klien ada di sebelah kiri dan diabaikan —
+ * mengambil entri pertama membuat semua rate limit bisa dilewati dengan mengirim header palsu.
+ * Bila header tidak ada/tidak valid, dipakai IP koneksi socket.
+ */
 export function getClientIp(event: any): string {
-  return getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
+  const n = trustedProxyCount()
+  const entries = (getHeader(event, 'x-forwarded-for') ?? '').split(',').map((s: string) => s.trim()).filter(Boolean)
+
+  if (entries.length) {
+    let picked: string
+    if (entries.length >= n) {
+      picked = entries[entries.length - n]
+    } else {
+      // Rantai lebih pendek dari yang dikonfigurasi (mis. TRUSTED_PROXY_COUNT=2 di Vercel yang hanya
+      // punya satu entri). Memakai IP socket akan membuat semua pengunjung berbagi satu IP proxy dan
+      // saling memblokir, jadi pakai entri pertama yang ada dan beri tahu lewat log.
+      if (!warnedShortChain) {
+        warnedShortChain = true
+        console.warn(`[client-ip] TRUSTED_PROXY_COUNT=${n} tetapi x-forwarded-for hanya berisi ${entries.length} entri — periksa konfigurasi proxy`)
+      }
+      picked = entries[0]
+    }
+    if (isIP(picked)) return picked
+  }
+
+  const socketIp = getRequestIP(event)
+  return socketIp && isIP(socketIp) ? socketIp : 'unknown'
 }
 
 /** Batasi request per IP untuk endpoint publik: `scope` membedakan bucket antar endpoint. */

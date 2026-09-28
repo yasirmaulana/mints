@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const ip = getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
+  const ip = getClientIp(event)
   await checkRateLimit(`orders-lookup:${ip}`, 20, 15 * 60 * 1000)
 
   if (!phone || !code) {
