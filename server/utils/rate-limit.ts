@@ -53,6 +53,16 @@ function checkInMemory(key: string, max: number, windowMs: number) {
   }
 }
 
+/** IP klien dari header proxy (entri pertama x-forwarded-for), fallback ke IP koneksi. */
+export function getClientIp(event: any): string {
+  return getHeader(event, 'x-forwarded-for')?.split(',')[0].trim() ?? getRequestIP(event) ?? 'unknown'
+}
+
+/** Batasi request per IP untuk endpoint publik: `scope` membedakan bucket antar endpoint. */
+export async function rateLimitByIp(event: any, scope: string, max: number, windowMs: number) {
+  await checkRateLimit(`${scope}:${getClientIp(event)}`, max, windowMs)
+}
+
 export async function checkRateLimit(key: string, max = 5, windowMs = 15 * 60 * 1000) {
   const limiter = getUpstashLimiter(max, windowMs)
   if (limiter) {

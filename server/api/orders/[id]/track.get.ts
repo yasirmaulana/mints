@@ -1,4 +1,5 @@
 export default defineEventHandler(async (event) => {
+  await rateLimitByIp(event, 'order-track', 20, 10 * 60 * 1000)
   const id = getRouterParam(event, 'id')!
 
   const shipment = await prisma.shipment.findUnique({ where: { orderId: id } })

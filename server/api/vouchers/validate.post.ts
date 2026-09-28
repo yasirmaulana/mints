@@ -1,11 +1,16 @@
 // Validasi kode voucher saat checkout (preview potongan sebelum submit order).
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-  const storeId = body.storeId
-  const code = String(body.code || '').trim().toUpperCase()
+  // Endpoint publik yang membedakan "kode tidak ada" vs "kadaluarsa/habis": tanpa batas, kode voucher
+  // toko (mis. DISKON10) bisa ditebak dengan kamus.
+  await rateLimitByIp(event, 'voucher-validate', 30, 10 * 60 * 1000)
+
+  const body = await readBody(event) ?? {}
+  const storeId = typeof body.storeId === 'string' ? body.storeId.slice(0, 64) : ''
+  const code = String(body.code || '').trim().toUpperCase().slice(0, 50)
   const subtotal = Number(body.subtotal || 0)
 
   if (!storeId || !code) throw createError({ statusCode: 400, statusMessage: 'storeId dan code wajib diisi' })
+  if (!Number.isFinite(subtotal) || subtotal < 0) throw createError({ statusCode: 400, statusMessage: 'subtotal tidak valid' })
 
   const voucher = await prisma.voucher.findUnique({ where: { storeId_code: { storeId, code } } })
   if (!voucher || !voucher.isActive) {
