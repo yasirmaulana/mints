@@ -67,7 +67,7 @@
           </div>
 
           <div class="mt-4 pt-4 border-t flex flex-wrap items-center justify-between gap-3" style="border-color:rgba(9,11,12,0.08)">
-            <p class="text-sm font-normal tabular-nums">Rp&nbsp;{{ formatPrice(Number(order.product.price) + (order.shippingCost || 0)) }}</p>
+            <p class="text-sm font-normal tabular-nums">Rp&nbsp;{{ formatPrice(orderTotal(order)) }}</p>
             <div class="flex gap-2">
               <button
                 class="rounded-full px-4 py-2 text-xs font-normal border transition-opacity hover:opacity-70"
@@ -131,7 +131,8 @@
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-normal leading-snug">{{ selectedOrder.product.title }}</p>
                   <p v-if="selectedOrder.variantId" class="text-xs mt-1" style="color:rgba(9,11,12,0.5)">Ukuran: {{ selectedOrder.variantId }}</p>
-                  <p class="text-sm font-normal mt-1.5 tabular-nums">Rp&nbsp;{{ formatPrice(Number(selectedOrder.product.price)) }}</p>
+                  <p class="text-xs mt-1" style="color:rgba(9,11,12,0.5)">{{ selectedOrder.qty }} × Rp&nbsp;{{ formatPrice(Number(selectedOrder.product.price)) }}</p>
+                  <p class="text-sm font-normal mt-1.5 tabular-nums">Rp&nbsp;{{ formatPrice(Number(selectedOrder.product.price) * selectedOrder.qty) }}</p>
                 </div>
               </div>
             </section>
@@ -141,16 +142,20 @@
               <p class="text-xs font-normal uppercase tracking-[0.12rem] mb-3" style="color:rgba(9,11,12,0.4)">Rincian Biaya</p>
               <div class="rounded-2xl overflow-hidden" style="border:1px solid rgba(9,11,12,0.06)">
                 <div class="flex justify-between px-4 py-3" style="border-bottom:1px solid rgba(9,11,12,0.06)">
-                  <span class="text-sm" style="color:rgba(9,11,12,0.6)">Harga produk</span>
-                  <span class="text-sm tabular-nums">Rp&nbsp;{{ formatPrice(Number(selectedOrder.product.price)) }}</span>
+                  <span class="text-sm" style="color:rgba(9,11,12,0.6)">Harga produk ({{ selectedOrder.qty }}×)</span>
+                  <span class="text-sm tabular-nums">Rp&nbsp;{{ formatPrice(Number(selectedOrder.product.price) * selectedOrder.qty) }}</span>
                 </div>
                 <div class="flex justify-between px-4 py-3" style="border-bottom:1px solid rgba(9,11,12,0.06)">
                   <span class="text-sm" style="color:rgba(9,11,12,0.6)">Ongkos kirim</span>
                   <span class="text-sm tabular-nums">{{ selectedOrder.shippingCost === 0 ? 'Gratis' : `Rp ${formatPrice(selectedOrder.shippingCost || 0)}` }}</span>
                 </div>
+                <div v-if="selectedOrder.discountAmount" class="flex justify-between px-4 py-3" style="border-bottom:1px solid rgba(9,11,12,0.06)">
+                  <span class="text-sm" style="color:rgba(9,11,12,0.6)">Diskon voucher{{ selectedOrder.voucherCode ? ` (${selectedOrder.voucherCode})` : '' }}</span>
+                  <span class="text-sm tabular-nums" style="color:rgb(22,163,74)">-Rp&nbsp;{{ formatPrice(selectedOrder.discountAmount) }}</span>
+                </div>
                 <div class="flex justify-between px-4 py-3">
                   <span class="text-sm font-normal">Total</span>
-                  <span class="text-sm font-normal tabular-nums">Rp&nbsp;{{ formatPrice(Number(selectedOrder.product.price) + (selectedOrder.shippingCost || 0)) }}</span>
+                  <span class="text-sm font-normal tabular-nums">Rp&nbsp;{{ formatPrice(orderTotal(selectedOrder)) }}</span>
                 </div>
               </div>
             </section>
@@ -365,6 +370,10 @@ function statusStyle(status: string) {
     REFUNDED: 'background:rgba(9,11,12,0.06);color:rgba(9,11,12,0.55)'
   }
   return map[status] || 'background:rgba(9,11,12,0.06);color:rgba(9,11,12,0.5)'
+}
+
+function orderTotal(order: any) {
+  return Number(order.product.price) * order.qty + (order.shippingCost || 0) - (order.discountAmount || 0)
 }
 
 function formatPrice(n: number) {
