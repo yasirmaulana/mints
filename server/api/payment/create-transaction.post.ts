@@ -50,6 +50,13 @@ export default defineEventHandler(async (event) => {
   if (!(totalAmount > 0)) {
     throw createError({ statusCode: 400, statusMessage: 'Total pembayaran tidak valid' })
   }
+  // Duitku menolak transaksi di bawah Rp10.000 (berlaku untuk semua metode gateway, termasuk FT
+  // manual yang tidak lewat Duitku tapi tetap harus konsisten). Tanpa pengecekan ini, panggilan
+  // /v2/inquiry di bawah gagal dengan HTTP 400 generik yang membingungkan pembeli.
+  const DUITKU_MIN_AMOUNT = 10000
+  if (totalAmount < DUITKU_MIN_AMOUNT) {
+    throw createError({ statusCode: 400, statusMessage: `Total pembayaran minimal Rp${DUITKU_MIN_AMOUNT.toLocaleString('id-ID')}` })
+  }
 
   // Transfer Bank Manual — tidak perlu gateway, simpan Payment record langsung per order
   if (paymentMethod === 'FT') {
@@ -99,11 +106,21 @@ export default defineEventHandler(async (event) => {
     expiryPeriod: 1440 // minutes
   }
 
-  const duitkuRes = await $fetch<any>(`${baseUrl}/v2/inquiry`, {
-    method: 'POST',
-    body: payload,
-    headers: { 'content-type': 'application/json' }
-  })
+  let duitkuRes: any
+  try {
+    duitkuRes = await $fetch<any>(`${baseUrl}/v2/inquiry`, {
+      method: 'POST',
+      body: payload,
+      headers: { 'content-type': 'application/json' }
+    })
+  } catch (err: any) {
+    // Duitku merespons status HTTP non-2xx untuk request yang ditolak (mis. di bawah minimum
+    // pembayaran), sehingga $fetch throw sebelum sempat baca field statusMessage di body — tanpa
+    // try/catch ini pembeli hanya melihat "Bad Request" generik dari HTTP reason phrase, bukan
+    // pesan asli dari Duitku (field "Message" di body error mereka).
+    const duitkuMsg = err?.data?.Message || err?.data?.statusMessage
+    throw createError({ statusCode: 400, statusMessage: duitkuMsg || 'Gagal membuat transaksi Duitku' })
+  }
 
   if (duitkuRes.statusCode !== '00') {
     throw createError({ statusCode: 400, statusMessage: duitkuRes.statusMessage || 'Gagal membuat transaksi Duitku' })

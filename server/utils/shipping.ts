@@ -39,15 +39,31 @@ export async function fetchShippingServices(opts: {
     courier: String(opts.courier)
   })
 
-  const res = await $fetch<any>('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', {
-    method: 'POST',
-    headers: {
-      key: config.rajaOngkirKey,
-      'content-type': 'application/x-www-form-urlencoded'
-    },
-    body: body.toString()
-  })
-
-  // Bentuk respons baru RajaOngkir: { service, description, cost: number, etd: string }
-  return res?.data ?? []
+  // RajaOngkir sesekali gagal sesaat (timeout/hiccup jaringan pihak ketiga) — satu kali retry
+  // sebelum menyerah, supaya checkout tidak gagal total hanya karena kegagalan sekali pakai.
+  let lastErr: unknown
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await $fetch<any>('https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost', {
+        method: 'POST',
+        headers: {
+          key: config.rajaOngkirKey,
+          'content-type': 'application/x-www-form-urlencoded'
+        },
+        body: body.toString()
+      })
+      // Bentuk respons baru RajaOngkir: { service, description, cost: number, etd: string }
+      return res?.data ?? []
+    } catch (err: any) {
+      // HTTP 404 dari endpoint ini berarti "kurir ini tidak melayani rute/tujuan ini" — respons
+      // normal, BUKAN kegagalan sistem (mis. TIKI/SiCepat/Pos sering tak menjangkau kode tujuan
+      // granular level kelurahan). Jangan retry atau lempar error, cukup kembalikan daftar kosong
+      // supaya UI menampilkan "Tidak ada layanan tersedia" alih-alih pesan gagal.
+      if (err?.status === 404 || err?.statusCode === 404) return []
+      lastErr = err
+      if (attempt === 0) await new Promise(r => setTimeout(r, 300))
+    }
+  }
+  console.error('[shipping] fetchShippingServices gagal setelah retry:', lastErr)
+  throw lastErr
 }

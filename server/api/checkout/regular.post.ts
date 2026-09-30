@@ -78,7 +78,8 @@ export default defineEventHandler(async (event) => {
         weight,
         courier: String(selected.courierCode)
       })
-    } catch {
+    } catch (err) {
+      console.error('[checkout] fetchShippingServices gagal:', storeKey, err)
       throw createError({ statusCode: 502, statusMessage: 'Gagal menghitung ongkos kirim, coba lagi' })
     }
     const match = services.find(s => s.service === selected.courierService)

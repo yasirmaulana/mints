@@ -60,7 +60,57 @@
             </div>
             <div>
               <label class="block text-sm font-normal mb-2" style="color:rgba(9,11,12,0.6)">Nomor HP (WhatsApp)</label>
-              <input v-model="form.buyerPhone" type="tel" placeholder="08xxxxxxxxxx" class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none" style="background:white;border:1px solid rgba(9,11,12,0.12);color:#090b0c" />
+
+              <!-- Akun sudah punya nomor HP: pilih pakai nomor akun atau nomor lain khusus pesanan ini -->
+              <div v-if="accountPhone" class="space-y-2">
+                <button
+                  type="button"
+                  class="w-full text-left rounded-2xl px-4 py-3 flex items-center gap-3 transition-all"
+                  :style="phoneMode === 'account' ? 'background:#090b0c;color:white' : 'background:white;border:1px solid rgba(9,11,12,0.12);color:#090b0c'"
+                  @click="phoneMode = 'account'"
+                >
+                  <span
+                    class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
+                    :style="phoneMode === 'account' ? 'border-color:rgba(255,255,255,0.6)' : 'border-color:rgba(9,11,12,0.2)'"
+                  >
+                    <span v-if="phoneMode === 'account'" class="w-2 h-2 rounded-full" style="background:white" />
+                  </span>
+                  <span class="text-sm font-normal tabular-nums">{{ accountPhone }}</span>
+                  <span class="text-xs ml-auto" :style="phoneMode === 'account' ? 'color:rgba(255,255,255,0.6)' : 'color:rgba(9,11,12,0.4)'">Nomor akun</span>
+                </button>
+                <button
+                  type="button"
+                  class="w-full text-left rounded-2xl px-4 py-3 flex items-center gap-3 transition-all"
+                  :style="phoneMode === 'new' ? 'background:#090b0c;color:white' : 'background:white;border:1px solid rgba(9,11,12,0.12);color:#090b0c'"
+                  @click="phoneMode = 'new'"
+                >
+                  <span
+                    class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
+                    :style="phoneMode === 'new' ? 'border-color:rgba(255,255,255,0.6)' : 'border-color:rgba(9,11,12,0.2)'"
+                  >
+                    <span v-if="phoneMode === 'new'" class="w-2 h-2 rounded-full" style="background:white" />
+                  </span>
+                  <span class="text-sm font-normal">Nomor lain untuk pesanan ini</span>
+                </button>
+                <input
+                  v-if="phoneMode === 'new'"
+                  v-model="form.buyerPhone"
+                  type="tel"
+                  placeholder="08xxxxxxxxxx"
+                  class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none"
+                  style="background:white;border:1px solid rgba(9,11,12,0.12);color:#090b0c"
+                />
+              </div>
+
+              <!-- Akun belum punya nomor HP: isi di sini, opsi simpan ke akun -->
+              <div v-else class="space-y-2">
+                <input v-model="form.buyerPhone" type="tel" placeholder="08xxxxxxxxxx" class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none" style="background:white;border:1px solid rgba(9,11,12,0.12);color:#090b0c" />
+                <label class="flex items-center gap-2 text-sm" style="color:rgba(9,11,12,0.6)">
+                  <input v-model="saveNewPhone" type="checkbox" class="rounded" />
+                  Simpan sebagai nomor HP akun saya
+                </label>
+              </div>
+
               <p class="text-xs mt-2" style="color:rgba(9,11,12,0.4)">Digunakan untuk konfirmasi pesanan via WhatsApp</p>
             </div>
           </div>
@@ -69,7 +119,7 @@
             class="w-full rounded-full py-3.5 text-sm font-normal transition-opacity"
             :style="canStep0 ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.08);color:rgba(9,11,12,0.35);cursor:not-allowed'"
             :disabled="!canStep0"
-            @click="canStep0 && (step = 1)"
+            @click="canStep0 && goToStep1()"
           >Lanjut ke Alamat</button>
         </div>
 
@@ -192,9 +242,12 @@
                   v-for="c in couriers"
                   :key="c"
                   class="px-4 py-2 rounded-full text-sm font-normal transition-all"
-                  :style="shippingState[g.storeId || 'null']?.courierCode === c ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.05);color:#090b0c'"
-                  @click="selectCourier(g.storeId, c)"
-                >{{ c.toUpperCase() }}</button>
+                  :disabled="courierUnavailable(g.storeId, c)"
+                  :style="courierUnavailable(g.storeId, c)
+                    ? 'background:rgba(9,11,12,0.03);color:rgba(9,11,12,0.25);cursor:not-allowed'
+                    : (shippingState[g.storeId || 'null']?.courierCode === c ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.05);color:#090b0c')"
+                  @click="!courierUnavailable(g.storeId, c) && selectCourier(g.storeId, c)"
+                >{{ c.toUpperCase() }}<span v-if="courierUnavailable(g.storeId, c)" class="ml-1 text-[10px]">· tidak tersedia</span></button>
               </div>
 
               <div class="space-y-2">
@@ -240,7 +293,7 @@
               class="w-full rounded-full py-3.5 text-sm font-normal transition-opacity"
               :style="canStep2 ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.08);color:rgba(9,11,12,0.35);cursor:not-allowed'"
               :disabled="!canStep2"
-              @click="canStep2 && (step = 3)"
+              @click="canStep2 && goToStep3()"
             >Lanjut ke Pembayaran</button>
           </template>
         </div>
@@ -269,10 +322,11 @@
               >
                 <span v-if="form.paymentMethod === pm.code" class="w-2 h-2 rounded-full" style="background:white" />
               </span>
-              <div class="text-left">
+              <div class="text-left flex-1">
                 <p class="text-sm font-normal">{{ pm.name }}</p>
                 <p class="text-xs mt-0.5" :style="form.paymentMethod === pm.code ? 'color:rgba(255,255,255,0.5)' : 'color:rgba(9,11,12,0.4)'">{{ pm.description }}</p>
               </div>
+              <p v-if="paymentFees[pm.code]" class="text-xs shrink-0" :style="form.paymentMethod === pm.code ? 'color:rgba(255,255,255,0.6)' : 'color:rgba(9,11,12,0.45)'">+{{ formatPrice(paymentFees[pm.code]) }}</p>
             </button>
           </div>
 
@@ -314,6 +368,7 @@
             <div class="p-5">
               <p class="text-xs font-normal uppercase tracking-[0.12rem] mb-3" style="color:rgba(9,11,12,0.4)">Metode Pembayaran</p>
               <p class="text-sm font-normal">{{ selectedPaymentMethodLabel }}</p>
+              <p v-if="selectedPaymentFee > 0" class="text-xs mt-0.5" style="color:rgba(9,11,12,0.45)">Biaya admin {{ formatPrice(selectedPaymentFee) }}</p>
               <!-- Info rekening bank jika memilih Transfer Manual -->
               <template v-if="form.paymentMethod === 'FT' && paymentConfig?.bankAccounts?.length">
                 <div class="mt-3 space-y-2">
@@ -367,9 +422,13 @@
               <span style="color:rgba(9,11,12,0.5)">Diskon voucher</span>
               <span class="tabular-nums" style="color:rgb(22,163,74)">-{{ formatPrice(totalDiscount) }}</span>
             </div>
+            <div v-if="selectedPaymentFee > 0" class="flex justify-between text-sm">
+              <span style="color:rgba(9,11,12,0.5)">Biaya admin</span>
+              <span class="tabular-nums">{{ formatPrice(selectedPaymentFee) }}</span>
+            </div>
             <div class="flex justify-between pt-3 border-t" style="border-color:rgba(9,11,12,0.08)">
               <span class="text-sm font-normal">Total</span>
-              <span class="text-lg font-normal tabular-nums tracking-tight">{{ formatPrice(subtotal + finalShippingCost - totalDiscount) }}</span>
+              <span class="text-lg font-normal tabular-nums tracking-tight">{{ formatPrice(subtotal + finalShippingCost - totalDiscount + selectedPaymentFee) }}</span>
             </div>
           </div>
 
@@ -491,8 +550,10 @@ function openNewAddressForm() {
   citySearch.value = ''
   saveNewAddress.value = true
 }
-// Satu entri per toko (storeId | 'null'): pengiriman dipilih per toko, PRD §11 Fase 5
-const shippingState = reactive<Record<string, { courierCode: string; services: any[]; selected: any }>>({})
+// Satu entri per toko (storeId | 'null'): pengiriman dipilih per toko, PRD §11 Fase 5.
+// byCourier: cache hasil per kode kurir supaya pindah tab tidak query ulang ke RajaOngkir —
+// semua kurir di-prefetch paralel sekali saat masuk step ini (lihat loadShipping()).
+const shippingState = reactive<Record<string, { courierCode: string; services: any[]; selected: any; byCourier: Record<string, any[]> }>>({})
 // Satu entri per toko: kode voucher diinput manual, divalidasi via /api/vouchers/validate
 const voucherState = reactive<Record<string, { input: string; code: string; discount: number; message: string; loading: boolean }>>({})
 watchEffect(() => {
@@ -531,14 +592,43 @@ const soldOutError = ref('') // nama produk yang habis, kosong = tidak ada error
 
 const couriers = ['jne', 'jnt', 'sicepat', 'pos', 'tiki']
 
+// Nomor HP akun (Buyer.phone) — kalau sudah ada, buyer memilih pakai nomor akun atau nomor lain
+// khusus pesanan ini. Kalau belum ada, buyer isi di checkout dan bisa disimpan ke akun.
+const accountPhone = ref('')
+const phoneMode = ref<'account' | 'new'>('account')
+const saveNewPhone = ref(true)
+
 onMounted(async () => {
   await fetchMe()
   if (user.value) {
     if (!form.buyerName) form.buyerName = user.value.name
-    if (!form.buyerPhone) form.buyerPhone = user.value.phone
+    if (user.value.phone) {
+      accountPhone.value = user.value.phone
+      phoneMode.value = 'account'
+      form.buyerPhone = user.value.phone
+    }
   }
   await loadSavedAddresses()
 })
+
+watch(phoneMode, (m) => {
+  if (m === 'account') form.buyerPhone = accountPhone.value
+  else form.buyerPhone = ''
+})
+
+async function goToStep1() {
+  // Akun belum punya nomor HP dan buyer minta disimpan: simpan best-effort, jangan blokir checkout kalau gagal.
+  if (!accountPhone.value && saveNewPhone.value && form.buyerPhone) {
+    try {
+      await $fetch('/api/buyer/profile', { method: 'PATCH', body: { phone: form.buyerPhone } })
+      await fetchMe()
+      accountPhone.value = user.value?.phone || form.buyerPhone
+    } catch {
+      // nomor sudah dipakai akun lain atau gagal simpan — tetap lanjut pakai nomor ini untuk pesanan ini
+    }
+  }
+  step.value = 1
+}
 
 // Daftar metode gateway ada di shared/utils/payment-methods.ts (dipakai juga oleh server untuk validasi).
 
@@ -574,6 +664,21 @@ const shippingLabel = computed(() => {
 const shippingCostDisplay = computed(() => formatPrice(finalShippingCost.value))
 const selectedPaymentMethodLabel = computed(() => paymentMethods.value.find((p: any) => p.code === form.paymentMethod)?.name || '-')
 
+// Estimasi biaya admin per metode (tampilan saja — lihat server/api/payment/fees.get.ts).
+// paymentAmount yang benar-benar dikirim ke Duitku tidak berubah oleh nilai ini.
+const paymentFees = ref<Record<string, number>>({})
+const selectedPaymentFee = computed(() => paymentFees.value[form.paymentMethod] || 0)
+
+async function goToStep3() {
+  step.value = 3
+  const amount = subtotal.value + finalShippingCost.value - totalDiscount.value
+  try {
+    paymentFees.value = await $fetch<Record<string, number>>('/api/payment/fees', { query: { amount } })
+  } catch {
+    paymentFees.value = {}
+  }
+}
+
 function storeWeight(storeId: string | null) {
   const key = storeId || 'null'
   const items = groupedByStore.value.find(g => (g.storeId || 'null') === key)?.items || []
@@ -602,30 +707,52 @@ async function loadShipping() {
   try {
     for (const g of groupedByStore.value) {
       const key = g.storeId || 'null'
-      if (!shippingState[key]) shippingState[key] = { courierCode: 'jne', services: [], selected: null }
-      else shippingState[key].selected = null
+      // Tujuan/berat berubah tiap kali step ini dimasuki (alamat bisa diganti di step
+      // sebelumnya) — cache byCourier lama sudah tidak relevan, mulai dari kosong lagi.
+      shippingState[key] = { courierCode: 'jne', services: [], selected: null, byCourier: {} }
     }
-    await Promise.all(groupedByStore.value.map(g => fetchShippingCosts(g.storeId)))
+    // Prefetch semua kurir untuk semua toko sekaligus secara paralel, supaya pindah tab kurir
+    // di UI tinggal baca cache (instan) tanpa query ulang ke RajaOngkir satu per satu.
+    await Promise.all(
+      groupedByStore.value.flatMap(g => couriers.map(c => fetchShippingCosts(g.storeId, c)))
+    )
+    for (const g of groupedByStore.value) {
+      const key = g.storeId || 'null'
+      shippingState[key].services = shippingState[key].byCourier['jne'] || []
+    }
   } finally {
     loadingShipping.value = false
   }
 }
 
-async function fetchShippingCosts(storeId: string | null) {
+async function fetchShippingCosts(storeId: string | null, courier: string) {
   const key = storeId || 'null'
   const state = shippingState[key]
-  const res = await $fetch<any>('/api/shipping/cost', {
-    query: { destination: form.cityId, weight: storeWeight(storeId), courier: state.courierCode, storeId: storeId || undefined }
-  })
-  state.services = res.services || []
+  try {
+    const res = await $fetch<any>('/api/shipping/cost', {
+      query: { destination: form.cityId, weight: storeWeight(storeId), courier, storeId: storeId || undefined }
+    })
+    state.byCourier[courier] = res.services || []
+  } catch {
+    // Kegagalan genuine (bukan "tidak ada layanan" — itu sudah ditangani sebagai array kosong
+    // di server/utils/shipping.ts) tetap ditandai gagal, bukan kosong, supaya tab-nya tidak
+    // salah tertandai "tidak tersedia" padahal cuma error sesaat.
+    delete state.byCourier[courier]
+  }
 }
 
-async function selectCourier(storeId: string | null, code: string) {
+function courierUnavailable(storeId: string | null, courier: string) {
   const key = storeId || 'null'
-  shippingState[key].courierCode = code
-  shippingState[key].selected = null
-  loadingShipping.value = true
-  await fetchShippingCosts(storeId).finally(() => { loadingShipping.value = false })
+  const cached = shippingState[key]?.byCourier[courier]
+  return Array.isArray(cached) && cached.length === 0
+}
+
+function selectCourier(storeId: string | null, code: string) {
+  const key = storeId || 'null'
+  const state = shippingState[key]
+  state.courierCode = code
+  state.selected = null
+  state.services = state.byCourier[code] || []
 }
 
 function formatPrice(n: number) {
