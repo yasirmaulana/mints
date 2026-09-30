@@ -83,13 +83,52 @@
             <h2 class="text-2xl font-normal tracking-tight">Alamat Pengiriman</h2>
           </div>
 
-          <div class="space-y-4">
+          <!-- Alamat tersimpan: pilih salah satu, atau tambah alamat baru -->
+          <div v-if="savedAddresses.length && !showAddressForm" class="space-y-3">
+            <button
+              v-for="a in savedAddresses"
+              :key="a.id"
+              class="w-full text-left rounded-3xl p-4 transition-all"
+              :style="selectedAddressId === a.id ? 'background:#090b0c;color:white' : 'background:white;color:#090b0c'"
+              @click="chooseSavedAddress(a)"
+            >
+              <div class="flex items-center gap-2">
+                <span
+                  class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
+                  :style="selectedAddressId === a.id ? 'border-color:rgba(255,255,255,0.6)' : 'border-color:rgba(9,11,12,0.2)'"
+                >
+                  <span v-if="selectedAddressId === a.id" class="w-2 h-2 rounded-full" style="background:white" />
+                </span>
+                <p class="text-sm font-normal">{{ a.label || a.cityName }}</p>
+                <span v-if="a.isDefault" class="text-xs px-2 py-0.5 rounded-full" :style="selectedAddressId === a.id ? 'background:rgba(255,255,255,0.2)' : 'background:rgba(9,11,12,0.06)'">Utama</span>
+              </div>
+              <p class="text-sm mt-2 pl-6" :style="selectedAddressId === a.id ? 'color:rgba(255,255,255,0.75)' : 'color:rgba(9,11,12,0.6)'">{{ a.address }}</p>
+              <p class="text-xs mt-1 pl-6" :style="selectedAddressId === a.id ? 'color:rgba(255,255,255,0.55)' : 'color:rgba(9,11,12,0.4)'">{{ a.cityName }}</p>
+            </button>
+
+            <button
+              class="w-full rounded-full py-3 text-sm font-normal transition-opacity"
+              style="background:rgba(9,11,12,0.05);color:#090b0c"
+              @click="openNewAddressForm"
+            >+ Tambah Alamat Baru</button>
+
+            <button
+              class="w-full rounded-full py-3.5 text-sm font-normal transition-opacity"
+              :style="canStep1 ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.08);color:rgba(9,11,12,0.35);cursor:not-allowed'"
+              :disabled="!canStep1"
+              @click="canStep1 && loadShipping()"
+            >Cek Ongkir</button>
+          </div>
+
+          <!-- Form alamat baru -->
+          <div v-else class="space-y-4">
+            <button v-if="savedAddresses.length" class="text-sm mb-1" style="color:rgba(9,11,12,0.5)" @click="showAddressForm = false">← Pilih dari alamat tersimpan</button>
             <div>
               <label class="block text-sm font-normal mb-2" style="color:rgba(9,11,12,0.6)">Alamat Lengkap</label>
               <textarea v-model="form.address" rows="3" placeholder="Jl. Contoh No. 1, RT/RW, Kelurahan, Kecamatan" class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none resize-none" style="background:white;border:1px solid rgba(9,11,12,0.12);color:#090b0c" />
             </div>
             <div>
-              <label class="block text-sm font-normal mb-2" style="color:rgba(9,11,12,0.6)">Kota / Kabupaten</label>
+              <label class="block text-sm font-normal mb-2" style="color:rgba(9,11,12,0.6)">Kelurahan/ Kecamatan/ Kabupaten/ Kota</label>
               <div class="relative">
                 <input
                   v-model="citySearch"
@@ -114,9 +153,14 @@
               </div>
               <p v-if="form.cityName" class="text-xs mt-2 font-normal" style="color:rgba(9,11,12,0.5)">Dipilih: {{ form.cityName }}</p>
             </div>
+            <label class="flex items-center gap-2 text-sm" style="color:rgba(9,11,12,0.6)">
+              <input v-model="saveNewAddress" type="checkbox" class="rounded" />
+              Simpan alamat ini untuk checkout berikutnya
+            </label>
           </div>
 
           <button
+            v-if="!savedAddresses.length || showAddressForm"
             class="w-full rounded-full py-3.5 text-sm font-normal transition-opacity"
             :style="canStep1 ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.08);color:rgba(9,11,12,0.35);cursor:not-allowed'"
             :disabled="!canStep1"
@@ -408,6 +452,45 @@ const form = reactive({
 const citySearch = ref('')
 const cities = ref<any[]>([])
 const showCityDropdown = ref(false)
+
+// Alamat tersimpan milik buyer login — dipilih atau ditambah baru (lihat pembahasan checkout alamat).
+const savedAddresses = ref<any[]>([])
+const selectedAddressId = ref<string | null>(null)
+const showAddressForm = ref(false)
+const saveNewAddress = ref(true)
+
+async function loadSavedAddresses() {
+  try {
+    savedAddresses.value = await $fetch<any[]>('/api/buyer/addresses')
+  } catch {
+    savedAddresses.value = []
+  }
+  if (savedAddresses.value.length) {
+    const def = savedAddresses.value.find(a => a.isDefault) || savedAddresses.value[0]
+    chooseSavedAddress(def)
+  } else {
+    showAddressForm.value = true
+  }
+}
+
+function chooseSavedAddress(a: any) {
+  selectedAddressId.value = a.id
+  showAddressForm.value = false
+  form.address = a.address
+  form.cityId = a.cityId
+  form.cityName = a.cityName
+  citySearch.value = a.cityName
+}
+
+function openNewAddressForm() {
+  selectedAddressId.value = null
+  showAddressForm.value = true
+  form.address = ''
+  form.cityId = ''
+  form.cityName = ''
+  citySearch.value = ''
+  saveNewAddress.value = true
+}
 // Satu entri per toko (storeId | 'null'): pengiriman dipilih per toko, PRD §11 Fase 5
 const shippingState = reactive<Record<string, { courierCode: string; services: any[]; selected: any }>>({})
 // Satu entri per toko: kode voucher diinput manual, divalidasi via /api/vouchers/validate
@@ -454,6 +537,7 @@ onMounted(async () => {
     if (!form.buyerName) form.buyerName = user.value.name
     if (!form.buyerPhone) form.buyerPhone = user.value.phone
   }
+  await loadSavedAddresses()
 })
 
 // Daftar metode gateway ada di shared/utils/payment-methods.ts (dipakai juga oleh server untuk validasi).
@@ -574,6 +658,7 @@ async function placeOrder() {
         address: form.address,
         cityId: form.cityId,
         cityName: form.cityName,
+        saveAddress: showAddressForm.value && saveNewAddress.value,
         shippingByStore,
         voucherByStore,
         totalSubtotal: subtotal.value,

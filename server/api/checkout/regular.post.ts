@@ -207,5 +207,31 @@ export default defineEventHandler(async (event) => {
     return createdOrders
   })
 
+  // Simpan alamat baru untuk buyer login (best-effort — kegagalan di sini tidak boleh
+  // menggagalkan checkout yang sudah sukses). Tidak dobel kalau alamat identik sudah ada.
+  if (buyerId && body.saveAddress) {
+    try {
+      const dup = await prisma.address.findFirst({
+        where: { buyerId, address: body.address, cityId: body.cityId }
+      })
+      if (!dup) {
+        const existingCount = await prisma.address.count({ where: { buyerId } })
+        await prisma.address.create({
+          data: {
+            buyerId,
+            recipientName: body.buyerName,
+            phone: body.buyerPhone,
+            address: body.address,
+            cityId: body.cityId,
+            cityName: body.cityName,
+            isDefault: existingCount === 0
+          }
+        })
+      }
+    } catch {
+      // abaikan — pesanan tetap berhasil dibuat
+    }
+  }
+
   return { success: true, orders }
 })

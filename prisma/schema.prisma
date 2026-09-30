@@ -151,6 +151,24 @@ model Buyer {
   updatedAt DateTime  @updatedAt
   orders    Order[]
   stores    Store[]
+  addresses Address[]
+}
+
+model Address {
+  id            String   @id @default(uuid())
+  buyerId       String
+  buyer         Buyer    @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  label         String?
+  recipientName String
+  phone         String
+  address       String
+  cityId        String
+  cityName      String
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([buyerId])
 }
 
 model EmailOtp {
