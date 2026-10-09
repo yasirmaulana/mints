@@ -112,21 +112,6 @@
         >{{ savingProfile ? 'Menyimpan…' : 'Simpan Profil' }}</button>
 
         <div v-if="profileMessage" class="rounded-2xl p-4 text-sm" :style="profileMessage.type === 'success' ? 'background:rgba(34,197,94,0.1);color:rgb(22,163,74)' : 'background:rgba(239,68,68,0.08);color:rgb(185,28,28)'">{{ profileMessage.text }}</div>
-
-        <div class="border-t pt-6" style="border-color:rgba(9,11,12,0.08)">
-          <p class="text-sm font-normal mb-4">Ubah Password</p>
-          <div class="grid gap-4 sm:grid-cols-2">
-            <input v-model="password.current" type="password" placeholder="Password lama" class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none" style="background:#f5f5f2;border:1px solid rgba(9,11,12,0.12);color:#090b0c" />
-            <input v-model="password.new" type="password" placeholder="Password baru" class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none" style="background:#f5f5f2;border:1px solid rgba(9,11,12,0.12);color:#090b0c" />
-          </div>
-          <button
-            class="w-full mt-4 rounded-full py-3.5 text-sm font-normal transition-opacity"
-            :style="canChangePassword ? 'background:#090b0c;color:white' : 'background:rgba(9,11,12,0.08);color:rgba(9,11,12,0.35);cursor:not-allowed'"
-            :disabled="!canChangePassword || savingPassword"
-            @click="savePassword"
-          >{{ savingPassword ? 'Menyimpan…' : 'Ubah Password' }}</button>
-          <div v-if="passwordMessage" class="mt-4 rounded-2xl p-4 text-sm" :style="passwordMessage.type === 'success' ? 'background:rgba(34,197,94,0.1);color:rgb(22,163,74)' : 'background:rgba(239,68,68,0.08);color:rgb(185,28,28)'">{{ passwordMessage.text }}</div>
-        </div>
       </div>
     </main>
   </div>
@@ -153,17 +138,12 @@ const originalProfile = reactive({ name: '', email: '', phone: '', gender: '', b
 const savingProfile = ref(false)
 const profileMessage = ref<{ type: string; text: string } | null>(null)
 
-const password = reactive({ current: '', new: '' })
-const savingPassword = ref(false)
-const passwordMessage = ref<{ type: string; text: string } | null>(null)
-
 const profileChanged = computed(() => {
   return profile.name !== originalProfile.name ||
     profile.phone !== originalProfile.phone ||
     profile.gender !== originalProfile.gender ||
     profile.birthDate !== originalProfile.birthDate
 })
-const canChangePassword = computed(() => password.current.length >= 6 && password.new.length >= 6)
 
 onMounted(async () => {
   await fetchMe()
@@ -231,24 +211,6 @@ async function verifyEmailChange() {
     emailMessage.value = { type: 'error', text: err?.data?.statusMessage || 'Gagal memverifikasi kode' }
   } finally {
     emailForm.loading = false
-  }
-}
-
-async function savePassword() {
-  savingPassword.value = true
-  passwordMessage.value = null
-  try {
-    await $fetch('/api/buyer/password', {
-      method: 'PATCH',
-      body: { currentPassword: password.current, newPassword: password.new }
-    })
-    password.current = ''
-    password.new = ''
-    passwordMessage.value = { type: 'success', text: 'Password berhasil diubah' }
-  } catch (err: any) {
-    passwordMessage.value = { type: 'error', text: err?.data?.statusMessage || 'Gagal mengubah password' }
-  } finally {
-    savingPassword.value = false
   }
 }
 </script>
