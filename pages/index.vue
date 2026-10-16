@@ -126,19 +126,9 @@
 
         <!-- Produk -->
         <section id="produk" class="mt-3 scroll-mt-24">
-          <div class="sticky top-[57px] z-30 -mx-3 flex flex-wrap items-center justify-between gap-2 px-3 py-2 md:top-[89px] md:mx-0 md:px-0" style="background:#f5f5f2">
-            <h2 class="text-sm font-bold uppercase tracking-wider" style="color:rgba(9,11,12,0.6)">
-              {{ search ? `Hasil "${search}"` : 'Untuk Kamu' }}
-            </h2>
-            <div class="flex gap-1 rounded-full p-1" style="background:rgba(9,11,12,0.08)">
-              <button
-                v-for="f in typeFilters" :key="f.value"
-                class="rounded-full px-3 py-1 text-xs transition-all"
-                :style="activeType === f.value ? 'background:#090b0c;color:white' : 'color:rgba(9,11,12,0.6)'"
-                @click="activeType = f.value"
-              >{{ f.label }}</button>
-            </div>
-          </div>
+          <h2 class="py-3 text-center text-base font-bold uppercase tracking-wider md:text-lg" style="color:#090b0c">
+            {{ search ? `Hasil "${search}"` : 'Rekomendasi' }}
+          </h2>
 
           <div v-if="pending" class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             <div v-for="i in 10" :key="i" class="aspect-[3/4] animate-pulse rounded-xl" style="background:rgba(9,11,12,0.06)" />
@@ -146,14 +136,15 @@
 
           <div v-else-if="!filteredProducts.length" class="rounded-xl bg-white py-20 text-center">
             <p class="text-lg" style="color:rgba(9,11,12,0.5)">Tidak ada produk ditemukan</p>
-            <button class="mt-3 text-sm underline underline-offset-4" style="color:rgba(9,11,12,0.5)" @click="search = ''; activeType = 'ALL'">Reset filter</button>
+            <button class="mt-3 text-sm underline underline-offset-4" style="color:rgba(9,11,12,0.5)" @click="search = ''">Reset pencarian</button>
           </div>
 
           <div v-else class="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             <NuxtLink
-              v-for="product in visibleProducts" :key="product.id"
+              v-for="(product, i) in visibleProducts" :key="product.id"
               :to="`/products/${product.id}`"
-              class="group flex flex-col overflow-hidden rounded-xl bg-white transition-shadow hover:shadow-lg"
+              class="group flex-col overflow-hidden rounded-xl bg-white transition-shadow hover:shadow-lg"
+              :class="rowClass(i)"
             >
               <div class="relative aspect-square overflow-hidden" style="background:rgba(9,11,12,0.05)">
                 <img
@@ -184,8 +175,20 @@
             </NuxtLink>
           </div>
 
-          <div v-if="filteredProducts.length > visibleCount" class="mt-4 text-center">
-            <button class="rounded-full border bg-white px-10 py-2.5 text-sm" style="border-color:rgba(9,11,12,0.15)" @click="visibleCount += PAGE_SIZE">Lihat Lainnya</button>
+          <!-- Produk lainnya hanya untuk pengguna yang sudah login -->
+          <div v-if="filteredProducts.length > 0 && (!isLoggedIn || filteredProducts.length > visibleCount)" class="mt-5 text-center">
+            <button
+              v-if="isLoggedIn"
+              class="rounded-full px-10 py-3 text-sm font-normal transition-opacity hover:opacity-85"
+              style="background:#090b0c;color:white"
+              @click="visibleCount += MAX_PRODUCTS"
+            >Lihat Lainnya</button>
+            <NuxtLink
+              v-else
+              to="/login?redirect=/"
+              class="inline-block rounded-full px-10 py-3 text-sm font-normal transition-opacity hover:opacity-85"
+              style="background:#090b0c;color:white"
+            >Masuk untuk Lihat Lainnya</NuxtLink>
           </div>
         </section>
       </div>
@@ -219,7 +222,6 @@
           <div>
             <p class="mb-4 text-xs font-normal uppercase tracking-[0.16rem]" style="color:rgba(9,11,12,0.4)">Belanja</p>
             <ul class="space-y-3 text-sm" style="color:rgba(9,11,12,0.6)">
-              <li><NuxtLink to="/koleksi" class="transition-colors hover:text-[#090b0c]">Koleksi</NuxtLink></li>
               <li><NuxtLink to="/account/orders" class="transition-colors hover:text-[#090b0c]">Pesanan Saya</NuxtLink></li>
               <li><NuxtLink to="/flash_sale" class="transition-colors hover:text-[#090b0c]">Flash Sale</NuxtLink></li>
               <li><NuxtLink to="/cart" class="transition-colors hover:text-[#090b0c]">Keranjang</NuxtLink></li>
@@ -293,20 +295,21 @@ const { data: flash } = await useAsyncData('home-flash', async () => {
 const flashProducts = computed(() => flash.value?.products ?? [])
 
 const search = ref('')
-const activeType = ref('ALL')
+const { isLoggedIn } = useAuth()
 
-const PAGE_SIZE = 20
-const visibleCount = ref(PAGE_SIZE)
-
-const typeFilters = [
-  { value: 'ALL', label: 'Semua' },
-  { value: 'REGULAR', label: 'Tersedia' },
-  { value: 'PRE_ORDER', label: 'Pre-Order' }
-]
+// 5 baris per breakpoint: 2 kolom (10) → 3 (15) → 4 (20) → 5 (25 produk)
+const MAX_PRODUCTS = 25
+const visibleCount = ref(MAX_PRODUCTS)
+function rowClass(i: number) {
+  if (visibleCount.value > MAX_PRODUCTS) return 'flex' // sudah diperluas: tampilkan semua
+  if (i < 10) return 'flex'
+  if (i < 15) return 'hidden sm:flex'
+  if (i < 20) return 'hidden md:flex'
+  return 'hidden lg:flex'
+}
 
 const filteredProducts = computed(() => {
   let list = products.value ?? []
-  if (activeType.value !== 'ALL') list = list.filter(p => p.productType === activeType.value)
   if (search.value.trim()) {
     const q = search.value.toLowerCase()
     list = list.filter(p => p.title.toLowerCase().includes(q))
@@ -314,7 +317,7 @@ const filteredProducts = computed(() => {
   return list
 })
 const visibleProducts = computed(() => filteredProducts.value.slice(0, visibleCount.value))
-watch([search, activeType], () => { visibleCount.value = PAGE_SIZE })
+watch(search, () => { visibleCount.value = MAX_PRODUCTS })
 
 function isNew(product: Product) {
   return Date.now() - new Date(product.createdAt).getTime() < 14 * 24 * 60 * 60 * 1000

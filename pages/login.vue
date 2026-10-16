@@ -138,7 +138,7 @@ const route = useRoute()
 // `javascript:` dan karakter kontrol (tab/newline dibuang browser sehingga `/\t/host` jadi `//host`).
 const redirect = computed(() => {
   const r = String(route.query.redirect || '')
-  return /^\/(?![\/\\])[^\u0000-\u001f\\]*$/.test(r) ? r : '/account'
+  return /^\/(?![\/\\])[^\u0000-\u001f\\]*$/.test(r) ? r : '/'
 })
 
 const step = ref<'email' | 'otp'>('email')

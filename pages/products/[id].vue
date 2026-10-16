@@ -194,6 +194,7 @@
 <script setup lang="ts">
 const route = useRoute()
 const { addItem, itemCount } = useCart()
+const { isLoggedIn, fetchMe } = useAuth()
 
 interface Variant { id: string; size: string; stock: number }
 interface Product {
@@ -233,8 +234,11 @@ const ctaStyle = computed(() => {
   return 'background:#090b0c;color:white'
 })
 
-function handleAddToCart() {
+async function handleAddToCart() {
   if (!product.value) return
+  // Tambah ke keranjang hanya untuk pembeli yang sudah login
+  if (!isLoggedIn.value) await fetchMe()
+  if (!isLoggedIn.value) return navigateTo(`/login?redirect=${encodeURIComponent(route.fullPath)}`)
   addItem({
     productId: product.value.id,
     storeId: product.value.store?.id ?? null,

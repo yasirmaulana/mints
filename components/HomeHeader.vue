@@ -5,7 +5,6 @@
       <div class="hidden md:block px-8">
         <div class="mx-auto flex max-w-6xl items-center justify-between py-1.5 text-xs" style="color:rgba(9,11,12,0.55)">
           <div class="flex gap-5">
-            <NuxtLink to="/koleksi" class="hover:text-[#090b0c]">Koleksi</NuxtLink>
             <NuxtLink to="/flash_sale" class="hover:text-[#090b0c]">Flash Sale</NuxtLink>
             <NuxtLink to="/tentang-kami" class="hover:text-[#090b0c]">Tentang Kami</NuxtLink>
             <NuxtLink to="/faq" class="hover:text-[#090b0c]">Bantuan</NuxtLink>

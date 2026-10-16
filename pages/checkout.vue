@@ -448,7 +448,7 @@
             <div class="px-5 py-4 space-y-2" style="background:white">
               <p class="text-xs" style="color:rgba(9,11,12,0.45)">Item tersebut sudah dihapus dari keranjang. Silakan pilih produk lain.</p>
               <div class="flex flex-col sm:flex-row gap-2 pt-1">
-                <NuxtLink to="/koleksi" class="flex-1 rounded-full py-2.5 text-sm font-medium text-center transition-colors" style="background:#090b0c;color:white">
+                <NuxtLink to="/" class="flex-1 rounded-full py-2.5 text-sm font-medium text-center transition-colors" style="background:#090b0c;color:white">
                   Lihat Koleksi
                 </NuxtLink>
                 <NuxtLink to="/flash_sale" class="flex-1 rounded-full py-2.5 text-sm font-medium text-center transition-colors" style="background:rgba(9,11,12,0.06);color:#090b0c">

@@ -14,7 +14,7 @@ export default defineOAuthGoogleEventHandler({
     // sameSite 'lax': redirect balik dari Google adalah navigasi lintas-situs.
     await setBuyerSession(event, buyer.id, 'lax')
 
-    return sendRedirect(event, '/account')
+    return sendRedirect(event, '/')
   },
   onError(event, error) {
     console.error('[google-oauth]', error)

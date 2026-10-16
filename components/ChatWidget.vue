@@ -1,6 +1,6 @@
 <template>
   <!-- Floating button -->
-  <div class="fixed bottom-20 md:bottom-6 right-6 z-50">
+  <div v-if="isLoggedIn" class="fixed bottom-20 md:bottom-6 right-6 z-50">
     <Transition name="fade">
       <div
         v-if="open"
@@ -88,6 +88,9 @@
 
 <script setup lang="ts">
 const props = defineProps<{ productId?: string; orderId?: string }>()
+
+// Chat hanya untuk pembeli yang sudah login
+const { user, isLoggedIn, fetchMe } = useAuth()
 
 const open = ref(false)
 const storageKey = props.productId || 'global'
@@ -232,7 +235,8 @@ watch(open, async (val) => {
 })
 
 onMounted(async () => {
-  if (sessionId.value) {
+  if (!user.value) await fetchMe()
+  if (isLoggedIn.value && sessionId.value) {
     await loadMessages()
     startPolling()
   }

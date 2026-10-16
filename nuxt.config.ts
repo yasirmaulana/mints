@@ -8,6 +8,11 @@ export default defineNuxtConfig({
   },
   devtools: { enabled: false },
 
+  // Halaman /koleksi sudah dihapus; arahkan tautan lama ke beranda
+  routeRules: {
+    '/koleksi': { redirect: '/' }
+  },
+
   css: ['~/assets/css/main.css'],
 
   app: {
