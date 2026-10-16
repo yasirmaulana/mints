@@ -155,6 +155,12 @@
                 <span v-else-if="product.variants?.length > 0 && !selectedVariant">Pilih Ukuran Dulu</span>
                 <span v-else>Tambah ke Keranjang</span>
               </button>
+              <button
+                v-if="product.store"
+                class="shrink-0 rounded-full px-5 py-3.5 text-sm font-normal border transition-opacity hover:opacity-70"
+                style="border-color:rgba(9,11,12,0.2);color:#090b0c"
+                @click="openChat(product.store.id)"
+              >Chat Penjual</button>
               <NuxtLink
                 v-if="itemCount > 0"
                 to="/cart"
@@ -186,7 +192,7 @@
 
     <!-- Chat widget -->
     <ClientOnly>
-      <ChatWidget v-if="product" :product-id="product.id" />
+      <ChatWidget />
     </ClientOnly>
   </div>
 </template>
@@ -195,6 +201,7 @@
 const route = useRoute()
 const { addItem, itemCount } = useCart()
 const { isLoggedIn, fetchMe } = useAuth()
+const { openChat } = useChat()
 
 interface Variant { id: string; size: string; stock: number }
 interface Product {

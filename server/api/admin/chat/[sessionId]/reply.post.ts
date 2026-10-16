@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const session = await prisma.chatSession.findUnique({ where: { id: sessionId } })
-  if (!session) throw createError({ statusCode: 404, statusMessage: 'Session tidak ditemukan' })
+  if (!session || session.buyerId) throw createError({ statusCode: 404, statusMessage: 'Session tidak ditemukan' })
 
   const msg = await prisma.chatMessage.create({
     data: { sessionId, sender: 'admin', body: body.message.trim() }

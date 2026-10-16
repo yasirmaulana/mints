@@ -24,6 +24,7 @@
             </div>
             <p v-if="store.cityName" class="text-sm" style="color:rgba(9,11,12,0.5)">{{ store.cityName }}</p>
           </div>
+          <button class="ml-auto rounded-full border px-5 py-2.5 text-sm transition-opacity hover:opacity-70" style="border-color:rgba(9,11,12,0.2);background:white" @click="openChat(store.id)">Chat Penjual</button>
         </div>
 
         <div v-if="store.bannerUrl || store.description" class="rounded-3xl p-6 mb-10" style="background:white">
@@ -108,6 +109,9 @@
         </div>
       </main>
     </template>
+    <ClientOnly>
+      <ChatWidget />
+    </ClientOnly>
   </div>
 </template>
 
@@ -115,6 +119,7 @@
 const route = useRoute()
 const slug = String(route.params.slug)
 const { itemCount } = useCart()
+const { openChat } = useChat()
 
 interface StoreProfile {
   id: string; name: string; slug: string; description: string | null

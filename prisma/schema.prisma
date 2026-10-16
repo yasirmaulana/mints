@@ -174,18 +174,19 @@ model WaTemplate {
 }
 
 model Buyer {
-  id        String    @id @default(uuid())
-  name      String
-  email     String?   @unique
-  phone     String?   @unique
-  password  String?
-  gender    String?
-  birthDate DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  orders    Order[]
-  stores    Store[]
-  addresses Address[]
+  id           String        @id @default(uuid())
+  name         String
+  email        String?       @unique
+  phone        String?       @unique
+  password     String?
+  gender       String?
+  birthDate    DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  orders       Order[]
+  stores       Store[]
+  addresses    Address[]
+  chatSessions ChatSession[]
 }
 
 model Address {
@@ -301,20 +302,32 @@ model StoreSettings {
   value String
 }
 
+// Percakapan pembeli ↔ toko: satu thread per pasangan (buyerId, storeId), seperti chat marketplace.
+// Baris lama (buyerId null) adalah chat tamu berbasis nomor HP yang dilayani admin platform — hanya dibaca.
 model ChatSession {
-  id         String        @id @default(uuid())
-  buyerPhone String
-  buyerName  String
-  productId  String?
-  orderId    String?
+  id            String        @id @default(uuid())
+  buyerPhone    String
+  buyerName     String
+  productId     String?
+  orderId       String?
   // null = chat lama sebelum multi-toko, diarahkan ke admin platform
-  storeId    String?
-  isRead     Boolean       @default(false)
-  messages   ChatMessage[]
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  storeId       String?
+  store         Store?        @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  buyerId       String?
+  buyer         Buyer?        @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  isRead        Boolean       @default(false)
+  // Kolom turunan untuk daftar percakapan & badge (diperbarui tiap pesan masuk/dibaca)
+  lastMessage   String        @default("")
+  lastMessageAt DateTime      @default(now())
+  buyerUnread   Int           @default(0)
+  sellerUnread  Int           @default(0)
+  messages      ChatMessage[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
-  @@index([storeId])
+  @@unique([buyerId, storeId])
+  @@index([storeId, lastMessageAt])
+  @@index([buyerId, lastMessageAt])
 }
 
 model ChatMessage {
@@ -382,6 +395,7 @@ model Store {
   media         StoreMedia[]
   subscriptions Subscription[]
   vouchers      Voucher[]
+  chatSessions  ChatSession[]
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 

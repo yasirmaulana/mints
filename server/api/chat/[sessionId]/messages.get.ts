@@ -5,7 +5,8 @@ export default defineEventHandler(async (event) => {
   const { after } = getQuery(event)
 
   const session = await prisma.chatSession.findUnique({ where: { id: sessionId } })
-  if (!session) throw createError({ statusCode: 404, statusMessage: 'Session tidak ditemukan' })
+  // Endpoint ini hanya untuk chat tamu lama; thread pembeli ↔ toko lewat /api/chat/threads
+  if (!session || session.buyerId) throw createError({ statusCode: 404, statusMessage: 'Session tidak ditemukan' })
 
   const where: Record<string, any> = { sessionId }
   if (after) {

@@ -1,255 +1,63 @@
 <template>
-  <!-- Floating button -->
-  <div v-if="isLoggedIn" class="fixed bottom-20 md:bottom-6 right-6 z-50">
-    <Transition name="fade">
+  <div v-if="isLoggedIn">
+    <!-- Bar peluncur -->
+    <button
+      v-if="!open"
+      class="fixed bottom-20 right-4 z-50 flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold shadow-lg md:bottom-0 md:right-6 md:rounded-b-none md:rounded-t-xl"
+      style="background:#090b0c;color:white"
+      @click="open = true"
+    >
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.4A8 8 0 1121 12z"/></svg>
+      Chat
+      <span v-if="unread > 0" class="flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-bold" style="background:#ef4444;color:white">{{ unread > 99 ? '99+' : unread }}</span>
+    </button>
+
+    <!-- Panel -->
+    <Transition name="chat">
       <div
         v-if="open"
-        class="absolute bottom-16 right-0 w-80 rounded-2xl shadow-2xl border overflow-hidden flex flex-col"
-        style="height: 420px; background: #ffffff; border-color: rgba(9,11,12,0.12)"
+        class="fixed inset-0 z-[60] flex flex-col bg-white md:inset-auto md:bottom-0 md:right-6 md:h-[560px] md:max-h-[85vh] md:w-[740px] md:rounded-t-xl md:shadow-2xl"
+        style="border:1px solid rgba(9,11,12,0.1)"
       >
-        <!-- Header -->
-        <div class="flex items-center justify-between px-4 py-3 flex-shrink-0" style="background: #090b0c">
-          <div>
-            <p class="font-semibold text-sm text-white">Chat dengan Seller</p>
-            <p class="text-xs" style="color:rgba(255,255,255,0.7)">Biasanya balas dalam 1 jam</p>
-          </div>
-          <button style="color:rgba(255,255,255,0.7)" class="hover:text-white transition-colors" @click="open = false">✕</button>
+        <div class="flex items-center justify-between border-b px-4 py-3" style="border-color:rgba(9,11,12,0.08)">
+          <p class="text-base font-bold">Chat <span v-if="unread > 0" class="text-xs font-normal" style="color:#ef4444">({{ unread }})</span></p>
+          <button class="flex h-7 w-7 items-center justify-center rounded hover:bg-black/5" aria-label="Tutup chat" @click="open = false">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
         </div>
-
-        <!-- Identity form (before session started) -->
-        <div v-if="!sessionId" class="flex-1 p-4 flex flex-col gap-3 justify-center">
-          <p class="text-sm text-center" style="color:rgba(9,11,12,0.5)">Perkenalkan diri kamu dulu ya!</p>
-          <input v-model="nameInput" type="text" placeholder="Nama kamu" class="w-full rounded-lg border px-3 py-2 text-sm outline-none" style="background:#f5f5f2;border-color:rgba(9,11,12,0.15);color:#090b0c" @keydown.enter="phoneInput && startChat()" />
-          <input v-model="phoneInput" type="tel" placeholder="Nomor WhatsApp" class="w-full rounded-lg border px-3 py-2 text-sm outline-none" style="background:#f5f5f2;border-color:rgba(9,11,12,0.15);color:#090b0c" @keydown.enter="nameInput && startChat()" />
-          <input v-model="firstMessage" type="text" placeholder="Pesan pertama..." class="w-full rounded-lg border px-3 py-2 text-sm outline-none" style="background:#f5f5f2;border-color:rgba(9,11,12,0.15);color:#090b0c" @keydown.enter="startChat()" />
-          <p v-if="startError" class="text-xs text-center" style="color:#991b1b">{{ startError }}</p>
-          <button
-            class="w-full py-2 rounded-lg text-sm font-semibold transition-opacity"
-            :class="canStart ? 'opacity-100' : 'opacity-40'"
-            :disabled="!canStart || starting"
-            style="background:#090b0c;color:white"
-            @click="startChat"
-          >{{ starting ? 'Memulai...' : 'Mulai Chat' }}</button>
-        </div>
-
-        <!-- Messages -->
-        <div v-else ref="messagesEl" class="flex-1 overflow-y-auto p-3 space-y-2">
-          <div
-            v-for="msg in messages"
-            :key="msg.id"
-            class="flex"
-            :class="msg.sender === 'buyer' ? 'justify-end' : 'justify-start'"
-          >
-            <div
-              class="max-w-[75%] rounded-2xl px-3 py-2 text-sm"
-              :style="msg.sender === 'buyer'
-                ? 'background:#090b0c;color:white;border-bottom-right-radius:4px'
-                : 'background:rgba(9,11,12,0.06);color:#090b0c;border-bottom-left-radius:4px'"
-            >
-              {{ msg.body }}
-              <p class="text-xs mt-0.5 opacity-60">{{ formatTime(msg.createdAt) }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Input -->
-        <div v-if="sessionId" class="p-3 border-t flex gap-2 flex-shrink-0" style="border-color:rgba(9,11,12,0.1)">
-          <input
-            v-model="newMessage"
-            type="text"
-            placeholder="Ketik pesan..."
-            class="flex-1 rounded-lg border px-3 py-2 text-sm focus:outline-none"
-            style="background:#f5f5f2;border-color:rgba(9,11,12,0.15);color:#090b0c"
-            @keydown.enter="sendMessage"
-          />
-          <button
-            class="px-3 py-2 rounded-lg text-sm font-semibold transition-opacity hover:opacity-80"
-            style="background:#090b0c;color:white"
-            @click="sendMessage"
-          >→</button>
+        <div class="min-h-0 flex-1">
+          <ChatPane mode="buyer" :initial-store-id="pendingStoreId" @unread="n => (unread = n)" />
         </div>
       </div>
     </Transition>
-
-    <!-- FAB -->
-    <button
-      class="w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 relative"
-      style="background: var(--brand-400); color: white"
-      @click="open = !open"
-    >
-      <span class="text-xl">💬</span>
-      <span
-        v-if="!open && unread"
-        class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold"
-      >{{ unread }}</span>
-    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ productId?: string; orderId?: string }>()
-
-// Chat hanya untuk pembeli yang sudah login
+// Chat pembeli ↔ pemilik toko. Hanya tampil untuk pembeli yang sudah login.
 const { user, isLoggedIn, fetchMe } = useAuth()
-
-const open = ref(false)
-const storageKey = props.productId || 'global'
-// Sesi butuh token akses dari server. Sesi lama (tersimpan tanpa token) tidak bisa dipakai lagi,
-// jadi diperlakukan sebagai belum ada sesi dan pembeli memulai chat baru.
-const storedSession = typeof localStorage !== 'undefined' ? localStorage.getItem(`chat-session-${storageKey}`) || '' : ''
-const storedToken = typeof localStorage !== 'undefined' ? localStorage.getItem(`chat-token-${storageKey}`) || '' : ''
-const sessionId = ref(storedSession && storedToken ? storedSession : '')
-const chatToken = ref(sessionId.value ? storedToken : '')
-const chatHeaders = () => ({ 'x-chat-token': chatToken.value })
-
-function resetSession() {
-  stopPolling()
-  sessionId.value = ''
-  chatToken.value = ''
-  messages.value = []
-  lastCreatedAt = ''
-  localStorage.removeItem(`chat-session-${storageKey}`)
-  localStorage.removeItem(`chat-token-${storageKey}`)
-}
-const messages = ref<any[]>([])
-const newMessage = ref('')
-const nameInput = ref('')
-const phoneInput = ref('')
-const firstMessage = ref('')
-const starting = ref(false)
-const startError = ref('')
+const { open, pendingStoreId } = useChat()
 const unread = ref(0)
-const messagesEl = ref<HTMLElement>()
 
-const canStart = computed(() => nameInput.value.trim().length >= 2 && /^(08|628)/.test(phoneInput.value) && firstMessage.value.trim())
-
-let pollTimer: ReturnType<typeof setTimeout> | null = null
-let lastCreatedAt = ''
-
-async function startChat() {
-  if (!canStart.value || starting.value) return
-  starting.value = true
-  startError.value = ''
-  try {
-    const res = await $fetch<any>('/api/chat/start', {
-      method: 'POST',
-      body: {
-        buyerName: nameInput.value.trim(),
-        buyerPhone: phoneInput.value.trim(),
-        message: firstMessage.value.trim(),
-        productId: props.productId || null,
-        orderId: props.orderId || null
-      }
-    })
-    sessionId.value = res.sessionId
-    chatToken.value = res.token
-    localStorage.setItem(`chat-session-${storageKey}`, res.sessionId)
-    localStorage.setItem(`chat-token-${storageKey}`, res.token)
-    await loadMessages()
-    startPolling()
-  } catch (err: any) {
-    startError.value = err?.data?.statusMessage || 'Gagal memulai chat, coba lagi'
-  } finally {
-    starting.value = false
-  }
+// Saat panel ditutup, cek jumlah pesan belum dibaca secara berkala (panel terbuka melaporkan sendiri)
+let timer: ReturnType<typeof setInterval> | null = null
+async function pollUnread() {
+  if (open.value || document.hidden || !isLoggedIn.value) return
+  try { unread.value = (await $fetch<{ count: number }>('/api/chat/threads/unread-count')).count } catch { /* abaikan */ }
 }
 
-async function sendMessage() {
-  if (!newMessage.value.trim() || !sessionId.value) return
-  const body = newMessage.value.trim()
-  newMessage.value = ''
-  // Optimistic update
-  messages.value.push({ id: `tmp-${Date.now()}`, sender: 'buyer', body, createdAt: new Date().toISOString() })
-  nextTick(() => {
-    if (messagesEl.value) messagesEl.value.scrollTop = messagesEl.value.scrollHeight
-  })
-  try {
-    await $fetch(`/api/chat/${sessionId.value}/messages`, { method: 'POST', body: { message: body }, headers: chatHeaders() })
-  } catch (err: any) {
-    // Token/sesi tidak valid lagi: mulai dari awal supaya pesan tidak terlihat terkirim padahal gagal.
-    if ([403, 404].includes(err?.statusCode ?? err?.status)) resetSession()
-    else messages.value = messages.value.filter((m: any) => !m.id.startsWith('tmp-'))
-  }
-}
-
-async function loadMessages() {
-  if (!sessionId.value) return
-  let res: { messages: any[] }
-  try {
-    res = await $fetch<{ messages: any[] }>(`/api/chat/${sessionId.value}/messages`, { headers: chatHeaders() })
-  } catch (err: any) {
-    if ([403, 404].includes(err?.statusCode ?? err?.status)) resetSession()
-    return
-  }
-  messages.value = res.messages
-  if (res.messages.length) lastCreatedAt = res.messages[res.messages.length - 1].createdAt
-  nextTick(() => {
-    if (messagesEl.value) messagesEl.value.scrollTop = messagesEl.value.scrollHeight
-  })
-}
-
-async function pollMessages() {
-  if (!sessionId.value) return
-  try {
-    const url = lastCreatedAt
-      ? `/api/chat/${sessionId.value}/messages?after=${encodeURIComponent(lastCreatedAt)}`
-      : `/api/chat/${sessionId.value}/messages`
-    const res = await $fetch<{ messages: any[] }>(url, { headers: chatHeaders() })
-    if (res.messages.length) {
-      const existingIds = new Set(messages.value.filter((m: any) => !m.id.startsWith('tmp-')).map((m: any) => m.id))
-      const incoming = res.messages.filter((m: any) => !existingIds.has(m.id))
-      if (incoming.length) {
-        messages.value = messages.value.filter((m: any) => !m.id.startsWith('tmp-'))
-        messages.value.push(...incoming)
-        lastCreatedAt = incoming[incoming.length - 1].createdAt
-        if (!open.value) unread.value += incoming.filter((m: any) => m.sender === 'admin').length
-        nextTick(() => {
-          if (messagesEl.value) messagesEl.value.scrollTop = messagesEl.value.scrollHeight
-        })
-      }
-    }
-  } catch (err: any) {
-    // Token ditolak / sesi hilang: berhenti polling, jangan mengulang request yang pasti gagal.
-    if ([403, 404].includes(err?.statusCode ?? err?.status)) { resetSession(); return }
-  }
-  pollTimer = setTimeout(pollMessages, 3000)
-}
-
-function startPolling() {
-  if (pollTimer) clearTimeout(pollTimer)
-  pollTimer = setTimeout(pollMessages, 3000)
-}
-
-function stopPolling() {
-  if (pollTimer) { clearTimeout(pollTimer); pollTimer = null }
-}
-
-watch(open, async (val) => {
-  if (val) {
-    unread.value = 0
-    if (sessionId.value && !messages.value.length) await loadMessages()
-    if (sessionId.value) startPolling()
-  } else {
-    stopPolling()
-  }
-})
+// tujuan toko sudah dipakai ChatPane; kosongkan agar tidak terbuka ulang
+watch(open, (v) => { if (!v) pendingStoreId.value = null })
 
 onMounted(async () => {
   if (!user.value) await fetchMe()
-  if (isLoggedIn.value && sessionId.value) {
-    await loadMessages()
-    startPolling()
-  }
+  pollUnread()
+  timer = setInterval(pollUnread, 15000)
 })
-
-onUnmounted(() => stopPolling())
-
-function formatTime(d: string) {
-  return new Date(d).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-}
+onBeforeUnmount(() => { if (timer) clearInterval(timer) })
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active { transition: opacity 0.15s, transform 0.15s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(8px); }
+.chat-enter-active, .chat-leave-active { transition: opacity 0.15s, transform 0.15s; }
+.chat-enter-from, .chat-leave-to { opacity: 0; transform: translateY(12px); }
 </style>
