@@ -15,6 +15,8 @@
       <nav class="mb-4 flex flex-wrap items-center gap-1.5 text-xs" style="color:rgba(9,11,12,0.5)">
         <NuxtLink to="/" class="hover:text-[#090b0c]">Beranda</NuxtLink>
         <span>›</span>
+        <NuxtLink to="/kategori" class="hover:text-[#090b0c]">Semua Kategori</NuxtLink>
+        <span>›</span>
         <NuxtLink v-if="activeSub" :to="`/kategori/${parent.slug}`" class="hover:text-[#090b0c]">{{ parent.name }}</NuxtLink>
         <span v-else style="color:#090b0c">{{ parent.name }}</span>
         <template v-if="activeSub"><span>›</span><span style="color:#090b0c">{{ activeSub.name }}</span></template>
@@ -29,6 +31,10 @@
         <!-- ── Sidebar ── -->
         <aside class="hidden lg:block w-56 flex-shrink-0 space-y-8">
           <div>
+            <NuxtLink to="/kategori" class="mb-4 flex items-center gap-1 text-sm font-medium hover:underline">
+              <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              Semua Kategori
+            </NuxtLink>
             <p class="text-[10px] font-bold uppercase tracking-[0.14em] mb-3" style="color:rgba(9,11,12,0.45)">Subkategori</p>
             <div class="space-y-1">
               <NuxtLink :to="`/kategori/${parent.slug}`" class="w-full flex items-center gap-2.5 py-1.5 text-sm text-left transition-colors">
@@ -283,6 +289,7 @@
 
           <!-- Subkategori mobile -->
           <div>
+            <NuxtLink to="/kategori" class="mb-4 flex items-center gap-1 text-sm font-medium" @click="mobileFilter = false">‹ Semua Kategori</NuxtLink>
             <p class="text-[10px] font-bold uppercase tracking-[0.14em] mb-3" style="color:rgba(9,11,12,0.45)">Subkategori</p>
             <div class="space-y-1" @click="mobileFilter = false">
               <NuxtLink :to="`/kategori/${parent.slug}`" class="w-full flex items-center gap-2.5 py-1.5 text-sm text-left transition-colors">

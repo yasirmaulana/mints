@@ -65,7 +65,10 @@
 
         <!-- Kategori: ikon geser horizontal -->
         <section id="kategori" class="mt-3 rounded-xl bg-white p-4">
-          <h2 class="mb-3 text-sm font-bold uppercase tracking-wider" style="color:rgba(9,11,12,0.6)">Kategori</h2>
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="text-sm font-bold uppercase tracking-wider" style="color:rgba(9,11,12,0.6)">Kategori</h2>
+            <NuxtLink to="/kategori" class="text-sm" style="color:rgba(9,11,12,0.6)">Lihat Semua ›</NuxtLink>
+          </div>
           <!-- 2 baris; 3 kolom terlihat di mobile, 5 di desktop; sisanya digeser horizontal (swipe / tombol panah di desktop) -->
           <div v-if="categories?.length" class="relative">
             <div ref="catEl" class="no-scrollbar grid snap-x snap-mandatory grid-flow-col grid-rows-2 auto-cols-[33.333%] gap-y-2 overflow-x-auto md:auto-cols-[20%]" @scroll.passive="updateCatArrows">
@@ -197,7 +200,10 @@
     <!-- Direktori kategori & subkategori -->
     <section v-if="categories?.length" class="px-5 pt-10 md:px-12" style="background:#f5f5f2">
       <div class="mx-auto max-w-6xl border-t pt-8" style="border-color:rgba(9,11,12,0.1)">
-        <h2 class="mb-5 text-sm font-bold" style="color:#090b0c">Kategori</h2>
+        <div class="mb-5 flex items-center justify-between">
+          <h2 class="text-sm font-bold" style="color:#090b0c">Kategori</h2>
+          <NuxtLink to="/kategori" class="text-xs hover:underline" style="color:rgba(9,11,12,0.6)">Semua Kategori ›</NuxtLink>
+        </div>
         <div class="columns-2 gap-8 md:columns-3 lg:columns-5">
           <div v-for="cat in categoriesByName" :key="cat.id" class="mb-5 break-inside-avoid">
             <NuxtLink :to="`/kategori/${cat.slug}`" class="mb-1.5 block text-xs font-bold uppercase tracking-wide hover:underline">{{ cat.name }}</NuxtLink>
@@ -294,7 +300,8 @@ const { data: flash } = await useAsyncData('home-flash', async () => {
 })
 const flashProducts = computed(() => flash.value?.products ?? [])
 
-const search = ref('')
+// ?q= datang dari pencarian di halaman lain (mis. Semua Kategori)
+const search = ref(String(useRoute().query.q ?? ''))
 const { isLoggedIn } = useAuth()
 
 // 5 baris per breakpoint: 2 kolom (10) → 3 (15) → 4 (20) → 5 (25 produk)
