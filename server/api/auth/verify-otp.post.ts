@@ -12,21 +12,9 @@ export default defineEventHandler(async (event) => {
   // apa pun IP-nya (IP bisa berganti-ganti atau dipalsukan).
   await checkRateLimit(`verify-otp-email:${normalizedEmail}`, 5, 15 * 60 * 1000)
 
-  const otp = await prisma.emailOtp.findFirst({
-    where: {
-      email: normalizedEmail,
-      code: String(code).trim(),
-      used: false,
-      expiresAt: { gt: new Date() },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
-
-  if (!otp) {
+  if (!(await consumeOtp(normalizedEmail, String(code), 'BUYER'))) {
     throw createError({ statusCode: 401, statusMessage: 'Kode tidak valid atau sudah kadaluarsa' })
   }
-
-  await prisma.emailOtp.update({ where: { id: otp.id }, data: { used: true } })
 
   // Upsert buyer — login dan register digabung
   let buyer = await prisma.buyer.findUnique({ where: { email: normalizedEmail } })

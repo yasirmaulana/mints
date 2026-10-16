@@ -1,5 +1,3 @@
-const TOKEN_VERSION = 'v1'
-
 export function getSecret(): string {
   const s = useRuntimeConfig().sessionSecret as string
   if (!s) throw createError({ statusCode: 500, statusMessage: 'SESSION_SECRET tidak dikonfigurasi' })
@@ -24,29 +22,62 @@ export async function hmacVerify(secret: string, data: string, sig: string): Pro
   return diff === 0
 }
 
-/** Generate a signed admin session token: "v1.<timestamp>.<hmac>" */
-export async function createAdminToken(): Promise<string> {
-  const ts = Date.now().toString()
-  const secret = getSecret()
-  const sig = await hmacSign(secret, `${TOKEN_VERSION}.${ts}`)
-  return `${TOKEN_VERSION}.${ts}.${sig}`
+// Sesi admin: cookie `admin_session` berisi token bertanda tangan HMAC dengan identitas admin.
+// Format: "a1.<adminId>.<expiryMs>.<hmac>" (prefix "a1" memisahkan dari token pembeli "b1." dan chat "chat.").
+// adminId = id baris Admin, atau ROOT_ADMIN_ID untuk super-admin dari env ADMIN_EMAIL (tanpa baris di tabel).
+const ADMIN_TOKEN_VERSION = 'a1'
+export const ADMIN_SESSION_MAX_AGE_SEC = 60 * 60 * 8
+export const ROOT_ADMIN_ID = 'root'
+
+function rootAdminEmail(): string {
+  return String(useRuntimeConfig().adminEmail || '').trim().toLowerCase()
 }
 
-/** Verify token is valid and not older than maxAgeMs (default 8h) */
-export async function verifyAdminToken(token: string | undefined, maxAgeMs = 8 * 60 * 60 * 1000): Promise<boolean> {
-  if (!token) return false
+/** Cari admin yang boleh login dengan email ini (tabel Admin, atau super-admin env). null = bukan admin. */
+export async function resolveAdminIdByEmail(email: string): Promise<string | null> {
+  const dbAdmin = await prisma.admin.findUnique({ where: { email }, select: { id: true } })
+  if (dbAdmin) return dbAdmin.id
+  const root = rootAdminEmail()
+  return root && root === email ? ROOT_ADMIN_ID : null
+}
+
+export async function createAdminToken(adminId: string): Promise<string> {
+  const exp = Date.now() + ADMIN_SESSION_MAX_AGE_SEC * 1000
+  const payload = `${ADMIN_TOKEN_VERSION}.${adminId}.${exp}`
+  return `${payload}.${await hmacSign(getSecret(), payload)}`
+}
+
+/**
+ * adminId bila token valid, belum kedaluwarsa, DAN admin-nya masih terdaftar (dicek ke DB tiap request
+ * supaya admin yang dihapus langsung kehilangan akses, tidak menunggu token habis). Selain itu null.
+ */
+export async function verifyAdminSession(token: string | undefined): Promise<string | null> {
+  if (!token) return null
   const parts = token.split('.')
-  if (parts.length !== 3 || parts[0] !== TOKEN_VERSION) return false
-  const [, ts, sig] = parts
-  const age = Date.now() - parseInt(ts)
-  if (isNaN(age) || age > maxAgeMs || age < 0) return false
-  const secret = getSecret()
-  return hmacVerify(secret, `${TOKEN_VERSION}.${ts}`, sig)
+  if (parts.length !== 4 || parts[0] !== ADMIN_TOKEN_VERSION) return null
+  const [, adminId, exp, sig] = parts
+  if (!adminId || !(Number(exp) > Date.now())) return null
+  if (!(await hmacVerify(getSecret(), `${ADMIN_TOKEN_VERSION}.${adminId}.${exp}`, sig))) return null
+
+  if (adminId === ROOT_ADMIN_ID) return rootAdminEmail() ? ROOT_ADMIN_ID : null
+  const admin = await prisma.admin.findUnique({ where: { id: adminId }, select: { email: true } })
+  return admin?.email ? adminId : null
 }
 
-export async function requireAdminSession(event: any) {
-  const token = getCookie(event, 'admin_session')
-  if (!(await verifyAdminToken(token))) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-  }
+export async function verifyAdminToken(token: string | undefined): Promise<boolean> {
+  return !!(await verifyAdminSession(token))
+}
+
+/** Pastikan request datang dari admin yang login; kembalikan adminId-nya. */
+export async function requireAdminSession(event: any): Promise<string> {
+  const adminId = await verifyAdminSession(getCookie(event, 'admin_session'))
+  if (!adminId) throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+  return adminId
+}
+
+export function setAdminSession(event: any, token: string) {
+  const opts = { secure: true, sameSite: 'strict', maxAge: ADMIN_SESSION_MAX_AGE_SEC, path: '/' } as const
+  setCookie(event, 'admin_session', token, { ...opts, httpOnly: true })
+  // Flag non-httpOnly agar middleware client tahu status login
+  setCookie(event, 'admin_auth', '1', { ...opts, httpOnly: false })
 }

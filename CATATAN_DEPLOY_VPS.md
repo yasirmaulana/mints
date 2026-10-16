@@ -161,7 +161,8 @@ Semua yang ada di `.env` lokal harus ada di server (Vercel tidak dipakai lagi). 
 | `NUXT_OAUTH_GOOGLE_CLIENT_ID/SECRET` | Tambahkan redirect URI `https://<domain>/auth/google` di Google Cloud Console. |
 | `NUXT_SESSION_PASSWORD` | ≥ 32 karakter (dibutuhkan `nuxt-auth-utils`). |
 | `DATABASE_URL`, `DIRECT_URL` | Bila memakai PgBouncer: `DATABASE_URL` lewat PgBouncer (`?pgbouncer=true`), `DIRECT_URL` langsung ke PostgreSQL untuk `prisma db push`. Bukan URL `prisma://` — Accelerate hanya dipakai bila `DATABASE_URL` berawalan `prisma`. |
-| `ADMIN_SEED_PASSWORD` | Hanya untuk `npm run db:seed` (min. 12 karakter). Tidak ada password bawaan. |
+| `ADMIN_EMAIL` | Super-admin darurat: boleh login via OTP email walau tidak ada di tabel `Admin`. |
+| `ADMIN_SEED_EMAIL` | Hanya untuk `npm run db:seed` (admin awal, login OTP email). |
 
 Di Google reCAPTCHA admin console, tambahkan domain VPS ke daftar domain kunci.
 

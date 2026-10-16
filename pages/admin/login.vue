@@ -9,46 +9,50 @@
           </svg>
         </div>
         <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Login Admin</h1>
-        <p class="text-sm text-gray-500 mt-1">Masuk ke dashboard pengelolaan</p>
+        <p class="text-sm text-gray-500 mt-1">Masuk dengan kode yang dikirim ke email admin</p>
       </div>
 
       <div class="card p-6 shadow-lg">
-        <form class="space-y-4" @submit.prevent="login">
+        <!-- Langkah 1: email -->
+        <form v-if="step === 'email'" class="space-y-4" @submit.prevent="sendOtp()">
           <div>
-            <label class="label-text">Username</label>
-            <input
-              v-model="form.username"
-              type="text"
-              placeholder="Masukkan username"
-              class="input-field"
-              autocomplete="username"
-              required
-            />
+            <label class="label-text">Email admin</label>
+            <input v-model="email" type="email" placeholder="nama@email.com" class="input-field" autocomplete="email" required />
           </div>
-          <div>
-            <label class="label-text">Password</label>
-            <input
-              v-model="form.password"
-              type="password"
-              placeholder="••••••••"
-              class="input-field"
-              autocomplete="current-password"
-              required
-            />
-          </div>
-
-
-          <div
-            v-if="errorMsg"
-            class="flex items-center gap-2 p-3 bg-error-50 border border-error-100 rounded-xl text-sm text-error-600"
-          >
+          <div v-if="errorMsg" class="flex items-center gap-2 p-3 bg-error-50 border border-error-100 rounded-xl text-sm text-error-600">
             <span>✕</span> {{ errorMsg }}
           </div>
+          <button type="submit" class="btn-primary-full" :disabled="loading || !email">
+            <span v-if="loading" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin"></span>
+            <span v-else>Kirim Kode</span>
+          </button>
+        </form>
 
-          <button type="submit" class="btn-primary-full" :disabled="loading">
+        <!-- Langkah 2: kode OTP -->
+        <form v-else class="space-y-4" @submit.prevent="verifyOtp">
+          <p class="text-sm text-gray-600">
+            Jika <span class="font-semibold">{{ email }}</span> terdaftar sebagai admin, kode 6 digit telah dikirim. Berlaku 10 menit.
+          </p>
+          <div>
+            <label class="label-text">Kode verifikasi</label>
+            <input
+              v-model="code" type="text" inputmode="numeric" maxlength="6" placeholder="••••••"
+              class="input-field text-center tracking-[0.4em] text-lg" autocomplete="one-time-code" required
+            />
+          </div>
+          <div v-if="errorMsg" class="flex items-center gap-2 p-3 bg-error-50 border border-error-100 rounded-xl text-sm text-error-600">
+            <span>✕</span> {{ errorMsg }}
+          </div>
+          <button type="submit" class="btn-primary-full" :disabled="loading || code.length < 6">
             <span v-if="loading" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin"></span>
             <span v-else>Masuk</span>
           </button>
+          <div class="flex items-center justify-between text-xs text-gray-500">
+            <button type="button" class="hover:text-gray-800" @click="step = 'email'; code = ''; errorMsg = ''">Ganti email</button>
+            <button type="button" class="hover:text-gray-800 disabled:opacity-40" :disabled="resendCooldown > 0 || loading" @click="sendOtp(true)">
+              {{ resendCooldown > 0 ? `Kirim ulang (${resendCooldown}s)` : 'Kirim ulang kode' }}
+            </button>
+          </div>
         </form>
       </div>
     </div>
@@ -58,9 +62,23 @@
 <script setup lang="ts">
 definePageMeta({ middleware: [] })
 
-const form = reactive({ username: '', password: '' })
+const step = ref<'email' | 'otp'>('email')
+const email = ref('')
+const code = ref('')
 const loading = ref(false)
 const errorMsg = ref('')
+const resendCooldown = ref(0)
+let cooldownTimer: ReturnType<typeof setInterval> | null = null
+
+function startCooldown(seconds = 60) {
+  resendCooldown.value = seconds
+  if (cooldownTimer) clearInterval(cooldownTimer)
+  cooldownTimer = setInterval(() => {
+    resendCooldown.value--
+    if (resendCooldown.value <= 0 && cooldownTimer) { clearInterval(cooldownTimer); cooldownTimer = null }
+  }, 1000)
+}
+onBeforeUnmount(() => { if (cooldownTimer) clearInterval(cooldownTimer) })
 
 const { public: { recaptchaSiteKey } } = useRuntimeConfig()
 
@@ -84,15 +102,30 @@ async function getRecaptchaToken(): Promise<string> {
   })
 }
 
-async function login() {
+async function sendOtp(resend = false) {
+  if (resend && resendCooldown.value > 0) return
   loading.value = true
   errorMsg.value = ''
   try {
     const recaptchaToken = await getRecaptchaToken()
-    await $fetch('/api/admin/login', { method: 'POST', body: { ...form, recaptchaToken } })
-    window.location.href = '/admin'
+    await $fetch('/api/admin/send-otp', { method: 'POST', body: { email: email.value, recaptchaToken } })
+    step.value = 'otp'
+    startCooldown()
   } catch (err: any) {
     errorMsg.value = err.data?.statusMessage || 'Terjadi kesalahan, coba lagi'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function verifyOtp() {
+  loading.value = true
+  errorMsg.value = ''
+  try {
+    await $fetch('/api/admin/verify-otp', { method: 'POST', body: { email: email.value, code: code.value } })
+    window.location.href = '/admin'
+  } catch (err: any) {
+    errorMsg.value = err.data?.statusMessage || 'Kode tidak valid'
     loading.value = false
   }
 }

@@ -1,23 +1,23 @@
-import bcrypt from 'bcryptjs'
-
+// Tambah admin: cukup email (login lewat OTP, tanpa password). `name` opsional, hanya untuk tampilan.
 export default defineEventHandler(async (event) => {
   await requireAdminSession(event)
-  const { username, password } = await readBody(event)
+  const { email, name } = await readBody(event) ?? {}
 
-  if (!username?.trim() || !password?.trim()) {
-    throw createError({ statusCode: 400, statusMessage: 'Username dan password wajib diisi' })
+  if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    throw createError({ statusCode: 400, statusMessage: 'Email tidak valid' })
   }
-  if (password.length < 6) {
-    throw createError({ statusCode: 400, statusMessage: 'Password minimal 6 karakter' })
+  const normalizedEmail = email.trim().toLowerCase()
+  const displayName = typeof name === 'string' && name.trim() ? name.trim() : null
+
+  if (await prisma.admin.findUnique({ where: { email: normalizedEmail } })) {
+    throw createError({ statusCode: 409, statusMessage: 'Email sudah terdaftar sebagai admin' })
+  }
+  if (displayName && await prisma.admin.findUnique({ where: { username: displayName } })) {
+    throw createError({ statusCode: 409, statusMessage: 'Nama sudah digunakan' })
   }
 
-  const exists = await prisma.admin.findUnique({ where: { username } })
-  if (exists) throw createError({ statusCode: 409, statusMessage: 'Username sudah digunakan' })
-
-  const hashed = await bcrypt.hash(password, 10)
-  const admin = await prisma.admin.create({
-    data: { username, password: hashed },
-    select: { id: true, username: true, createdAt: true }
+  return await prisma.admin.create({
+    data: { email: normalizedEmail, username: displayName },
+    select: { id: true, email: true, username: true, createdAt: true }
   })
-  return admin
 })

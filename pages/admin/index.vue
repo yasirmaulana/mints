@@ -1161,14 +1161,29 @@
       <div class="card p-6 space-y-5">
         <h2 class="text-base font-bold text-gray-900">Kelola Admin</h2>
 
+        <p class="text-xs text-gray-500">Admin masuk lewat kode OTP yang dikirim ke emailnya. Hanya email yang terdaftar di sini yang bisa login.</p>
+
         <!-- Daftar admin -->
         <div class="divide-y divide-gray-100">
-          <div v-for="a in adminList" :key="a.id" class="flex items-center justify-between py-3">
-            <div>
-              <p class="text-sm font-medium text-gray-800">{{ a.username }}</p>
-              <p class="text-xs text-gray-400">Dibuat {{ formatDateTime(a.createdAt) }}</p>
+          <div v-for="a in adminList" :key="a.id" class="flex items-center justify-between gap-3 py-3">
+            <div class="min-w-0 flex-1">
+              <template v-if="a.email">
+                <p class="text-sm font-medium text-gray-800 truncate">
+                  {{ a.email }}
+                  <span v-if="a.isSelf" class="ml-1 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-normal text-gray-500">Anda</span>
+                </p>
+                <p class="text-xs text-gray-400">{{ a.username ? `${a.username} · ` : '' }}Dibuat {{ formatDateTime(a.createdAt) }}</p>
+              </template>
+              <template v-else>
+                <p class="text-sm font-medium text-gray-800">{{ a.username }} <span class="text-xs font-normal text-amber-600">· belum punya email, belum bisa login</span></p>
+                <form class="mt-1.5 flex gap-2" @submit.prevent="setAdminEmail(a.id)">
+                  <input v-model="emailDrafts[a.id]" type="email" placeholder="Isi email admin ini" class="input-field flex-1 text-sm" />
+                  <button class="btn-primary text-xs px-3" :disabled="!emailDrafts[a.id]">Simpan</button>
+                </form>
+              </template>
             </div>
             <button
+              v-if="!a.isSelf"
               class="text-xs text-red-500 hover:text-red-700 disabled:opacity-40"
               :disabled="deletingAdminId === a.id"
               @click="deleteAdmin(a.id)"
@@ -1184,15 +1199,15 @@
           <p class="text-sm font-semibold text-gray-700">Tambah Admin Baru</p>
           <div class="space-y-2">
             <div>
-              <label class="block text-xs text-gray-500 mb-1">Username</label>
-              <input v-model="adminForm.username" type="text" placeholder="Masukkan username" class="input-field w-full" />
+              <label class="block text-xs text-gray-500 mb-1">Email</label>
+              <input v-model="adminForm.email" type="email" placeholder="nama@email.com" class="input-field w-full" />
             </div>
             <div>
-              <label class="block text-xs text-gray-500 mb-1">Password</label>
-              <input v-model="adminForm.password" type="password" placeholder="Min. 6 karakter" class="input-field w-full" />
+              <label class="block text-xs text-gray-500 mb-1">Nama <span class="text-gray-400">(opsional)</span></label>
+              <input v-model="adminForm.name" type="text" placeholder="Nama tampilan" class="input-field w-full" />
             </div>
           </div>
-          <button class="btn-primary w-full" :disabled="addingAdmin || !adminForm.username || !adminForm.password" @click="addAdmin">
+          <button class="btn-primary w-full" :disabled="addingAdmin || !adminForm.email" @click="addAdmin">
             <span v-if="addingAdmin" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin" />
             <span v-else>Tambah Admin</span>
           </button>
@@ -2371,8 +2386,9 @@ async function saveWaTemplates() {
 }
 
 // ── Kelola Admin ──
-const { data: adminList, refresh: refreshAdmins } = await useFetch<{ id: string; username: string; createdAt: string }[]>('/api/admin/admins')
-const adminForm = reactive({ username: '', password: '' })
+const { data: adminList, refresh: refreshAdmins } = await useFetch<{ id: string; email: string | null; username: string | null; isSelf: boolean; createdAt: string }[]>('/api/admin/admins')
+const adminForm = reactive({ email: '', name: '' })
+const emailDrafts = reactive<Record<string, string>>({})
 const addingAdmin = ref(false)
 const deletingAdminId = ref<string | null>(null)
 
@@ -2380,14 +2396,25 @@ async function addAdmin() {
   addingAdmin.value = true
   try {
     await $fetch('/api/admin/admins', { method: 'POST', body: adminForm })
-    adminForm.username = ''
-    adminForm.password = ''
+    adminForm.email = ''
+    adminForm.name = ''
     await refreshAdmins()
     showToast('success', 'Admin berhasil ditambahkan')
   } catch (e: any) {
     showToast('error', e?.data?.statusMessage || 'Gagal menambahkan admin')
   } finally {
     addingAdmin.value = false
+  }
+}
+
+async function setAdminEmail(id: string) {
+  try {
+    await $fetch(`/api/admin/admins/${id}`, { method: 'PATCH', body: { email: emailDrafts[id] } })
+    delete emailDrafts[id]
+    await refreshAdmins()
+    showToast('success', 'Email admin disimpan')
+  } catch (e: any) {
+    showToast('error', e?.data?.statusMessage || 'Gagal menyimpan email')
   }
 }
 

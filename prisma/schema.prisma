@@ -59,10 +59,14 @@ enum SubscriptionStatus {
   CANCELLED
 }
 
+// Admin platform login lewat OTP email (bukan password). `email` nullable selama transisi:
+// admin lama (username/password) belum punya email sampai diisi dari Kelola Admin.
+// `username` dipakai sebagai nama tampilan; `password` legacy, tidak dipakai lagi (hapus setelah migrasi).
 model Admin {
   id        String   @id @default(uuid())
-  username  String   @unique
-  password  String
+  email     String?  @unique
+  username  String?  @unique
+  password  String?
   createdAt DateTime @default(now())
 }
 
@@ -85,16 +89,16 @@ model Category {
 
 // Banner carousel beranda — dikelola admin platform
 model Banner {
-  id        String   @id @default(uuid())
+  id        String         @id @default(uuid())
   title     String
   imageUrl  String
   linkUrl   String?
   // MAIN = carousel utama; SIDE = banner kecil di sisi kanan (desktop)
   position  BannerPosition @default(MAIN)
-  sortOrder Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  sortOrder Int            @default(0)
+  isActive  Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 
   @@index([position, isActive, sortOrder])
 }
@@ -201,13 +205,20 @@ model Address {
   @@index([buyerId])
 }
 
+// Pemisah OTP pembeli dan admin: kode yang diminta untuk satu tujuan tidak boleh dipakai di tujuan lain.
+enum OtpPurpose {
+  BUYER
+  ADMIN
+}
+
 model EmailOtp {
-  id        String   @id @default(uuid())
+  id        String     @id @default(uuid())
   email     String
+  purpose   OtpPurpose @default(BUYER)
   code      String
   expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  used      Boolean    @default(false)
+  createdAt DateTime   @default(now())
 
   @@index([email])
 }

@@ -29,8 +29,8 @@ export default defineNuxtConfig({
     fonnteToken: process.env.WHATSAPP_API_TOKEN_FONNTE,
     fonnteUrl: process.env.WHATSAPP_API_URL,
     fonnteApiKey: process.env.FONNTE_API_KEY || process.env.WHATSAPP_API_TOKEN_FONNTE || '',
-    adminUsername: process.env.ADMIN_USERNAME || '',
-    adminPassword: process.env.ADMIN_PASSWORD || '',
+    // Super-admin darurat: boleh login via OTP walau tidak ada barisnya di tabel Admin
+    adminEmail: process.env.ADMIN_EMAIL || '',
     sessionSecret: process.env.SESSION_SECRET || '',
     s3AccessKey: process.env.S3_ACCESS_KEY || '',
     s3SecretKey: process.env.S3_SECRET_KEY || '',
