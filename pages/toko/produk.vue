@@ -71,18 +71,14 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-sm font-normal mb-2" style="color:rgba(9,11,12,0.6)">Kategori</label>
-              <input
-                v-model="categoryInput"
-                list="category-options"
-                type="text"
-                placeholder="Pilih atau ketik nama kategori baru"
-                class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none"
-                style="background:#f5f5f2;border:1px solid rgba(9,11,12,0.12)"
-              />
-              <datalist id="category-options">
-                <option v-for="cat in categories" :key="cat.id" :value="cat.name" />
-              </datalist>
-              <p class="text-xs mt-1.5" style="color:rgba(9,11,12,0.4)">Ketik nama kategori yang belum ada di daftar untuk membuatnya otomatis.</p>
+              <select v-model="catParentId" class="w-full rounded-2xl px-4 py-3 text-sm focus:outline-none" style="background:#f5f5f2;border:1px solid rgba(9,11,12,0.12)" @change="categoryId = ''">
+                <option value="">— Pilih kategori —</option>
+                <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+              </select>
+              <select v-model="categoryId" :disabled="!catParentId" class="mt-2 w-full rounded-2xl px-4 py-3 text-sm focus:outline-none disabled:opacity-50" style="background:#f5f5f2;border:1px solid rgba(9,11,12,0.12)">
+                <option value="">— Pilih subkategori —</option>
+                <option v-for="sub in subCategories" :key="sub.id" :value="sub.id">{{ sub.name }}</option>
+              </select>
             </div>
             <div>
               <label class="block text-sm font-normal mb-2" style="color:rgba(9,11,12,0.6)">Tipe Produk</label>
@@ -216,18 +212,10 @@ async function loadCategories() {
 }
 await Promise.all([loadProducts(), loadCategories()])
 
-// ── Kategori: ketik nama yang sudah ada, atau nama baru untuk membuatnya otomatis saat simpan ──
-const categoryInput = ref('')
-
-async function resolveCategoryId(): Promise<string> {
-  const name = categoryInput.value.trim()
-  if (!name) return ''
-  const existing = categories.value.find((c: any) => c.name.toLowerCase() === name.toLowerCase())
-  if (existing) return existing.id
-  const cat: any = await $fetch('/api/store/categories', { method: 'POST', body: { name } })
-  categories.value.push(cat)
-  return cat.id
-}
+// ── Kategori: pilih induk lalu subkategori (kategori hanya dikelola admin) ──
+const catParentId = ref('')
+const categoryId = ref('')
+const subCategories = computed(() => categories.value.find((c: any) => c.id === catParentId.value)?.children ?? [])
 
 // ── Form produk ──
 const showProductModal = ref(false)
@@ -282,7 +270,8 @@ function openProductForm(product?: any) {
   productForm.price = product?.price ? String(product.price) : ''
   productForm.originalPrice = product?.originalPrice ? String(product.originalPrice) : ''
   productForm.description = product?.description || ''
-  categoryInput.value = categories.value.find((c: any) => c.id === product?.categoryId)?.name || ''
+  categoryId.value = product?.categoryId || ''
+  catParentId.value = categories.value.find((c: any) => c.children?.some((x: any) => x.id === categoryId.value) || c.id === categoryId.value)?.id || ''
   productForm.productType = product?.productType || 'REGULAR'
   productForm.material = product?.material || ''
   productForm.weight = product?.weight ? String(product.weight) : ''
@@ -352,13 +341,12 @@ async function saveProduct() {
   }
   savingProduct.value = true
   try {
-    const categoryId = await resolveCategoryId()
     const fd = new FormData()
     fd.append('title', productForm.title)
     fd.append('price', productForm.price)
     if (productForm.originalPrice) fd.append('originalPrice', productForm.originalPrice)
     fd.append('description', productForm.description)
-    fd.append('categoryId', categoryId)
+    fd.append('categoryId', categoryId.value)
     fd.append('productType', productForm.productType)
     fd.append('material', productForm.material)
     fd.append('weight', productForm.weight)

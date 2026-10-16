@@ -435,7 +435,12 @@ const totalCount = computed(() => products.value?.length ?? 0)
 const filteredProducts = computed(() => {
   let list = [...(products.value ?? [])]
 
-  if (activeCategory.value) list = list.filter(p => p.categoryId === activeCategory.value)
+  if (activeCategory.value) {
+    // induk → cocokkan semua subkategorinya; id subkategori (mis. dari link lama) → cocok langsung
+    const parent = categories.value?.find((c: any) => c.id === activeCategory.value)
+    const ids = new Set([activeCategory.value, ...(parent?.children?.map((c: any) => c.id) ?? [])])
+    list = list.filter(p => p.categoryId && ids.has(p.categoryId))
+  }
   if (search.value.trim()) {
     const q = search.value.trim().toLowerCase()
     list = list.filter(p => p.title.toLowerCase().includes(q) || p.category?.name?.toLowerCase().includes(q))

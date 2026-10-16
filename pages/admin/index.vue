@@ -529,7 +529,11 @@
           <!-- Form tambah kategori -->
           <div class="card p-5">
             <h3 class="text-sm font-bold text-gray-900 mb-3">Tambah Kategori</h3>
-            <form class="flex gap-2" @submit.prevent="addCategory">
+            <form class="flex flex-wrap gap-2" @submit.prevent="addCategory">
+              <select v-model="newCategoryParent" class="input-field w-full">
+                <option value="">Kategori induk (tingkat atas)</option>
+                <option v-for="p in parentCategories" :key="p.id" :value="p.id">Subkategori dari: {{ p.name }}</option>
+              </select>
               <input v-model="newCategoryName" type="text" placeholder="Nama kategori (misal: Gamis)" class="input-field flex-1" required />
               <button type="submit" class="btn-primary shrink-0" :disabled="addingCategory">
                 <span v-if="addingCategory" class="inline-block h-4 w-4 rounded-full border-2 border-black/30 border-t-black animate-spin"></span>
@@ -541,22 +545,29 @@
           <!-- Daftar kategori -->
           <div class="card p-4 space-y-2">
             <p v-if="!categories?.length" class="text-sm text-gray-400 text-center py-4">Belum ada kategori</p>
-            <div v-for="cat in categories" :key="cat.id" class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-              <div>
-                <p class="text-sm font-semibold text-gray-900">{{ cat.name }}</p>
-                <p class="text-xs text-gray-400">{{ cat._count?.products ?? 0 }} produk · /{{ cat.slug }}</p>
+            <div v-for="p in parentCategories" :key="p.id" class="border-b border-gray-100 pb-2 last:border-0">
+              <div class="flex items-center justify-between py-1">
+                <div>
+                  <p class="text-sm font-bold text-gray-900">{{ p.name }}</p>
+                  <p class="text-xs text-gray-400">{{ childrenOf(p.id).length }} subkategori · {{ p._count?.products ?? 0 }} produk langsung</p>
+                </div>
+                <button class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded" :disabled="deletingCategory === p.id" @click="deleteCategory(p.id)">Hapus</button>
               </div>
-              <button
-                class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded"
-                :disabled="deletingCategory === cat.id"
-                @click="deleteCategory(cat.id)"
-              >
-                <span v-if="deletingCategory === cat.id" class="inline-block h-3 w-3 rounded-full border border-red-400 border-t-transparent animate-spin"></span>
-                <span v-else>Hapus</span>
-              </button>
+              <details v-if="childrenOf(p.id).length" class="ml-3">
+                <summary class="cursor-pointer text-xs text-gray-500">Lihat subkategori</summary>
+                <div v-for="c in childrenOf(p.id)" :key="c.id" class="flex items-center justify-between py-1">
+                  <p class="text-sm text-gray-700">{{ c.name }} <span class="text-xs text-gray-400">· {{ c._count?.products ?? 0 }} produk</span></p>
+                  <button class="text-xs text-red-500 hover:text-red-700 px-2" :disabled="deletingCategory === c.id" @click="deleteCategory(c.id)">Hapus</button>
+                </div>
+              </details>
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- ── Tab: Banner ── -->
+      <div v-else-if="activeTab === 'banners'">
+        <AdminBannerManager />
       </div>
 
       <!-- ── Tab: Chat ── -->
@@ -1223,7 +1234,9 @@
               <label class="label-text">Kategori</label>
               <select v-model="productForm.categoryId" class="input-field">
                 <option value="">— Pilih Kategori —</option>
-                <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                <optgroup v-for="p in parentCategories.filter(p => childrenOf(p.id).length)" :key="p.id" :label="p.name">
+                  <option v-for="cat in childrenOf(p.id)" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                </optgroup>
               </select>
             </div>
             <div>
@@ -1456,6 +1469,7 @@ const tabs = [
   { key: 'orders', label: 'Pesanan' },
   { key: 'products', label: 'Produk' },
   { key: 'categories', label: 'Kategori' },
+  { key: 'banners', label: 'Banner' },
   { key: 'chat', label: 'Chat' },
   { key: 'config', label: 'Flash Sale' },
   { key: 'stores', label: 'Toko' },
@@ -1760,13 +1774,16 @@ const { data: categories, refresh: refreshCategories } = await useFetch<any[]>('
 
 // Category management
 const newCategoryName = ref('')
+const newCategoryParent = ref('')
+const parentCategories = computed(() => (categories.value ?? []).filter((c: any) => !c.parentId))
+const childrenOf = (id: string) => (categories.value ?? []).filter((c: any) => c.parentId === id)
 const addingCategory = ref(false)
 const deletingCategory = ref<string | null>(null)
 
 async function addCategory() {
   addingCategory.value = true
   try {
-    await $fetch('/api/admin/categories', { method: 'POST', body: { name: newCategoryName.value } })
+    await $fetch('/api/admin/categories', { method: 'POST', body: { name: newCategoryName.value, parentId: newCategoryParent.value || null } })
     newCategoryName.value = ''
     await refreshCategories()
   } catch (e: any) {
@@ -1782,6 +1799,8 @@ async function deleteCategory(id: string) {
   try {
     await $fetch(`/api/admin/categories/${id}`, { method: 'DELETE' })
     await refreshCategories()
+  } catch (e: any) {
+    alert(e?.data?.statusMessage || 'Gagal menghapus kategori')
   } finally {
     deletingCategory.value = null
   }

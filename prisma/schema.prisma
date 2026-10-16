@@ -66,12 +66,42 @@ model Admin {
   createdAt DateTime @default(now())
 }
 
+// Pohon kategori dua tingkat: induk (parentId null) → subkategori. Produk menunjuk ke subkategori.
+// Nama subkategori boleh kembar antar induk ("Atasan" di Pakaian Pria & Wanita), jadi slug
+// subkategori diberi prefiks slug induk. Data awal: prisma/seed-kategori.js dari kategori.md.
 model Category {
-  id        String    @id @default(uuid())
-  name      String    @unique
-  slug      String    @unique
+  id        String     @id @default(uuid())
+  name      String
+  slug      String     @unique
+  parentId  String?
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children  Category[] @relation("CategoryTree")
   products  Product[]
-  createdAt DateTime  @default(now())
+  createdAt DateTime   @default(now())
+
+  @@unique([parentId, name])
+  @@index([parentId])
+}
+
+// Banner carousel beranda — dikelola admin platform
+model Banner {
+  id        String   @id @default(uuid())
+  title     String
+  imageUrl  String
+  linkUrl   String?
+  // MAIN = carousel utama; SIDE = banner kecil di sisi kanan (desktop)
+  position  BannerPosition @default(MAIN)
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([position, isActive, sortOrder])
+}
+
+enum BannerPosition {
+  MAIN
+  SIDE
 }
 
 model FlashSaleConfig {
